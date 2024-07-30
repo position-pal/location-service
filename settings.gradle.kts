@@ -6,8 +6,11 @@ plugins {
 rootProject.name = "location-service"
 
 include(
+    "commons",
     "domain",
     "application",
+    "presentation",
+    "infrastructure",
 )
 
 develocity {
