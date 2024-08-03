@@ -36,7 +36,7 @@ allprojects {
         testLogging {
             showCauses = true
             showStackTraces = true
-            events(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.STARTED)
+            events(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.STARTED, TestLogEvent.STANDARD_OUT)
             exceptionFormat = TestExceptionFormat.FULL
         }
     }

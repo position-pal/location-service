@@ -1,7 +1,13 @@
 package io.github.positionpal.location.application.geo
 
+import java.util.Date
+
 import io.github.positionpal.location.commons.CanRaise
-import io.github.positionpal.location.domain.{Address, GPSLocation, Latitude, Longitude}
+import io.github.positionpal.location.domain.GPSLocation
+
+/** The mode of routing to a destination. */
+enum RoutingMode:
+  case Driving, Walking, Cycling
 
 /** An alias for the map service error. */
 type MapsServiceError = String
@@ -11,8 +17,8 @@ type MapsServiceError = String
   */
 trait MapsService[M[_]: CanRaise[MapsServiceError]]:
 
-  /** @return the [[Address]] at the given [[Latitude]] and [[Longitude]]. */
-  def addressOf(latitude: Latitude, longitude: Longitude): M[Address]
+  /** @return the [[Date]] of arrival to the [[destination]] from the [[origin]] using the given [[RoutingMode]]. */
+  def arrivalTime(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): M[Date]
 
-  /** @return the [[GPSLocation]] of the given [[Address]]. */
-  def locationOf(address: Address): M[GPSLocation]
+  /** @return the distance between the [[origin]] and the [[destination]] using the given [[RoutingMode]]. */
+  def distance(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): M[Distance]

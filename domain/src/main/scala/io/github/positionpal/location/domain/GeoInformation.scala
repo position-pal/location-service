@@ -1,17 +1,5 @@
 package io.github.positionpal.location.domain
 
-/** A street address, comprising a name and a number. */
-final case class Street(name: String, number: String)
-
-/** A city, identified by its name. */
-final case class City(name: String)
-
-/** A postal code, identifying a [[City]]. */
-final case class ZipCode(code: String)
-
-/** An address, comprising a [[Street]], a [[City]] and a [[ZipCode]]. */
-final case class Address(street: Street, city: City, zipCode: ZipCode)
-
 /** The latitude of a [[GPSLocation]]. */
 type Latitude = Double
 
