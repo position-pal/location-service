@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.geo
 
-import java.util.Date
+import scala.concurrent.duration.FiniteDuration
 
 import io.github.positionpal.location.commons.CanRaise
 import io.github.positionpal.location.domain.GPSLocation
@@ -18,7 +18,7 @@ type MapsServiceError = String
 trait MapsService[M[_]: CanRaise[MapsServiceError]]:
 
   /** @return the [[Date]] of arrival to the [[destination]] from the [[origin]] using the given [[RoutingMode]]. */
-  def arrivalTime(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): M[Date]
+  def duration(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): M[FiniteDuration]
 
   /** @return the distance between the [[origin]] and the [[destination]] using the given [[RoutingMode]]. */
   def distance(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): M[Distance]

@@ -1,11 +1,13 @@
 package io.github.positionpal.location.infrastructure.geo
 
-import java.util.Date
+import scala.concurrent.duration.{DurationDouble, FiniteDuration}
 
 import cats.data.{EitherT, ReaderT}
 import cats.effect.IO
 import cats.implicits.catsSyntaxEither
 import io.circe.Json
+import io.github.positionpal.location.application.geo.Distance.meters
+import io.github.positionpal.location.application.geo.RoutingMode.Driving
 import io.github.positionpal.location.application.geo.{Distance, MapsService, MapsServiceError, RoutingMode}
 import io.github.positionpal.location.domain.GPSLocation
 import org.http4s.Uri
@@ -21,22 +23,33 @@ type Response[E] = EitherT[IOWithContext, MapsServiceError, E]
 /** A [[MapService]] adapter interacting with the Mapbox service. */
 class MapboxServiceAdapter extends MapsService[Response]:
 
-  override def arrivalTime(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): Response[Date] = ???
+  override def duration(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): Response[FiniteDuration] =
+    request[FiniteDuration](mode, origin, destination)(_.extractDuration)
 
   override def distance(mode: RoutingMode)(origin: GPSLocation, destination: GPSLocation): Response[Distance] =
+    request[Distance](mode, origin, destination)(_.extractDistance)
+
+  private def request[T](
+      mode: RoutingMode,
+      origin: GPSLocation,
+      destination: GPSLocation,
+  )(extract: Json => Either[MapsServiceError, T]): Response[T] =
     EitherT:
-      ReaderT: configuration =>
-        configuration.client
-          .expect(directionsApiRoute(mode, origin, destination, configuration.accessToken))(jsonOf[IO, Json]).attempt
-          .map(_.leftMap(_.getMessage)).map(_.flatMap(_.extractDistance))
+      ReaderT: config =>
+        config.client.expect(directionsApiRoute(mode, origin, destination, config.accessToken))(jsonOf[IO, Json])
+          .attempt.map(_.leftMap(_.getMessage).flatMap(extract(_)))
 
   private def directionsApiRoute(mode: RoutingMode, origin: GPSLocation, destination: GPSLocation, token: String): Uri =
-    uri"https://api.mapbox.com/directions/v5/mapbox/".addPath(mode.toString.toLowerCase)
+    val smode = mode.toString.toLowerCase.appendedAll(if mode == Driving then "-traffic" else "")
+    uri"https://api.mapbox.com/directions/v5/mapbox/".addPath(smode)
       .addSegment(s"${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}")
       .withQueryParam("access_token", token)
 
-  import io.github.positionpal.location.presentation.geo.Distance.distancePlainDecoder
-
   extension (json: Json)
     private def extractDistance: Either[String, Distance] =
-      json.hcursor.downField("routes").downArray.downField("distance").as[Distance].left.map(_.message)
+      json.routes.downField("distance").as[Double].map(_.meters).leftMap(_.message)
+
+    private def extractDuration: Either[String, FiniteDuration] =
+      json.routes.downField("duration").as[Double].map(_.seconds).leftMap(_.message)
+
+    private def routes = json.hcursor.downField("routes").downArray
