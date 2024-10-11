@@ -2,12 +2,24 @@ package io.github.positionpal.location.domain
 
 import java.util.Date
 
+/** A list of ordered [[SampledLocation]]s that can be interpolated
+  * forming a path between two geographical positions.
+  */
 type Route = List[SampledLocation]
 
+/** The tracking of a user. */
 trait Tracking:
+
+  /** @return the route followed by the user ordered by the most recent location. */
   def route: Route
+
+  /** @return the user being tracked. */
   def user: UserId
+
+  /** @return a new tracking with the added sample at the beginning of the route. */
   def addSample(sample: SampledLocation): Tracking
+
+  /** An alias for [[addSample]], allowing to use the `+` operator to add a sample. */
   def +(sample: SampledLocation): Tracking = addSample(sample)
 
 trait MonitorableTracking extends Tracking:

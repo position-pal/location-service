@@ -7,7 +7,7 @@ import cats.data.ReaderT
 import cats.effect.{IO, Resource}
 import com.typesafe.config.Config
 import io.github.positionpal.location.application.services.RealTimeTrackingService
-import io.github.positionpal.location.domain.DrivingEvent
+import io.github.positionpal.location.domain.DomainEvent
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
 
 object RealTimeTrackingService:
@@ -16,7 +16,7 @@ object RealTimeTrackingService:
 
   class ActorBasedRealTimeTrackingService extends RealTimeTrackingService[IO]:
 
-    val cluster: ReaderT[[A] =>> Resource[IO, A], Config, ActorSystem[DrivingEvent]] =
+    val cluster: ReaderT[[A] =>> Resource[IO, A], Config, ActorSystem[DomainEvent]] =
       ReaderT: config =>
         for
           system <- AkkaUtils.startup(config)(Behaviors.empty)
@@ -24,7 +24,7 @@ object RealTimeTrackingService:
           _ <- Resource.eval(IO(cluster.init(RealTimeUserTracker())))
         yield system
 
-    override def handle[Unit](event: DrivingEvent): IO[Unit] = ???
+    override def handle[Unit](event: DomainEvent): IO[Unit] = ???
 
 //@main def testRealTimeTrackingService(): Unit =
 //  import com.typesafe.config.ConfigFactory

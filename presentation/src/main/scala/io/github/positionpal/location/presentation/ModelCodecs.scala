@@ -19,7 +19,7 @@ trait ModelCodecs:
 
   given routingModeCodec: Codec[RoutingMode] = deriveCodec[RoutingMode]
 
-  given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
+  given domainEventCodec: Codec[DomainEvent] = deriveAllCodecs[DomainEvent]
 
   given routingStartedCodec: Codec[RoutingStarted] = deriveCodec[RoutingStarted]
 

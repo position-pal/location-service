@@ -3,7 +3,7 @@ package io.github.positionpal.location.application.reactions
 import scala.annotation.targetName
 
 import cats.Monad
-import io.github.positionpal.location.domain.DrivingEvent
+import io.github.positionpal.location.domain.DomainEvent
 
 /** An abstract data type for effectful event reactions. */
 trait EventReactionADT:
@@ -11,7 +11,7 @@ trait EventReactionADT:
   type Environment
 
   /** The type of the event triggering the reaction. */
-  type Event <: DrivingEvent
+  type Event <: DomainEvent
 
   /** The outcome of the reaction application, i.e., the result of the reaction. */
   type Outcome
