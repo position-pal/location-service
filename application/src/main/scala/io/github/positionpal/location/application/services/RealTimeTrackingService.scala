@@ -8,4 +8,4 @@ import io.github.positionpal.location.domain.DomainEvent
 trait RealTimeTrackingService[M[_]]:
 
   /** Handle the [[event]]. */
-  def handle[U](event: DomainEvent): M[U]
+  def handle(event: DomainEvent): M[Unit]

@@ -4,7 +4,7 @@ echo "Starting docker compose..."
 docker compose up --wait
 
 echo "Creating tables in postgres..."
-docker exec -i postgres-db psql -U postgres -t < ./experiments/src/main/resources/create-tables-postgres.sql
+docker exec -i postgres-db psql -U postgres -t < ./infrastructure/src/main/resources/ddl-scripts/create-tables-postgres.sql
 
 echo "Docker containers status..."
 docker ps

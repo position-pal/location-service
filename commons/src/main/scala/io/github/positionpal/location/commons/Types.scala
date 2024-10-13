@@ -1,6 +1,6 @@
 package io.github.positionpal.location.commons
 
-import cats.mtl.{Ask, Raise}
+import cats.mtl.{Ask, Raise, Stateful}
 
 /** A type alias for a type constructor `M` expressing the
   * capability to raise an error of type `E`.
@@ -8,3 +8,5 @@ import cats.mtl.{Ask, Raise}
 type CanRaise[E] = [M[_]] =>> Raise[M, E]
 
 type CanAsk[E] = [M[_]] =>> Ask[M, E]
+
+type HasState[S] = [M[_]] =>> Stateful[M, S]
