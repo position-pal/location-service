@@ -1,5 +1,8 @@
 package io.github.positionpal.location.infrastructure.services
 
+import java.time.Instant
+import java.util.Date
+
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
@@ -104,7 +107,8 @@ object RealTimeUserTracker:
 
   private def aliveCheckHandler(timer: TimerScheduler[Command]): (State, AliveCheck.type) => Effect[Event, State] =
     (state, _) =>
-      if state.lastSample.get.timestamp.before(java.util.Date.from(java.time.Instant.now().minusSeconds(30))) then
+      if state.lastSample.isDefined && state.lastSample.get.timestamp.before(Date.from(Instant.now().minusSeconds(30)))
+      then
         timer.cancelAll()
         if state.userState == SOS || state.userState == Routing then ??? // send alert notification
         Effect.persist(WentOffline(state.lastSample.get.timestamp, state.lastSample.get.user))

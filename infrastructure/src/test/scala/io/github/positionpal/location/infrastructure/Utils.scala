@@ -10,5 +10,5 @@ object TimeUtils:
   import java.util.Date
 
   def now: Date = Date()
-  def inTheFuture: Date = Date.from(now.toInstant.plusSeconds(60))
-  def inThePast: Date = Date.from(now.toInstant.minusSeconds(60))
+  def inTheFuture: Date = Date.from(now.toInstant.plusSeconds(90))
+  def inThePast: Date = Date.from(now.toInstant.minusSeconds(90))

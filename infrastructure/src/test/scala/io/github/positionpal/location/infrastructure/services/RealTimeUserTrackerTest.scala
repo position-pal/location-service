@@ -1,116 +1,117 @@
 package io.github.positionpal.location.infrastructure.services
 
-import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
+import scala.language.postfixOps
+
+import akka.actor.testkit.typed.scaladsl.{ActorTestKitBase, ScalaTestWithActorTestKit}
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import com.typesafe.config.{Config, ConfigFactory}
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.domain.EventConversions.toMonitorableTracking
+import io.github.positionpal.location.domain.EventConversions.*
 import io.github.positionpal.location.domain.RoutingMode.*
 import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.*
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.Eventually.eventually
+import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, time}
 
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)
     with AnyWordSpecLike
-    with BeforeAndAfterEach:
+    with BeforeAndAfterEach
+    with ActorTestVerifierDSL:
 
-  private val eventSourcedTestKit =
-    EventSourcedBehaviorTestKit[Command, DomainEvent, State](system, RealTimeUserTracker("testUser"))
   private val testUser = UserId("user-test")
+  private val routingStartedEvent = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
+  private val sampledLocationEvent = SampledLocation(now, testUser, cesenaCampusLocation)
+  private val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
 
-  override protected def beforeEach(): Unit =
-    super.beforeEach()
-    eventSourcedTestKit.clear()
+  given Context[UserState, State] = ins =>
+    ins.map: s =>
+      State(
+        s,
+        s match
+          case SOS => Some(sosAlertTriggered.toTracking)
+          case Routing => Some(routingStartedEvent.toMonitorableTracking)
+          case _ => None,
+        None,
+      )
 
   "RealTimeUserTracker" when:
-    "initialized" should:
-      "have an empty state" in:
-        eventSourcedTestKit.getState() shouldMatch (Inactive, None, None)
+    "in inactive or active state" when:
+      "receives a new location sample" should:
+        "update the last location sample" in:
+          (Active | Inactive) -- sampledLocationEvent --> Active verifying: (e, s) =>
+            s shouldMatch (None, Some(e))
 
-    "in active state" should:
-      "update the last location sample" in:
-        val sample = SampledLocation(now, testUser, cesenaCampusLocation)
-        eventSourcedTestKit.runCommand(sample).events should contain only sample
-        eventSourcedTestKit.getState() shouldMatch (Active, None, Some(sample))
+      "receives a routing started event" should:
+        "transition to routing mode" in:
+          (Active | Inactive) -- routingStartedEvent --> Routing verifying: (_, s) =>
+            s shouldMatch (Some(routingStartedEvent.toMonitorableTracking), None)
 
-      "transition to routing mode if a routing is started" in:
-        val lastSample = SampledLocation(now, testUser, cesenaCampusLocation)
-        eventSourcedTestKit.runCommand(lastSample)
-        val routingEvent = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
-        eventSourcedTestKit.runCommand(routingEvent).events should contain only routingEvent
-        eventSourcedTestKit.getState() shouldMatch (Routing, Some(routingEvent.toMonitorableTracking), Some(lastSample))
+      "receives an SOS alert triggered event" should:
+        "transition to SOS mode" in:
+          (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
+            s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered.toSampledLocation))
 
-      "transition to sos mode if an sos alert is triggered" in:
-        val sosTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
-        eventSourcedTestKit.runCommand(sosTriggered)
-        eventSourcedTestKit.getState() shouldMatch (
-          SOS,
-          Some(Tracking(sosTriggered.user)),
-          Some(SampledLocation(sosTriggered.timestamp, sosTriggered.user, sosTriggered.position)),
-        )
+    "in routing or SOS state" when:
+      "receives new location samples" should:
+        "track the user positions" ignore:
+          val trace = generateTrace
+          (Routing | SOS) -- trace --> (Routing | SOS) verifying: (_, s) =>
+            s shouldMatch (Some(fromTrace(s.userState, trace)), Some(trace.last))
 
+    "in routing state" when:
+      "reaching the destination" should:
+        "transition to active mode" in:
+          Routing -- SampledLocation(now, testUser, cesenaCampusLocation) --> Active verifying: (e, s) =>
+            s shouldMatch (None, Some(e))
+
+      "receives a routing stopped event" should:
+        "transition to active mode" in:
+          Routing -- RoutingStopped(now, testUser) --> Active verifying: (_, s) =>
+            s shouldMatch (None, None)
+
+    "in SOS state" when:
+      "receives a SOS stopped event" should:
+        "transition to active mode" in:
+          SOS -- SOSAlertStopped(now, testUser) --> Active verifying: (_, s) =>
+            s shouldMatch (None, None)
+
+  /*
       "transition to inactive mode after some time not receiving any event" ignore:
         ???
 
     "in routing state" should:
-      "track the user position" ignore:
-        val trace = SampledLocation(now, testUser, GPSLocation(44, 12))
-          :: SampledLocation(now, testUser, GPSLocation(43, 13))
-          :: SampledLocation(now, testUser, GPSLocation(42, 14))
-          :: Nil
-        eventSourcedTestKit.runCommand(RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture))
-        trace.reverse.foreach(eventSourcedTestKit.runCommand(_))
-        eventSourcedTestKit.getState() shouldMatch (
-          Routing,
-          Some(Tracking.withMonitoring(testUser, Driving, cesenaCampusLocation, inTheFuture, trace)),
-          Some(trace.last),
-        )
-
-      "transition to active mode if the routing is stopped" ignore:
-        ???
-
-      "transition to active mode if the reaction output is successful" ignore:
-        ???
-
-      "send an alert if the reaction output is an alert" ignore:
-        ???
-
-      "transition to sos mode if an sos alert is triggered" ignore:
-        ???
 
       "transition to inactive mode after some time not receiving any event" ignore:
         ???
 
     "in sos state" should:
-      "track the user position" ignore:
-        ???
-
-      "transition to active mode if the sos alert is stopped" ignore:
-        ???
 
       "transition to inactive mode after some time not receiving any event" ignore:
         ???
-
-    "in inactive state" should:
-      "transition to active mode if a new event is received" ignore:
-        ???
-
-      "transition to routing mode if a routing is started" ignore:
-        ???
-
-      "transition to sos mode if an sos alert is triggered" ignore:
-        ???
+   */
 
   extension (s: State)
-    infix def shouldMatch(userState: UserState, route: Option[Tracking], lastSample: Option[SampledLocation]): Unit =
-      s.userState shouldBe userState
+    infix def shouldMatch(route: Option[Tracking], lastSample: Option[DomainEvent]): Unit =
       s.tracking shouldBe route
       s.lastSample shouldBe lastSample
+
+  private def generateTrace: List[SampledLocation] =
+    SampledLocation(now, testUser, GPSLocation(44, 12))
+      :: SampledLocation(now, testUser, GPSLocation(43, 13))
+      :: SampledLocation(now, testUser, GPSLocation(42, 14))
+      :: Nil
+
+  private def fromTrace(userState: UserState, trace: List[SampledLocation]): Tracking | MonitorableTracking =
+    if userState == SOS then Tracking(testUser, trace)
+    else Tracking.withMonitoring(testUser, Driving, cesenaCampusLocation, inTheFuture, trace)
 
 object RealTimeUserTrackerTest:
   val config: Config = ConfigFactory.parseString("""
@@ -129,3 +130,42 @@ object RealTimeUserTrackerTest:
         }
       }
     """).withFallback(EventSourcedBehaviorTestKit.config).resolve()
+
+trait SystemVerifier[S, E, X](val ins: List[S], val events: List[E]):
+  infix def -->(outs: List[S])(using ctx: Context[S, X]): Verification[E, X]
+
+trait Verification[E, X]:
+  infix def verifying(verifyLast: (E, X) => Unit): Unit
+
+trait Context[S, X]:
+  def initialStates(ins: List[S]): List[X]
+
+trait ActorTestVerifierDSL:
+  context: ActorTestKitBase & Matchers =>
+
+  given Conversion[UserState, List[UserState]] = _ :: Nil
+  given Conversion[DomainEvent, List[DomainEvent]] = _ :: Nil
+  extension (u: UserState) infix def |(other: UserState): List[UserState] = u :: other :: Nil
+  extension (us: List[UserState]) infix def |(other: UserState): List[UserState] = us :+ other
+
+  extension (xs: List[UserState])
+    infix def --(events: List[DomainEvent]): SystemVerifier[UserState, DomainEvent, RealTimeUserTracker.State] =
+      RealTimeUserTrackerVerifier(xs, events)
+
+  class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DomainEvent])
+      extends SystemVerifier[UserState, DomainEvent, State](ins, events):
+    override infix def -->(outs: List[UserState])(using
+        ctx: Context[UserState, State],
+    ): Verification[DomainEvent, State] =
+      (verifyLast: (Event, State) => Unit) =>
+        val testKit = EventSourcedBehaviorTestKit[Command, DomainEvent, State](system, RealTimeUserTracker("testUser"))
+        ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
+          testKit.initialize(state)
+          println(s">>> Initial state: ${testKit.getState()}")
+          events.foreach: ev =>
+            testKit.runCommand(ev) // should contain only ev
+          eventually(Timeout(Span(20, Seconds)), Interval(Span(5, Seconds))):
+            val currentState = testKit.getState()
+            println(s">>> Current state: $currentState")
+            currentState.userState shouldBe outs(if outs.size == 1 then 0 else idx)
+            verifyLast(events.last, currentState)

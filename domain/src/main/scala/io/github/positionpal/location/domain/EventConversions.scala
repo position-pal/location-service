@@ -7,3 +7,7 @@ object EventConversions:
   extension (ev: RoutingStarted)
     def toMonitorableTracking: MonitorableTracking =
       Tracking.withMonitoring(ev.user, ev.mode, ev.destination, ev.expectedArrival)
+
+  extension (ev: SOSAlertTriggered)
+    def toTracking: Tracking = Tracking(ev.user)
+    def toSampledLocation: SampledLocation = SampledLocation(ev.timestamp, ev.user, ev.position)
