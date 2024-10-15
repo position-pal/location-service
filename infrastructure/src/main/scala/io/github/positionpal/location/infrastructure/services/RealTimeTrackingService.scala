@@ -38,5 +38,6 @@ object RealTimeTrackingService:
     override def handle(event: DomainEvent): F[Unit] =
       for
         actorSystem <- Stateful[F, ActorSystem[DomainEvent]].get
-        _ <- Async[F].delay(actorSystem ! event)
+        _ <- Async[F].delay:
+          ClusterSharding(actorSystem).entityRefFor(RealTimeUserTracker.key, event.user.id) ! event
       yield ()

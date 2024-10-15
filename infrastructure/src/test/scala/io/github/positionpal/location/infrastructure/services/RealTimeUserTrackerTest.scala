@@ -45,7 +45,7 @@ class RealTimeUserTrackerTest
   "RealTimeUserTracker" when:
     "in inactive or active state" when:
       "receives a new location sample" should:
-        "update the last location sample" in:
+        "update the last known location" in:
           (Active | Inactive) -- sampledLocationEvent --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
