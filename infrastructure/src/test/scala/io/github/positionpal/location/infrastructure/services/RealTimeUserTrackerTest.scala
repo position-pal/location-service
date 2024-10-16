@@ -14,8 +14,8 @@ import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.*
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
-import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.time.{Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class RealTimeUserTrackerTest
@@ -30,8 +30,6 @@ class RealTimeUserTrackerTest
   private val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
 
   given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None))
-  given Interval = Interval(Span(15, Millis))
-  given Timeout = Timeout(Span(150, Millis))
 
   "RealTimeUserTracker" when:
     "in inactive or active state" when:
@@ -48,8 +46,7 @@ class RealTimeUserTrackerTest
     "in routing state" when:
       "reaching the destination" should:
         "transition to active mode" in:
-          given Interval = Interval(Span(5, Seconds))
-          given Timeout = Timeout(Span(60, Seconds))
+          given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
           Routing -- SampledLocation(now, testUser, cesenaCampusLocation) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
@@ -78,8 +75,7 @@ class RealTimeUserTrackerTest
 
     "inactive for a while" should:
       "transition to inactive mode" in:
-        given Interval = Interval(Span(5, Seconds))
-        given Timeout = Timeout(Span(60, Seconds))
+        given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
         (Active | Routing | SOS) -- sampledLocationEvent --> Inactive verifying: (_, _) =>
           // s shouldMatch(None, Some(wentOffline))
           ()
