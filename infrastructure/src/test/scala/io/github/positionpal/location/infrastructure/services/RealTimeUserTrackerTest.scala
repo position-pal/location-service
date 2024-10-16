@@ -28,6 +28,7 @@ class RealTimeUserTrackerTest
   private val routingStartedEvent = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
   private val sampledLocationEvent = SampledLocation(now, testUser, cesenaCampusLocation)
   private val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
+  private val longLastingPatience = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
 
   given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None))
 
@@ -46,7 +47,7 @@ class RealTimeUserTrackerTest
     "in routing state" when:
       "reaching the destination" should:
         "transition to active mode" in:
-          given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
+          given Eventually.PatienceConfig = longLastingPatience
           Routing -- SampledLocation(now, testUser, cesenaCampusLocation) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
@@ -75,10 +76,9 @@ class RealTimeUserTrackerTest
 
     "inactive for a while" should:
       "transition to inactive mode" in:
-        given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
-        (Active | Routing | SOS) -- sampledLocationEvent --> Inactive verifying: (_, _) =>
-          // s shouldMatch(None, Some(wentOffline))
-          ()
+        given Eventually.PatienceConfig = longLastingPatience
+        (Active | Routing | SOS) -- sampledLocationEvent --> Inactive verifying: (_, s) =>
+          s.lastSample shouldBe Some(sampledLocationEvent)
 
   extension (s: State)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[DomainEvent]): Unit =
