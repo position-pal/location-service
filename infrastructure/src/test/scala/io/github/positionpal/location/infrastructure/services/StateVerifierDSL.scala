@@ -2,13 +2,15 @@ package io.github.positionpal.location.infrastructure.services
 
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.domain.DomainEvent
+import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.Command
+import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.matchers.should.Matchers
 
 trait SystemVerifier[S, E, X](val ins: List[S], val events: List[E]):
   infix def -->(outs: List[S])(using ctx: Context[S, X]): Verification[E, X]
 
 trait Verification[E, X]:
-  infix def verifying(verifyLast: (E, X) => Unit): Unit
+  infix def verifying(verifyLast: (E, X) => Unit)(using timeout: Timeout, interval: Interval): Unit
 
 trait Context[S, X]:
   def initialStates(ins: List[S]): List[X]
@@ -32,22 +34,23 @@ trait RealTimeUserTrackerVerifierDSL:
 
     import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
     import org.scalatest.concurrent.Eventually.eventually
-    import org.scalatest.concurrent.PatienceConfiguration.{Timeout, Interval}
-    import org.scalatest.time.{Seconds, Span}
 
     override infix def -->(outs: List[UserState])(using
         ctx: Context[UserState, RealTimeUserTracker.State],
     ): Verification[DomainEvent, RealTimeUserTracker.State] =
-      (verifyLast: (RealTimeUserTracker.Event, RealTimeUserTracker.State) => Unit) =>
-        val testKit = EventSourcedBehaviorTestKit[RealTimeUserTracker.Command, DomainEvent, RealTimeUserTracker.State](
-          system,
-          RealTimeUserTracker("testUser"),
-        )
-        ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
-          testKit.initialize(state)
-          events.foreach: ev =>
-            testKit.runCommand(ev).events should contain only ev
-          eventually(Timeout(Span(20, Seconds)), Interval(Span(5, Seconds))):
-            val currentState = testKit.getState()
-            currentState.userState shouldBe outs(if outs.size == 1 then 0 else idx)
-            verifyLast(events.last, currentState)
+      new Verification[DomainEvent, RealTimeUserTracker.State]:
+        override infix def verifying(
+            verifyLast: (DomainEvent, RealTimeUserTracker.State) => Unit,
+        )(using timeout: Timeout, interval: Interval): Unit =
+          val testKit = EventSourcedBehaviorTestKit[Command, DomainEvent, RealTimeUserTracker.State](
+            system,
+            RealTimeUserTracker("testUser"),
+          )
+          ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
+            testKit.initialize(state)
+            events.foreach: ev =>
+              testKit.runCommand(ev).events should contain only ev
+            eventually(timeout, interval):
+              val currentState = testKit.getState()
+              currentState.userState shouldBe outs(if outs.size == 1 then 0 else idx)
+              verifyLast(events.last, currentState)

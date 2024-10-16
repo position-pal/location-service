@@ -14,6 +14,8 @@ import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.*
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class RealTimeUserTrackerTest
@@ -28,6 +30,8 @@ class RealTimeUserTrackerTest
   private val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
 
   given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None))
+  given Interval = Interval(Span(15, Millis))
+  given Timeout = Timeout(Span(150, Millis))
 
   "RealTimeUserTracker" when:
     "in inactive or active state" when:
@@ -41,21 +45,11 @@ class RealTimeUserTrackerTest
           (Active | Inactive) -- routingStartedEvent --> Routing verifying: (_, s) =>
             s shouldMatch (Some(routingStartedEvent.toMonitorableTracking), None)
 
-      "receives an SOS alert triggered event" should:
-        "transition to SOS mode" in:
-          (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
-            s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
-
-    "in routing or SOS state" when:
-      "receives new location samples" should:
-        "track the user positions" ignore:
-          val trace = generateTrace
-          (Routing | SOS) -- trace --> (Routing | SOS) verifying: (_, s) =>
-            s shouldMatch (tracking(s.userState, trace), Some(trace.last))
-
     "in routing state" when:
       "reaching the destination" should:
         "transition to active mode" in:
+          given Interval = Interval(Span(5, Seconds))
+          given Timeout = Timeout(Span(60, Seconds))
           Routing -- SampledLocation(now, testUser, cesenaCampusLocation) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
@@ -70,20 +64,25 @@ class RealTimeUserTrackerTest
           SOS -- SOSAlertStopped(now, testUser) --> Active verifying: (_, s) =>
             s shouldMatch (None, None)
 
-  /*
-      "transition to inactive mode after some time not receiving any event" ignore:
-        ???
+    "in routing or SOS state" when:
+      "receives new location samples" should:
+        "track the user positions" ignore:
+          val trace = generateTrace
+          (Routing | SOS) -- trace --> (Routing | SOS) verifying: (_, s) =>
+            s shouldMatch (tracking(s.userState, trace), Some(trace.last))
 
-    "in routing state" should:
+    "receives an SOS alert triggered event" should:
+      "transition to SOS mode" in:
+        (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
+          s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
-      "transition to inactive mode after some time not receiving any event" ignore:
-        ???
-
-    "in sos state" should:
-
-      "transition to inactive mode after some time not receiving any event" ignore:
-        ???
-   */
+    "inactive for a while" should:
+      "transition to inactive mode" in:
+        given Interval = Interval(Span(5, Seconds))
+        given Timeout = Timeout(Span(60, Seconds))
+        (Active | Routing | SOS) -- sampledLocationEvent --> Inactive verifying: (_, _) =>
+          // s shouldMatch(None, Some(wentOffline))
+          ()
 
   extension (s: State)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[DomainEvent]): Unit =

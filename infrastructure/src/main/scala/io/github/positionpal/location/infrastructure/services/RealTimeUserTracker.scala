@@ -48,7 +48,7 @@ object RealTimeUserTracker:
     given ActorContext[Command] = ctx
     Behaviors.withTimers: timer =>
       ctx.log.debug("Starting RealTimeUserTracker::{}@{}", entityId, Cluster(ctx.system).selfMember.address)
-      timer.startTimerAtFixedRate(AliveCheck, 20.seconds)
+      timer.startTimerAtFixedRate(AliveCheck, 10.seconds)
       EventSourcedBehavior(PersistenceId(key.name, entityId), State.empty, commandHandler(timer), eventHandler)
 
   private val eventHandler: (State, Event) => State = (state, event) =>
