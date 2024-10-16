@@ -10,7 +10,7 @@ import cats.effect.{Async, Resource}
 import cats.implicits.{toFlatMapOps, toFunctorOps}
 import cats.mtl.{Ask, Stateful}
 import com.typesafe.config.Config
-import io.github.positionpal.location.application.services.{RealTimeTrackingService, StartableOps}
+import io.github.positionpal.location.application.services.{RealTimeTrackingService, Startable}
 import io.github.positionpal.location.commons.{CanAsk, HasState}
 import io.github.positionpal.location.domain.DomainEvent
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
@@ -24,7 +24,7 @@ object RealTimeTrackingService:
 
   private class ActorBasedRealTimeTrackingService[F[_]: Async: CanAsk[Config]: HasState[ActorSystem[DomainEvent]]]
       extends RealTimeTrackingService[F]
-      with StartableOps[[A] =>> Resource[F, A], ActorSystem[DomainEvent]]:
+      with Startable[[A] =>> Resource[F, A], ActorSystem[DomainEvent]]:
 
     override def start: Resource[F, ActorSystem[DomainEvent]] =
       for
