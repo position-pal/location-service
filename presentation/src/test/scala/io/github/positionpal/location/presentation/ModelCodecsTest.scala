@@ -3,14 +3,7 @@ package io.github.positionpal.location.presentation
 import java.util.Date
 
 import io.bullet.borer.Cbor
-import io.github.positionpal.location.domain.{
-  GPSLocation,
-  MonitorableTracking,
-  RoutingMode,
-  SampledLocation,
-  Tracking,
-  UserId,
-}
+import io.github.positionpal.location.domain.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
