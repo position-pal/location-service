@@ -22,11 +22,22 @@ trait Tracking:
   /** An alias for [[addSample]], allowing to use the `+` operator to add a sample. */
   def +(sample: SampledLocation): Tracking = addSample(sample)
 
+/** A [[Tracking]] with additional information to monitor the user's route. */
 trait MonitorableTracking extends Tracking:
+
+  /** @return the mode of routing to the destination. */
   def mode: RoutingMode
+
+  /** @return the destination of the route. */
   def destination: GPSLocation
+
+  /** @return the expected arrival time at the destination. */
   def expectedArrival: Date
+
+  /** @return a new [[MonitorableTracking]] with the added sample at the beginning of the route. */
   override def addSample(sample: SampledLocation): MonitorableTracking
+
+  /** An alias for [[addSample]], allowing to use the `+` operator to add a sample. */
   override def +(sample: SampledLocation): MonitorableTracking = addSample(sample)
 
 /** The mode of routing to a destination. */
@@ -35,8 +46,10 @@ enum RoutingMode:
 
 object Tracking:
 
+  /** Creates a new [[Tracking]]. */
   def apply(userId: UserId, route: Route = List()): Tracking = TrackingImpl(route, userId)
 
+  /** Creates a new [[MonitorableTracking]]. */
   def withMonitoring(
       userId: UserId,
       routingMode: RoutingMode,

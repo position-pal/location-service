@@ -8,7 +8,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.domain.EventConversions.*
+import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.RoutingMode.*
 import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
@@ -57,7 +57,7 @@ class RealTimeUserTrackerTest
       "receives an SOS alert triggered event" should:
         "transition to SOS mode" in:
           (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
-            s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered.toSampledLocation))
+            s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
     "in routing or SOS state" when:
       "receives new location samples" should:
