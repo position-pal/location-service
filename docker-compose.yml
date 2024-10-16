@@ -1,6 +1,8 @@
 services:
   postgres-db:
-    image: postgres:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-db
     container_name: postgres-db
     ports:
       - "5432:5432"
