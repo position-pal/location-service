@@ -9,14 +9,15 @@ import com.typesafe.config.Config
 
 object AkkaUtils:
 
-  def startup2[T, F[_]: Async](
+  /** Starts an Akka actor system named [[actorSystemName]] with the given [[configuration]] and [[behavior]]. */
+  def startup[F[_]: Async, T](
       configuration: Config,
-      name: String = "ClusterSystem",
+      actorSystemName: String = "ClusterSystem",
   )(behavior: => Behavior[T]): Resource[F, ActorSystem[T]] =
     Resource:
       for
         ec <- Async[F].executionContext
         config <- Async[F].pure(BootstrapSetup(configuration).withDefaultExecutionContext(ec))
-        system <- Async[F].delay(ActorSystem(behavior, name, config))
+        system <- Async[F].delay(ActorSystem(behavior, actorSystemName, config))
         cancel = Async[F].fromFuture(Async[F].delay(system.whenTerminated)).void
       yield (system, cancel)

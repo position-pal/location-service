@@ -4,4 +4,4 @@ package io.github.positionpal.location.infrastructure.services
   * Every message class exchanged between distributed actors should extend this trait
   * (which is referenced as binding in the Akka configuration).
   */
-trait Serializable
+trait AkkaSerializable

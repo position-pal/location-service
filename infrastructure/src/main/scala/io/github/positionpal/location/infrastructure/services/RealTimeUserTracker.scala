@@ -14,7 +14,7 @@ import akka.cluster.sharding.typed.scaladsl.*
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import io.github.positionpal.location.application.reactions.*
-import io.github.positionpal.location.application.reactions.TrackingEventReaction.Notification
+import io.github.positionpal.location.application.reactions.TrackingEventReaction.*
 import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
@@ -37,7 +37,7 @@ object RealTimeUserTracker:
       userState: UserState,
       tracking: Option[T],
       lastSample: Option[SampledLocation],
-  ) extends Serializable
+  ) extends AkkaSerializable
   object State:
     def empty: State = State(UserState.Inactive, None, None)
 
@@ -91,9 +91,9 @@ object RealTimeUserTracker:
       result <- checks(tracking, event).value.run(config)
     yield result.flatten
 
-  private def reactionHandler(event: Event)(result: Either[java.io.Serializable, TrackingEventReaction.Continue.type])(
-      using ctx: ActorContext[Command],
-  ): Command = result match
+  private def reactionHandler(event: Event)(
+      result: Either[Serializable, Continue.type],
+  )(using ctx: ActorContext[Command]): Command = result match
     case Right(_) => Ignore
     case Left(Notification.Alert(msg)) =>
       ctx.log.debug(msg)
@@ -105,11 +105,14 @@ object RealTimeUserTracker:
       ctx.log.error(e.toString)
       Ignore
 
-  private def aliveCheckHandler(timer: TimerScheduler[Command]): (State, AliveCheck.type) => Effect[Event, State] =
+  private def aliveCheckHandler(
+      timer: TimerScheduler[Command],
+  )(using ctx: ActorContext[Command]): (State, AliveCheck.type) => Effect[Event, State] =
     (state, _) =>
       if state.lastSample.isDefined && state.lastSample.get.timestamp.before(Date.from(Instant.now().minusSeconds(30)))
       then
         timer.cancelAll()
-        if state.userState == SOS || state.userState == Routing then ??? // send alert notification
+        if state.userState == SOS || state.userState == Routing then
+          ctx.log.info("User {} went offline", state.lastSample.get.user)
         Effect.persist(WentOffline(state.lastSample.get.timestamp, state.lastSample.get.user))
       else Effect.none
