@@ -5,7 +5,6 @@ plugins {
     `java-library`
     id("scala")
     alias(libs.plugins.scala.extras)
-    alias(libs.plugins.cucumber.jvm)
 }
 
 class DotenvConfiguration(private val fileName: String = DEFAULT_ENV_FILE_NAME) {
@@ -32,7 +31,6 @@ allprojects {
     with(rootProject.libs.plugins) {
         apply(plugin = "java-library")
         apply(plugin = "scala")
-        apply(plugin = cucumber.jvm.get().pluginId)
         apply(plugin = scala.extras.get().pluginId)
     }
 
@@ -65,18 +63,7 @@ allprojects {
         dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
     }
 
-    cucumber {
-        val featureFilesDirectory = "features"
-        featurePath = "src/test/resources/$featureFilesDirectory"
-        glue = "$group.location.${this@allprojects.name}.$featureFilesDirectory"
-        main = "io.cucumber.core.cli.Main"
-        plugin = arrayOf("pretty")
-    }
-
     tasks.withType<Test> {
-        if (projectDir.resolve(cucumber.featurePath).exists()) {
-            dependsOn("cucumber")
-        }
         dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
     }
 }
