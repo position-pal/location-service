@@ -11,16 +11,15 @@ object DotenvUtils {
 
     fun <T> Project.injectInto(vararg taskTypes: KClass<out T>) where T : Task, T : ProcessForkOptions =
         ProcessForkOptionConfigurator(
-            taskTypes.flatMap { taskType ->
-                tasks.withType(taskType.java).map { it as ProcessForkOptions }
-            }
+            taskTypes.flatMap { tasks.withType(it.java) }
         )
 
-    fun injectInto(pfo: ProcessForkOptions) = ProcessForkOptionConfigurator(listOf(pfo))
-
-    class ProcessForkOptionConfigurator(private val pfo: List<ProcessForkOptions>) {
-        infix fun environmentsFrom(dotenv: DotEnv) =
-            dotenv.variables().forEach { (key, value) -> pfo.forEach { it.environment(key, value) } }
+    class ProcessForkOptionConfigurator<T>(private val pfo: List<T>) where T : Task, T : ProcessForkOptions {
+        infix fun environmentsFrom(dotenv: DotEnv) = pfo.forEach {
+            it.doFirst {
+                dotenv.variables().forEach { (key, value) -> it.environment(key, value) }
+            }
+        }
     }
 
     interface DotEnv {
