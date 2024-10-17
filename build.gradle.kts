@@ -44,7 +44,7 @@ allprojects {
         }
     }
 
-    if (!inCI()) {
+    if (!inCI) {
         injectInto(JavaExec::class, Test::class) environmentsFrom rootProject.dotenv
     }
 }
