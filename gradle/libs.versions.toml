@@ -32,7 +32,7 @@ http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref
 http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
 junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
-logback-classic = "ch.qos.logback:logback-classic:1.5.8"
+logback-classic = "ch.qos.logback:logback-classic:1.5.11"
 log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
 pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
 pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.ref = "pureconfig" }
