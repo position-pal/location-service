@@ -1,28 +1,61 @@
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.process.ProcessForkOptions
 import java.io.File
+import kotlin.reflect.KClass
 
 object DotenvUtils {
 
-    fun Project.dotenv(): DotenvConfiguration = DotenvConfiguration(projectDir)
+    val Project.dotenv: DotEnv
+        get() = DotEnv.from(file(".env"))
 
-    class DotenvConfiguration(private val rootDir: File, private val fileName: String = DEFAULT_ENV_FILE_NAME) {
+    fun <T> Project.injectInto(vararg taskTypes: KClass<out T>): ProcessForkOptionConfigurator where T : Task, T : ProcessForkOptions {
+        val forkOptionsList = mutableListOf<ProcessForkOptions>()
+        taskTypes.forEach { taskType ->
+            tasks.withType(taskType.java).all { task ->
+                forkOptionsList.add(task)
+            }
+        }
+        return ProcessForkOptionConfigurator(forkOptionsList)
+    }
 
-        fun environmentVariables(): Map<String, String> =
-            rootDir.resolve(fileName)
-                .takeIf { it.exists() }
-                ?.readLines()
-                ?.filter { it.isNotBlank() && !it.startsWith(COMMENT_SYMBOL) }
-                ?.associate { it.split(KEY_VALUE_SEPARATOR).let { (key, value) -> key to value } }
-                ?: emptyMap()
+    fun injectInto(pfo: ProcessForkOptions) = ProcessForkOptionConfigurator(listOf(pfo))
 
-        fun applyTo(vararg pfo: ProcessForkOptions) =
-            environmentVariables().forEach { (key, value) -> pfo.forEach { it.environment(key, value) } }
+    class ProcessForkOptionConfigurator(private val pfo: List<ProcessForkOptions>) {
+        infix fun environmentsFrom(dotenv: DotEnv) =
+            dotenv.variables().forEach { (key, value) -> pfo.forEach { it.environment(key, value) } }
+    }
+
+    interface DotEnv {
+
+        /** The `*.env` file instance. */
+        val file: File
+
+        /** @return a map environment variables key-value pairs. */
+        fun variables(): Map<String, String>
 
         companion object {
-            private const val DEFAULT_ENV_FILE_NAME = ".env"
-            private const val COMMENT_SYMBOL = "#"
-            private const val KEY_VALUE_SEPARATOR = "="
+            fun from(file: File): DotEnv = DotEnvImpl(file)
+        }
+    }
+
+    private class DotEnvImpl(override val file: File) : DotEnv {
+
+        init {
+            require(file.exists() && file.name.endsWith(EXTENSION_NAME)) {
+                "File $file does not exist or has wrong extension. Only `*$EXTENSION_NAME` files are supported."
+            }
+        }
+
+        override fun variables(): Map<String, String> = file
+            .readLines()
+            .filter { it.isNotBlank() && !it.startsWith(COMMENT_SYMBOL) }
+            .associate { it.split(KEY_VALUE_SEPARATOR).let { (key, value) -> key to value } }
+
+        private companion object {
+            const val EXTENSION_NAME = ".env"
+            const val COMMENT_SYMBOL = "#"
+            const val KEY_VALUE_SEPARATOR = "="
         }
     }
 }

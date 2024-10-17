@@ -1,6 +1,8 @@
 import DotenvUtils.dotenv
+import DotenvUtils.injectInto
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import kotlin.reflect.KClass
 
 plugins {
     `java-library`
@@ -42,11 +44,5 @@ allprojects {
         }
     }
 
-    tasks.withType<JavaExec> {
-        rootProject.dotenv().environmentVariables().forEach { environment(it.key, it.value) }
-    }
-
-    tasks.withType<Test> {
-        rootProject.dotenv().environmentVariables().forEach { environment(it.key, it.value) }
-    }
+    injectInto(JavaExec::class, Test::class) environmentsFrom rootProject.dotenv
 }
