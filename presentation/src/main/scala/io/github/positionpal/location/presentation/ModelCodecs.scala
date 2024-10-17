@@ -2,6 +2,8 @@ package io.github.positionpal.location.presentation
 
 import java.util.Date
 
+import scala.reflect.ClassTag
+
 import io.bullet.borer.derivation.ArrayBasedCodecs.{deriveAllCodecs, deriveCodec}
 import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
 import io.github.positionpal.location.application.services.UserState
@@ -26,22 +28,20 @@ trait ModelCodecs:
   given sampledLocationCodec: Codec[SampledLocation] = deriveCodec[SampledLocation]
 
   given trackingCodec: Codec[Tracking] =
-    import cats.implicits._
     Codec[Tracking](
       Encoder[Tracking]: (writer, tracking) =>
         writer.writeMapHeader(2).writeString("user").write(tracking.user).writeString("route").write(tracking.route),
       Decoder[Tracking]: reader =>
         val length = reader.readMapHeader().toInt
-        (0 until length).foldLeft((Option.empty[UserId], Option.empty[Route])): (data, _) =>
+        val fields = (0 until length).foldLeft(Map.empty[String, Any]): (data, _) =>
           reader.readString() match
-            case "user" => (Some(reader.read[UserId]()), data._2)
-            case "route" => (data._1, Some(reader.read[Route]()))
+            case "user" => data + ("user" -> reader.read[UserId]())
+            case "route" => data + ("route" -> reader.read[Route]())
             case _ => reader.unexpectedDataItem(expected = "`user` or `route`")
-        .tupled.map(t => Tracking(t._1, t._2)).get,
+        Tracking(fields.at[UserId]("user"), fields.at[Route]("route")),
     )
 
   given monitorableTrackingCodec: Codec[MonitorableTracking] =
-    import cats.implicits._
     Codec[MonitorableTracking](
       Encoder[MonitorableTracking]: (writer, tracking) =>
         writer.writeMapHeader(5).writeString("user").write(tracking.user).writeString("route").write(tracking.route)
@@ -49,22 +49,23 @@ trait ModelCodecs:
           .writeString("expectedArrival").write(tracking.expectedArrival),
       Decoder[MonitorableTracking]: reader =>
         val length = reader.readMapHeader().toInt
-        val result = (0 until length).foldLeft(
-          (
-            Option.empty[UserId],
-            Option.empty[RoutingMode],
-            Option.empty[GPSLocation],
-            Option.empty[Date],
-            Option.empty[Route],
-          ),
-        ): (data, _) =>
+        val fields = (0 until length).foldLeft(Map.empty[String, Any]): (data, _) =>
           reader.readString() match
-            case "user" => (Some(reader.read[UserId]()), data._2, data._3, data._4, data._5)
-            case "mode" => (data._1, Some(reader.read[RoutingMode]()), data._3, data._4, data._5)
-            case "destination" => (data._1, data._2, Some(reader.read[GPSLocation]()), data._4, data._5)
-            case "expectedArrival" => (data._1, data._2, data._3, Some(reader.read[Date]()), data._5)
-            case "route" => (data._1, data._2, data._3, data._4, Some(reader.read[Route]()))
-            case _ =>
-              reader.unexpectedDataItem(expected = "`user`, `route`, `mode`, `destination` or `expectedArrival`")
-        result.tupled.map(t => Tracking.withMonitoring(t._1, t._2, t._3, t._4, t._5)).get,
+            case s @ "user" => data + (s -> reader.read[UserId]())
+            case s @ "route" => data + (s -> reader.read[Route]())
+            case s @ "mode" => data + (s -> reader.read[RoutingMode]())
+            case s @ "destination" => data + (s -> reader.read[GPSLocation]())
+            case s @ "expectedArrival" => data + (s -> reader.read[Date]())
+            case _ => reader.unexpectedDataItem(expected = "`user`, `route`, `mode`, `destination`, `expectedArrival`")
+        Tracking.withMonitoring(
+          fields.at[UserId]("user"),
+          fields.at[RoutingMode]("mode"),
+          fields.at[GPSLocation]("destination"),
+          fields.at[Date]("expectedArrival"),
+          fields.at[Route]("route"),
+        ),
     )
+
+  extension (m: Map[String, Any])
+    private def at[T](s: String)(using ClassTag[T]): T =
+      m.get(s).collect { case t: T => t }.get
