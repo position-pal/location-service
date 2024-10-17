@@ -14,8 +14,8 @@ object DotenvUtils {
             taskTypes.flatMap { tasks.withType(it.java) }
         )
 
-    class ProcessForkOptionConfigurator<T>(private val pfo: List<T>) where T : Task, T : ProcessForkOptions {
-        infix fun environmentsFrom(dotenv: DotEnv) = pfo.forEach {
+    class ProcessForkOptionConfigurator<T>(private val taskTypes: List<T>) where T : Task, T : ProcessForkOptions {
+        infix fun environmentsFrom(dotenv: DotEnv) = taskTypes.forEach {
             it.doFirst {
                 dotenv.variables().forEach { (key, value) -> it.environment(key, value) }
             }
