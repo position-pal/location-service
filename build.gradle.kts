@@ -10,7 +10,7 @@ plugins {
 class DotenvConfiguration(private val fileName: String = DEFAULT_ENV_FILE_NAME) {
 
     fun environmentVariables(): Map<String, String> =
-        rootDir.resolve(dotenv.fileName)
+        rootDir.resolve(fileName)
             .takeIf { it.exists() }
             ?.readLines()
             ?.filter { it.isNotBlank() && !it.startsWith(COMMENT_SYMBOL) }
@@ -23,7 +23,7 @@ class DotenvConfiguration(private val fileName: String = DEFAULT_ENV_FILE_NAME) 
         private const val KEY_VALUE_SEPARATOR = "="
     }
 }
-val dotenv = DotenvConfiguration()
+val dotenvConfig = DotenvConfiguration()
 
 allprojects {
     group = "io.github.positionpal"
@@ -31,10 +31,7 @@ allprojects {
     with(rootProject.libs.plugins) {
         apply(plugin = "java-library")
         apply(plugin = "scala")
-        // TODO: generated code by protobuf should be excluded from qa checks
-        if (name != "presentation") {
-            apply(plugin = scala.extras.get().pluginId)
-        }
+        apply(plugin = scala.extras.get().pluginId)
     }
 
     repositories {
@@ -63,10 +60,10 @@ allprojects {
     }
 
     tasks.withType<JavaExec> {
-        dotenv.environmentVariables().forEach { environment(it.key, it.value) }
+        dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
     }
 
     tasks.withType<Test> {
-        dotenv.environmentVariables().forEach { environment(it.key, it.value) }
+        dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
     }
 }
