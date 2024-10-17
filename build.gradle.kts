@@ -1,8 +1,8 @@
 import DotenvUtils.dotenv
 import DotenvUtils.injectInto
+import Utils.inCI
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import kotlin.reflect.KClass
 
 plugins {
     `java-library`
@@ -44,5 +44,7 @@ allprojects {
         }
     }
 
-    injectInto(JavaExec::class, Test::class) environmentsFrom rootProject.dotenv
+    if (!inCI()) {
+        injectInto(JavaExec::class, Test::class) environmentsFrom rootProject.dotenv
+    }
 }
