@@ -1,3 +1,6 @@
+import DotenvUtils.dotenv
+import DotenvUtils.injectInto
+import Utils.inCI
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -6,24 +9,6 @@ plugins {
     id("scala")
     alias(libs.plugins.scala.extras)
 }
-
-class DotenvConfiguration(private val fileName: String = DEFAULT_ENV_FILE_NAME) {
-
-    fun environmentVariables(): Map<String, String> =
-        rootDir.resolve(fileName)
-            .takeIf { it.exists() }
-            ?.readLines()
-            ?.filter { it.isNotBlank() && !it.startsWith(COMMENT_SYMBOL) }
-            ?.associate { it.split(KEY_VALUE_SEPARATOR).let { (key, value) -> key to value } }
-            ?: emptyMap()
-
-    companion object {
-        private const val DEFAULT_ENV_FILE_NAME = ".env"
-        private const val COMMENT_SYMBOL = "#"
-        private const val KEY_VALUE_SEPARATOR = "="
-    }
-}
-val dotenvConfig = DotenvConfiguration()
 
 allprojects {
     group = "io.github.positionpal"
@@ -59,11 +44,7 @@ allprojects {
         }
     }
 
-    tasks.withType<JavaExec> {
-        dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
-    }
-
-    tasks.withType<Test> {
-        dotenvConfig.environmentVariables().forEach { environment(it.key, it.value) }
+    if (!inCI) {
+        injectInto(JavaExec::class, Test::class) environmentsFrom rootProject.dotenv
     }
 }
