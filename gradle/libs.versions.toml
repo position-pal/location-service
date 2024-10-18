@@ -14,7 +14,7 @@ akka-actor = { module = "com.typesafe.akka:akka-actor_3", version.ref = "akka" }
 akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", version.ref = "akka" }
 akka-cluster-typed = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
 akka-cluster-sharding-typed = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
-akka-persistence-r2dbc = "com.lightbend.akka:akka-persistence-r2dbc_3:1.2.5"
+akka-persistence-r2dbc = "com.lightbend.akka:akka-persistence-r2dbc_3:1.2.6"
 akka-persistence-typed = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
 akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testkit_3", version.ref = "akka" }
 borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
