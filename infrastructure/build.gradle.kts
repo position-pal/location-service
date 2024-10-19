@@ -7,6 +7,8 @@ dependencies {
     implementation(libs.akka.persistence.typed)
     implementation(libs.akka.persistence.r2dbc)
     implementation(libs.logback.classic)
+    implementation(libs.akka.stream)
+    implementation(libs.akka.http)
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
 }
