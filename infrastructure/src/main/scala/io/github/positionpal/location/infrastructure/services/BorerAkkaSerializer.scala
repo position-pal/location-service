@@ -3,6 +3,8 @@ package io.github.positionpal.location.infrastructure.services
 import io.bullet.borer.Codec
 import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
 import io.github.positionpal.location.domain.DomainEvent
+import io.github.positionpal.location.infrastructure.ws.Protocol
+import io.github.positionpal.location.infrastructure.ws.Protocol.Msg
 import io.github.positionpal.location.presentation.{BorerCborAkkaSerializer, ModelCodecs}
 
 /** Custom Akka serializer for the RealTimeUserTracker actor. */
@@ -17,3 +19,15 @@ class BorerAkkaSerializer extends BorerCborAkkaSerializer with ModelCodecs:
   register[RealTimeUserTracker.Ignore.type]()
   register[DomainEvent]()
   register[RealTimeUserTracker.State]()
+
+  // for akka ws tests
+  given msgCodec: Codec[Protocol.Msg] = deriveCodec[Protocol.Msg]
+  given streamCompletedSuccessfullyCodec: Codec[Protocol.StreamCompletedSuccessfully.type] =
+    deriveCodec[Protocol.StreamCompletedSuccessfully.type]
+  given wsMsgCodec: Codec[Protocol.WsMsg] = deriveCodec[Protocol.WsMsg]
+  given completedCodec: Codec[Protocol.Completed.type] = deriveCodec[Protocol.Completed.type]
+
+  register[Protocol.Msg]()
+  register[Protocol.StreamCompletedSuccessfully.type]()
+  register[Protocol.WsMsg]()
+  register[Protocol.Completed.type]()

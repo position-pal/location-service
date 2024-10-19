@@ -12,3 +12,9 @@ dependencies {
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
 }
+
+scalaExtras {
+    qa {
+        allWarningsAsErrors = false
+    }
+}

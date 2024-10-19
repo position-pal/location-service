@@ -1,4 +1,4 @@
-package io.github.positionpal.location.infrastructure.services.actors.handler
+package io.github.positionpal.location.infrastructure.ws.routes
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
@@ -57,9 +57,7 @@ object Handler:
             connectionHandler(Some(ws))
           case IncomingMessage(text) =>
             context.log.info(s"Processing incoming message: $text")
-            ws match
-              case Some(value) => value ! OutgoingMessage(s"<<< $text")
-              case None => context.log.info("No outgoing actor reference")
+            ws foreach (_ ! OutgoingMessage(s"<<< $text"))
             Behaviors.same
           case _ =>
             context.log.info("Can't process the following message")
