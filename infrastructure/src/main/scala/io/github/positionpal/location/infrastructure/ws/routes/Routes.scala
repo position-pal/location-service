@@ -6,17 +6,18 @@ import akka.http.scaladsl.model.*
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import io.github.positionpal.location.infrastructure.ws.Protocol
+import io.github.positionpal.location.infrastructure.ws.Protocol.{IncomingEvent, OutgoingEvent}
 import io.github.positionpal.location.infrastructure.ws.routes.WebSocketHandlers.websocketHandler
 
 /** Object that contains the routes definition for the websocket server */
 object Routes:
 
-  def webSocketFlowRoute(groupRef: ActorRef[ShardingEnvelope[Protocol.IncomingEvent]]): Route =
+  def webSocketFlowRoute(sessionRef: ActorRef[OutgoingEvent], groupRef: ActorRef[ShardingEnvelope[IncomingEvent]]): Route =
     path("group" / Segment): groupId =>
       println(s"Opened a new connection for group id: $groupId")
       handleWebSocketMessages:
         println(s"[Route] Creating a new websocket handler for the group $groupId")
-        websocketHandler(groupId, groupRef)
+        websocketHandler(groupId, sessionRef, groupRef)
 
   /** Default route for the server
     * @return The route

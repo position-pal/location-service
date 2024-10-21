@@ -19,12 +19,13 @@ object WebSocketHandlers:
     */
   def websocketHandler(
     groupId: String,
+    sessionRef: ActorRef[OutgoingEvent],
     incomingActorRef: ActorRef[ShardingEnvelope[IncomingEvent]]
   ): Flow[Message, Message, WebSocketHandler] =
 
     val incomingMessage: Sink[Message, NotUsed] =
       Flow[Message].map:
-        case TextMessage.Strict(text) => 
+        case TextMessage.Strict(text) =>
           println(s"Received message: $text")
           ShardingEnvelope(groupId, Msg(text))
       .to:
@@ -42,9 +43,10 @@ object WebSocketHandlers:
         overflowStrategy = OverflowStrategy.fail,
       ).map: (protocolMessage: OutgoingEvent) =>
         protocolMessage match
-          case WsMsg(content) => TextMessage.Strict(content)
+          case WsMsg(_, content) => TextMessage.Strict(content)
 
     Flow.fromSinkAndSourceMat(incomingMessage, outgoingMessage):
       case (_, outgoingActorRef) =>
-        incomingActorRef ! ShardingEnvelope(groupId, Connected(outgoingActorRef))
+        incomingActorRef ! ShardingEnvelope(groupId, Connected(sessionRef))
+        sessionRef ! NewConnection(groupId, outgoingActorRef)
         WebSocketHandler(outgoingActorRef.narrow[OutgoingEvent])

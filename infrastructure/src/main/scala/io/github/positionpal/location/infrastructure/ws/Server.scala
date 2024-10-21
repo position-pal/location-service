@@ -3,9 +3,11 @@ package io.github.positionpal.location.infrastructure.ws
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorSystem, SpawnProtocol}
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import com.typesafe.config.{Config, ConfigFactory}
+import io.github.positionpal.location.infrastructure.ws.actors.{GroupActor, SessionActor}
 import io.github.positionpal.location.infrastructure.ws.routes.Routes.{defaultRoute, webSocketFlowRoute}
 
 import scala.concurrent.ExecutionContextExecutor
@@ -17,10 +19,16 @@ object Server:
   given executionContext: ExecutionContextExecutor = actorSystem.executionContext
 
   def startup(config: Config, port: Int): Unit =
-    val actorSystem = ActorSystem(Behaviors.empty, "ClusterSystem", config)
-    val cluster = ClusterSharding(actorSystem)
-    val groupRef = cluster.init(GroupActor())
-    val binding = Http().newServerAt("localhost", port).bind(defaultRoute ~ webSocketFlowRoute(groupRef))
+    val actorSystem = ActorSystem(SessionActor(), "ClusterSystem", config)
+    val sessionRef = actorSystem.systemActorOf(SessionActor(), "session-actor")
+    // join the current node to the cluster
+//    val cluster = Cluster(actorSystem)
+//    cluster.manager ! Join(cluster.selfMember.address)
+    // setup the sharding
+    val sharding = ClusterSharding(actorSystem)
+    val groupRef = sharding.init(GroupActor())
+    // start the websocket server
+    val binding = Http().newServerAt("localhost", port).bind(defaultRoute ~ webSocketFlowRoute(sessionRef, groupRef))
     println("Server running...")
     // let it run until user presses return
     StdIn.readLine()

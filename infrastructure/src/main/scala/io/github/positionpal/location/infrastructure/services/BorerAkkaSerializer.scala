@@ -15,11 +15,6 @@ class BorerAkkaSerializer extends BorerCborAkkaSerializer with ModelCodecs:
   given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
   given alignCheckCodec: Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]
 
-  register[RealTimeUserTracker.AliveCheck.type]()
-  register[RealTimeUserTracker.Ignore.type]()
-  register[DomainEvent]()
-  register[RealTimeUserTracker.State]()
-
   // for akka ws tests
   given msgCodec: Codec[Protocol.Msg] = deriveCodec[Protocol.Msg]
   given streamCompletedSuccessfullyCodec: Codec[Protocol.StreamCompletedSuccessfully.type] =
@@ -27,6 +22,13 @@ class BorerAkkaSerializer extends BorerCborAkkaSerializer with ModelCodecs:
   given wsMsgCodec: Codec[Protocol.WsMsg] = deriveCodec[Protocol.WsMsg]
   given completedCodec: Codec[Protocol.Completed.type] = deriveCodec[Protocol.Completed.type]
 
+  println("Registering codecs")
+
+  register[RealTimeUserTracker.AliveCheck.type]()
+  register[RealTimeUserTracker.Ignore.type]()
+  register[DomainEvent]()
+  register[RealTimeUserTracker.State]()
+  // for akka ws tests
   register[Protocol.Msg]()
   register[Protocol.StreamCompletedSuccessfully.type]()
   register[Protocol.WsMsg]()
