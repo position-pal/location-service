@@ -9,7 +9,6 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.akka.stream)
     implementation(libs.akka.http)
-    // implementation("com.typesafe.akka:akka-serialization-jackson_3:2.10.0")
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
 }

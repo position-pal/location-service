@@ -25,6 +25,9 @@ object GroupManager:
 
   def apply(groupId: String): Behavior[Command] = Behaviors.setup: ctx =>
     ctx.log.debug("Starting GroupManager::{}@{}", groupId, Cluster(ctx.system).selfMember.address)
+    Behaviors.receiveMessage: msg =>
+      ctx.log.debug("Received message: {}", msg)
+      Behaviors.same
     /*
     var observers = Set.empty[ActorObserver[IO]] // TODO: to be placed in the constructor
     command match
@@ -37,4 +40,3 @@ object GroupManager:
           case Failure(exception) => ctx.log.error(exception.getMessage)
         Behaviors.same
      */
-    Behaviors.same

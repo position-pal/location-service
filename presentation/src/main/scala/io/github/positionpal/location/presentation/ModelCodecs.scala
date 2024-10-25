@@ -20,13 +20,15 @@ trait ModelCodecs:
 
   given routingModeCodec: Codec[RoutingMode] = deriveCodec[RoutingMode]
 
-  given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
-
   given routingStartedCodec: Codec[RoutingStarted] = deriveCodec[RoutingStarted]
 
   given routingStoppedCodec: Codec[RoutingStopped] = deriveCodec[RoutingStopped]
 
   given sampledLocationCodec: Codec[SampledLocation] = deriveCodec[SampledLocation]
+
+  given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
+
+  given drivenEventCodec: Codec[DrivenEvent] = deriveAllCodecs[DrivenEvent]
 
   given trackingCodec: Codec[Tracking] =
     Codec[Tracking](
