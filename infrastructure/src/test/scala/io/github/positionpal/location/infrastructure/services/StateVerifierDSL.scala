@@ -19,29 +19,27 @@ trait RealTimeUserTrackerVerifierDSL:
 
   import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
   import org.scalatest.concurrent.Eventually.eventually
-  import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.{Command, State, Event}
-  import io.github.positionpal.location.domain.DomainEvent
-  import io.github.positionpal.location.application.services.UserState
+  import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
+  import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.{Command, State, Event}
+  import io.github.positionpal.location.domain.{DrivingEvent, UserState}
 
   given Conversion[UserState, List[UserState]] = _ :: Nil
-  given Conversion[DomainEvent, List[DomainEvent]] = _ :: Nil
+  given Conversion[DrivingEvent, List[DrivingEvent]] = _ :: Nil
   extension (u: UserState) infix def |(other: UserState): List[UserState] = u :: other :: Nil
   extension (us: List[UserState]) infix def |(other: UserState): List[UserState] = us :+ other
 
   extension (xs: List[UserState])
-    infix def --(events: List[DomainEvent]): SystemVerifier[UserState, DomainEvent, RealTimeUserTracker.State] =
+    infix def --(events: List[DrivingEvent]): SystemVerifier[UserState, DrivingEvent, State] =
       RealTimeUserTrackerVerifier(xs, events)
 
-  private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DomainEvent])
-      extends SystemVerifier[UserState, DomainEvent, RealTimeUserTracker.State](ins, events):
+  private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DrivingEvent])
+      extends SystemVerifier[UserState, DrivingEvent, State](ins, events):
 
-    override infix def -->(outs: List[UserState])(using
-        ctx: Context[UserState, RealTimeUserTracker.State],
-    ): Verification[DomainEvent, RealTimeUserTracker.State] =
-      new Verification[DomainEvent, RealTimeUserTracker.State]:
-        override infix def verifying(
-            verifyLast: (DomainEvent, RealTimeUserTracker.State) => Unit,
-        )(using patience: PatienceConfig): Unit =
+    override infix def -->(
+        outs: List[UserState],
+    )(using ctx: Context[UserState, State]): Verification[DrivingEvent, State] =
+      new Verification[DrivingEvent, State]:
+        override infix def verifying(verifyLast: (DrivingEvent, State) => Unit)(using patience: PatienceConfig): Unit =
           val testKit = EventSourcedBehaviorTestKit[Command, Event, State](system, RealTimeUserTracker("userTest"))
           ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
             testKit.initialize(state)

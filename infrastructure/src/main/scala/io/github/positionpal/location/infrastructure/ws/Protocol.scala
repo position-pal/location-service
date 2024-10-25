@@ -1,7 +1,7 @@
 package io.github.positionpal.location.infrastructure.ws
 
 import akka.actor.typed.ActorRef
-import io.github.positionpal.location.infrastructure.services.AkkaSerializable
+import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
 
 object Protocol:
   sealed trait IncomingEvent extends AkkaSerializable

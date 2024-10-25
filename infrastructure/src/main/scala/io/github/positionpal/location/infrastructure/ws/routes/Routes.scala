@@ -12,7 +12,10 @@ import io.github.positionpal.location.infrastructure.ws.routes.WebSocketHandlers
 /** Object that contains the routes definition for the websocket server */
 object Routes:
 
-  def webSocketFlowRoute(sessionRef: ActorRef[OutgoingEvent], groupRef: ActorRef[ShardingEnvelope[IncomingEvent]]): Route =
+  def webSocketFlowRoute(
+      sessionRef: ActorRef[OutgoingEvent],
+      groupRef: ActorRef[ShardingEnvelope[IncomingEvent]],
+  ): Route =
     path("group" / Segment): groupId =>
       println(s"Opened a new connection for group id: $groupId")
       handleWebSocketMessages:

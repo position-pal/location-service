@@ -1,17 +1,16 @@
 package io.github.positionpal.location.infrastructure.ws
 
+import scala.concurrent.ExecutionContextExecutor
+import scala.io.StdIn
+
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorSystem, SpawnProtocol}
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import com.typesafe.config.{Config, ConfigFactory}
 import io.github.positionpal.location.infrastructure.ws.actors.{GroupActor, SessionActor}
 import io.github.positionpal.location.infrastructure.ws.routes.Routes.{defaultRoute, webSocketFlowRoute}
-
-import scala.concurrent.ExecutionContextExecutor
-import scala.io.StdIn
 
 object Server:
 
@@ -44,8 +43,6 @@ def main(): Unit =
 def main2(): Unit =
   import Server.startup
   startup(
-    ConfigFactory
-      .parseString("akka.remote.artery.canonical.port = 2552")
-      .withFallback(ConfigFactory.load("akka.conf")),
-    8081
+    ConfigFactory.parseString("akka.remote.artery.canonical.port = 2552").withFallback(ConfigFactory.load("akka.conf")),
+    8081,
   )

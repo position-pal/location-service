@@ -6,7 +6,6 @@ import scala.reflect.ClassTag
 
 import io.bullet.borer.derivation.ArrayBasedCodecs.{deriveAllCodecs, deriveCodec}
 import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
-import io.github.positionpal.location.application.services.UserState
 import io.github.positionpal.location.domain.*
 
 /** Provides codecs for the domain model and application services. */
@@ -21,9 +20,11 @@ trait ModelCodecs:
 
   given routingModeCodec: Codec[RoutingMode] = deriveCodec[RoutingMode]
 
-  given domainEventCodec: Codec[DomainEvent] = deriveAllCodecs[DomainEvent]
+  given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
 
   given routingStartedCodec: Codec[RoutingStarted] = deriveCodec[RoutingStarted]
+
+  given routingStoppedCodec: Codec[RoutingStopped] = deriveCodec[RoutingStopped]
 
   given sampledLocationCodec: Codec[SampledLocation] = deriveCodec[SampledLocation]
 

@@ -1,4 +1,4 @@
-package io.github.positionpal.location.infrastructure.services
+package io.github.positionpal.location.infrastructure.services.actors
 
 import java.time.Instant
 import java.util.Date
@@ -15,22 +15,24 @@ import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import io.github.positionpal.location.application.reactions.*
 import io.github.positionpal.location.application.reactions.TrackingEventReaction.*
-import io.github.positionpal.location.application.services.UserState
-import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.EventConversions.{*, given}
+import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.infrastructure.geo.*
 
+/** The actor in charge of tracking the real-time location of users, reacting to
+  * their movements and status changes. This actor is managed by Akka Cluster Sharding.
+  */
 object RealTimeUserTracker:
 
   /** Uniquely identifies the types of this entity instances (actors) that will be managed by cluster sharding. */
-  val key: EntityTypeKey[Command] = EntityTypeKey[Command](getClass.getName)
+  val key: EntityTypeKey[Command] = EntityTypeKey(getClass.getName)
 
   case object Ignore
   case object AliveCheck
 
-  type Command = DomainEvent | Ignore.type | AliveCheck.type
-  type Event = DomainEvent
+  type Command = DrivingEvent | Ignore.type | AliveCheck.type
+  type Event = DrivingEvent
   private type T = Tracking | MonitorableTracking
 
   final case class State(

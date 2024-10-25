@@ -5,14 +5,13 @@ import scala.language.postfixOps
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import com.typesafe.config.{Config, ConfigFactory}
-import io.github.positionpal.location.application.services.UserState
-import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.RoutingMode.*
+import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
-import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.*
+import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Seconds, Span}
@@ -81,7 +80,7 @@ class RealTimeUserTrackerTest
           s.lastSample shouldBe Some(sampledLocationEvent)
 
   extension (s: State)
-    infix def shouldMatch(route: Option[Tracking], lastSample: Option[DomainEvent]): Unit =
+    infix def shouldMatch(route: Option[Tracking], lastSample: Option[DrivingEvent]): Unit =
       s.tracking shouldBe route
       s.lastSample shouldBe lastSample
 
@@ -106,11 +105,11 @@ object RealTimeUserTrackerTest:
       }
       akka.actor {
         serializers {
-          borer-json = "io.github.positionpal.location.infrastructure.services.BorerAkkaSerializer"
+          borer-json = "io.github.positionpal.location.infrastructure.services.actors.BorerAkkaSerializer"
         }
         serialization-bindings {
-          "io.github.positionpal.location.infrastructure.services.AkkaSerializable" = borer-json
-          "io.github.positionpal.location.domain.DomainEvent" = borer-json
+          "io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable" = borer-json
+          "io.github.positionpal.location.domain.DrivingEvent" = borer-json
         }
       }
     """).withFallback(EventSourcedBehaviorTestKit.config).resolve()

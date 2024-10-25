@@ -1,7 +1,7 @@
 package io.github.positionpal.location.infrastructure.ws.actors
 
-import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.cluster.typed.Cluster
 import io.github.positionpal.location.infrastructure.ws.Protocol.{NewConnection, OutgoingEvent, WsMsg}
 
@@ -18,3 +18,4 @@ object SessionActor:
       case NewConnection(uid, ws) =>
         ctx.log.debug("[SessionActor @ {}] New connection for user {}", Cluster(ctx.system).selfMember.address, uid)
         apply(wss + (uid -> (wss.getOrElse(uid, Set.empty) + ws)))
+      case _ => Behaviors.same
