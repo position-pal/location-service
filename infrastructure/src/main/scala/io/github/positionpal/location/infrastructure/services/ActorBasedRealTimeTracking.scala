@@ -9,9 +9,9 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
   import akka.actor.typed.{ActorRef, ActorSystem}
   import akka.cluster.sharding.typed.scaladsl.ClusterSharding
   import cats.effect.kernel.Async
-  import io.github.positionpal.location.infrastructure.services.actors.WebSocketsManagers.GroupWebsocketManager
+  import io.github.positionpal.location.infrastructure.ws.WebSockets
 
-  override type Outcome = GroupWebsocketManager.Command
+  override type Outcome = WebSockets.Protocol
 
   override type OutcomeObserver = ActorRef[Outcome]
 
