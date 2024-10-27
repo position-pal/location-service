@@ -4,7 +4,7 @@ import java.util.Date
 
 import scala.reflect.ClassTag
 
-import io.bullet.borer.derivation.ArrayBasedCodecs.{deriveAllCodecs, deriveCodec}
+import io.bullet.borer.derivation.MapBasedCodecs.{deriveAllCodecs, deriveCodec}
 import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
 import io.github.positionpal.location.domain.*
 
@@ -33,26 +33,27 @@ trait ModelCodecs:
   given trackingCodec: Codec[Tracking] =
     Codec[Tracking](
       Encoder[Tracking]: (writer, tracking) =>
-        writer.writeMapHeader(2).writeString("user").write(tracking.user).writeString("route").write(tracking.route),
+        writer.writeMapOpen(2).writeString("user").write(tracking.user).writeString("route").write(tracking.route)
+          .writeMapClose(),
       Decoder[Tracking]: reader =>
-        val length = reader.readMapHeader().toInt
-        val fields = (0 until length).foldLeft(Map.empty[String, Any]): (data, _) =>
+        val unbounded = reader.readMapOpen(2)
+        val fields = (0 until 2).foldLeft(Map.empty[String, Any]): (data, _) =>
           reader.readString() match
             case "user" => data + ("user" -> reader.read[UserId]())
             case "route" => data + ("route" -> reader.read[Route]())
             case _ => reader.unexpectedDataItem(expected = "`user` or `route`")
-        Tracking(fields.at[UserId]("user"), fields.at[Route]("route")),
+        reader.readMapClose(unbounded, Tracking(fields.at[UserId]("user"), fields.at[Route]("route"))),
     )
 
   given monitorableTrackingCodec: Codec[MonitorableTracking] =
     Codec[MonitorableTracking](
       Encoder[MonitorableTracking]: (writer, tracking) =>
-        writer.writeMapHeader(5).writeString("user").write(tracking.user).writeString("route").write(tracking.route)
+        writer.writeMapOpen(5).writeString("user").write(tracking.user).writeString("route").write(tracking.route)
           .writeString("mode").write(tracking.mode).writeString("destination").write(tracking.destination)
-          .writeString("expectedArrival").write(tracking.expectedArrival),
+          .writeString("expectedArrival").write(tracking.expectedArrival).writeMapClose(),
       Decoder[MonitorableTracking]: reader =>
-        val length = reader.readMapHeader().toInt
-        val fields = (0 until length).foldLeft(Map.empty[String, Any]): (data, _) =>
+        val unbounded = reader.readMapOpen(5)
+        val fields = (0 until 5).foldLeft(Map.empty[String, Any]): (data, _) =>
           reader.readString() match
             case s @ "user" => data + (s -> reader.read[UserId]())
             case s @ "route" => data + (s -> reader.read[Route]())
@@ -60,12 +61,15 @@ trait ModelCodecs:
             case s @ "destination" => data + (s -> reader.read[GPSLocation]())
             case s @ "expectedArrival" => data + (s -> reader.read[Date]())
             case _ => reader.unexpectedDataItem(expected = "`user`, `route`, `mode`, `destination`, `expectedArrival`")
-        Tracking.withMonitoring(
-          fields.at[UserId]("user"),
-          fields.at[RoutingMode]("mode"),
-          fields.at[GPSLocation]("destination"),
-          fields.at[Date]("expectedArrival"),
-          fields.at[Route]("route"),
+        reader.readMapClose(
+          unbounded,
+          Tracking.withMonitoring(
+            fields.at[UserId]("user"),
+            fields.at[RoutingMode]("mode"),
+            fields.at[GPSLocation]("destination"),
+            fields.at[Date]("expectedArrival"),
+            fields.at[Route]("route"),
+          ),
         ),
     )
 

@@ -16,11 +16,11 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
   override type OutcomeObserver = ActorRef[Outcome]
 
   object Service:
-    def apply[F[_]: Async](using actorSystem: ActorSystem[Any]): Service[F] = ServiceImpl(actorSystem)
+    def apply[F[_]: Async](actorSystem: ActorSystem[?]): Service[F] = ServiceImpl(actorSystem)
 
-  private class ServiceImpl[F[_]: Async](actorSystem: ActorSystem[Any]) extends Service[F]:
-    override def handle(event: DrivingEvent): F[Unit] = Async[F].delay:
-      refOf(???) ! event
+  private class ServiceImpl[F[_]: Async](actorSystem: ActorSystem[?]) extends Service[F]:
+    override def handleFor(groupId: GroupId)(event: DrivingEvent): F[Unit] = Async[F].delay:
+      refOf(groupId) ! event
 
     override def addObserverFor(groupId: GroupId)(observer: OutcomeObserver): F[Unit] = Async[F].delay:
       refOf(groupId) ! GroupManager.Wire(observer)

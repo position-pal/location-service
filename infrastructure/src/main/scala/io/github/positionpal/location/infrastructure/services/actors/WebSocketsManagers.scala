@@ -3,7 +3,7 @@ package io.github.positionpal.location.infrastructure.services.actors
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import io.github.positionpal.location.domain.{DrivenEvent, GroupId}
-import io.github.positionpal.location.infrastructure.services.Protocol
+import io.github.positionpal.location.infrastructure.ws.WebSockets
 
 object WebSocketsManagers:
 
@@ -15,7 +15,7 @@ object WebSocketsManagers:
     sealed trait Command
     case class NewConnection(
         groupId: GroupId,
-        ws: ActorRef[Protocol.WebSocketEvent],
+        ws: ActorRef[WebSockets.Protocol],
         replyTo: ActorRef[Reply],
     ) extends Command
 
@@ -34,20 +34,20 @@ object WebSocketsManagers:
     private def spawnChildManager(
         groupId: GroupId,
     )(using ctx: ActorContext[?]): ActorRef[GroupWebsocketManager.Command] =
-      ctx.spawn(behavior = GroupWebsocketManager(), name = s"group-websocket-manager-$groupId")
+      ctx.spawn(behavior = GroupWebsocketManager(), name = s"group-websocket-manager-${groupId.id}")
 
   /** The actor in charge of managing the WebSocket connections of a specific group. */
   object GroupWebsocketManager:
 
     sealed trait Command extends AkkaSerializable
-    private[WebSocketsManagers] case class AddClient(ws: ActorRef[Protocol.WebSocketEvent]) extends Command
+    private[WebSocketsManagers] case class AddClient(ws: ActorRef[WebSockets.Protocol]) extends Command
     case class MessageToClient(message: DrivenEvent) extends Command
 
-    def apply(clients: Set[ActorRef[Protocol.WebSocketEvent]] = Set.empty): Behavior[Command] =
+    def apply(clients: Set[ActorRef[WebSockets.Protocol]] = Set.empty): Behavior[Command] =
       Behaviors.receive: (ctx, msg) =>
         msg match
           case AddClient(ws) => apply(clients + ws)
           case MessageToClient(message) =>
             ctx.log.debug("Sending message to clients: {}", message)
-            clients.foreach(_ ! Protocol.MessageToClient(message))
+            clients.foreach(_ ! WebSockets.Reply(message))
             Behaviors.same
