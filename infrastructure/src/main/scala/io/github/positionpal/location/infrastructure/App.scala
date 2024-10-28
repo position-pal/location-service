@@ -7,7 +7,7 @@ import akka.http.scaladsl.Http
 import cats.effect.{IO, Resource}
 import com.typesafe.config.{Config, ConfigFactory}
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
-import io.github.positionpal.location.infrastructure.services.actors.GroupManager
+import io.github.positionpal.location.infrastructure.services.actors.{GroupManager, RealTimeUserTracker}
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
 import io.github.positionpal.location.infrastructure.ws.WebSockets
 
@@ -25,11 +25,14 @@ def startup(port: Int)(config: Config) =
     actorSystem <- AkkaUtils.startup[IO, Any](config)(Behaviors.empty)
     given ActorSystem[Any] = actorSystem
     sharding <- Resource.eval(IO(ClusterSharding(actorSystem)))
-    _ <- Resource.eval(IO(sharding.init(GroupManager())))
+    _ <- Resource.eval(configureSharding(sharding))
     realTimeTrackingService <- Resource.eval(IO(ActorBasedRealTimeTracking.Service[IO](actorSystem)))
     wsService <- Resource.eval(IO(configureHttpServer(port)(realTimeTrackingService)))
   yield wsService
   result.use(_ => IO.never).unsafeRunSync()
+
+def configureSharding(sharding: ClusterSharding)(using actorSystem: ActorSystem[?]) =
+  IO(sharding.init(GroupManager())) *> IO(sharding.init(RealTimeUserTracker()))
 
 def configureHttpServer(port: Int)(
     service: ActorBasedRealTimeTracking.Service[IO],

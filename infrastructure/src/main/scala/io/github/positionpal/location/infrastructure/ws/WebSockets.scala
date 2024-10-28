@@ -34,7 +34,6 @@ object WebSockets:
     import akka.stream.scaladsl.{Flow, Sink, Source}
     import akka.stream.typed.scaladsl.ActorSource
     import io.bullet.borer.Json
-    import io.github.positionpal.location.domain.DrivenEvent
 
     def handleGroupRoute(groupId: String, service: ActorBasedRealTimeTracking.Service[IO]): Flow[Message, Message, ?] =
       val routeToGroupActor: Sink[Message, NotUsed] =
@@ -42,7 +41,7 @@ object WebSockets:
           case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
           case _ => Left("Invalid message")
         .collect { case Right(e) => e }.to(Sink.foreach(e => service.handleFor(GroupId(groupId))(e).unsafeToFuture()))
-      val routeToClient: Source[Message, ActorRef[DrivenEvent]] =
+      val routeToClient: Source[Message, ActorRef[Protocol]] =
         ActorSource.actorRef(
           completionMatcher = { case Complete => },
           failureMatcher = { case Failure(ex) => ex },

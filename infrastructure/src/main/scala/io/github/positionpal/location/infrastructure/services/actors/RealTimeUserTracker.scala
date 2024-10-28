@@ -2,11 +2,9 @@ package io.github.positionpal.location.infrastructure.services.actors
 
 import java.time.Instant
 import java.util.Date
-
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
-
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 import akka.cluster.Cluster
 import akka.cluster.sharding.typed.ShardingEnvelope
@@ -31,7 +29,9 @@ object RealTimeUserTracker:
   case object Ignore
   case object AliveCheck
 
-  type Command = DrivingEvent | Ignore.type | AliveCheck.type
+  final case class React(e: DrivingEvent)(val replyTo: ActorRef[GroupManager.Command]) extends AkkaSerializable
+
+  type Command = DrivingEvent | Ignore.type | AliveCheck.type | React
   type Event = DrivingEvent
   private type T = Tracking | MonitorableTracking
 
@@ -66,11 +66,16 @@ object RealTimeUserTracker:
 
   private def commandHandler(
       timer: TimerScheduler[Command],
-  )(using ActorContext[Command]): (State, Command) => Effect[Event, State] = (state, command) =>
+  )(using ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] = (state, command) =>
     command match
       case ev: SampledLocation => trackingHandler(state, ev)
       case ev: (RoutingStarted | RoutingStopped | SOSAlertTriggered | SOSAlertStopped) => Effect.persist(ev)
       case ev: AliveCheck.type => aliveCheckHandler(timer)(state, ev)
+      case ev: React =>
+        ctx.log.debug("Replying to react command {}", ev)
+        Effect.none
+          .thenReply(ev.replyTo): s =>
+            GroupManager.Event(UserUpdate(ev.e.timestamp, ev.e.user, GPSLocation(0.0, 0.0), s.userState))
       case _ => Effect.none
 
   private def trackingHandler(using ctx: ActorContext[Command]): (State, SampledLocation) => Effect[Event, State] =
