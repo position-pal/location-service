@@ -15,26 +15,26 @@ import io.github.positionpal.location.infrastructure.ws.WebSockets
 object EndOfWorld:
 
   @main def main1(): Unit =
-    startup(8080)(ConfigFactory.load("akka.conf"))
+    import cats.effect.unsafe.implicits.global
+    startup(8080)(ConfigFactory.load("akka.conf")).use(_ => IO.never).unsafeRunSync()
 
   @main def main2(): Unit =
+    import cats.effect.unsafe.implicits.global
     val config = ConfigFactory.parseString("akka.remote.artery.canonical.port = 2552")
       .withFallback(ConfigFactory.load("akka.conf"))
-    startup(8081)(config)
+    startup(8081)(config).use(_ => IO.never).unsafeRunSync()
 
-  def startup(port: Int)(config: Config) =
-    import cats.effect.unsafe.implicits.global
-    val result = for
+  def startup(port: Int)(config: Config): Resource[IO, ActorSystem[Any]] =
+    for
       actorSystem <- AkkaUtils.startup[IO, Any](config)(Behaviors.empty)
       given ActorSystem[Any] = actorSystem
       realTimeTrackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem))
-      wsService <- configureHttpServer[IO](port)(realTimeTrackingService)
-    yield wsService
-    result.use(_ => IO.never).unsafeRunSync()
+      _ <- configureHttpServer[IO](port)(realTimeTrackingService)
+    yield actorSystem
 
   def configureHttpServer[F[_]: Async](port: Int)(
       service: ActorBasedRealTimeTracking.Service[IO, UserId],
-  )(using actorSystem: ActorSystem[?]) =
+  )(using actorSystem: ActorSystem[?]): Resource[F, Http.ServerBinding] =
     Resource.make(
       Async[F].fromFuture:
         Async[F].delay:

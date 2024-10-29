@@ -2,10 +2,8 @@ package io.github.positionpal.location.infrastructure.ws
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import akka.actor.typed.ActorRef
-import akka.stream.OverflowStrategy
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
@@ -31,9 +29,12 @@ object WebSockets:
 
   object Handlers extends ModelCodecs:
 
+    import akka.actor.typed.ActorRef
     import akka.http.scaladsl.model.ws.{Message, TextMessage}
     import akka.stream.scaladsl.{Flow, Sink, Source}
+    import akka.stream.OverflowStrategy
     import akka.stream.typed.scaladsl.ActorSource
+    import cats.effect.unsafe.implicits.global
     import io.bullet.borer.Json
 
     private val activeSessions = scala.collection.mutable.Map[GroupId, Set[(UserId, ActorRef[Protocol])]]()
@@ -67,5 +68,7 @@ object WebSockets:
           println(s"Active sessions: $activeSessions")
           service.addObserverFor(userId)(activeSessions(groupId).map(_._2)).unsafeRunSync()
           ref
-        .map(msg => TextMessage.Strict(msg.toString))
+        .map:
+          case Reply(event) => TextMessage(Json.encode(event).toUtf8String)
+          case _ => ???
       Flow.fromSinkAndSource(routeToGroupActor, routeToClient)

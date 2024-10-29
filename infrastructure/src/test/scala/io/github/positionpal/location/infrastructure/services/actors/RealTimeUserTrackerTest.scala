@@ -12,7 +12,6 @@ import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.*
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -20,7 +19,6 @@ import org.scalatest.wordspec.AnyWordSpecLike
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)
     with AnyWordSpecLike
-    with BeforeAndAfterEach
     with RealTimeUserTrackerVerifierDSL:
 
   private val testUser = UserId("user-test")

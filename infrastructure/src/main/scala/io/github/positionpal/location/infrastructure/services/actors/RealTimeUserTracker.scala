@@ -90,12 +90,8 @@ object RealTimeUserTracker:
         state.observers
           .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
-      case Wire(observer) =>
-        ctx.log.debug("Wiring observer {}", observer)
-        State(state.userState, state.tracking, state.lastSample, state.observers + observer)
-      case UnWire(observer) =>
-        ctx.log.debug("Unwiring observer {}", observer)
-        State(state.userState, state.tracking, state.lastSample, state.observers - observer)
+      case Wire(observer) => State(state.userState, state.tracking, state.lastSample, state.observers + observer)
+      case UnWire(observer) => State(state.userState, state.tracking, state.lastSample, state.observers - observer)
 
   private def commandHandler(
       timer: TimerScheduler[Command],
