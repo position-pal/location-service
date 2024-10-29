@@ -22,21 +22,10 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
     )
   given stateCodec: Codec[RealTimeUserTracker.State] = deriveCodec[RealTimeUserTracker.State]
   given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
-  given alignCheckCodec: Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]
-//  given reactCodec: Codec[RealTimeUserTracker.React] =
-//    Codec[RealTimeUserTracker.React](
-//      Encoder[RealTimeUserTracker.React]: (writer, react) =>
-//        writer.writeArrayOpen(2).write(react.e).write(react.replyTo).writeArrayClose(),
-//      Decoder[RealTimeUserTracker.React]: reader =>
-//        val unbounded = reader.readArrayOpen(2)
-//        reader.readArrayClose(
-//          unbounded, RealTimeUserTracker.React(reader.read[DrivingEvent]())(reader.read[ActorRef[GroupManager.Command]]())
-//        )
-//    )
+  given aliveCheckCodec: Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]
   given wireCodec: Codec[RealTimeUserTracker.Wire] = deriveCodec[RealTimeUserTracker.Wire]
   given unwireCodec: Codec[RealTimeUserTracker.UnWire] = deriveCodec[RealTimeUserTracker.UnWire]
   given replyCodec: Codec[WebSockets.Reply] = deriveCodec[WebSockets.Reply]
-  // given eventCodec: Codec[GroupManager.Event] = deriveCodec[GroupManager.Event]
 
   register[RealTimeUserTracker.AliveCheck.type]()
   register[RealTimeUserTracker.Ignore.type]()
@@ -45,6 +34,4 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
   register[RealTimeUserTracker.State]()
   register[RealTimeUserTracker.Wire]()
   register[RealTimeUserTracker.UnWire]()
-  // register[GroupManager.Event]()
   register[WebSockets.Reply]()
-  // register[RealTimeUserTracker.React]()
