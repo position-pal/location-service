@@ -12,3 +12,25 @@ dependencies {
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
 }
+
+tasks.withType<Test> {
+    dependsOn(":infrastructure:composeUp")
+    finalizedBy(":infrastructure:composeDown")
+}
+
+tasks.create("composeDown") {
+    compose("down")
+}
+
+tasks.create("composeUp") {
+    compose("up", "-d")
+}
+
+fun Task.compose(vararg args: String) {
+    doLast {
+        exec {
+            workingDir = project.rootDir
+            commandLine("docker", "compose", *args)
+        }
+    }
+}

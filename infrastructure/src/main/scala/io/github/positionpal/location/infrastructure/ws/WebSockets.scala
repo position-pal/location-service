@@ -6,7 +6,7 @@ import akka.actor.typed.ActorRef
 import akka.stream.OverflowStrategy
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, UserId}
+import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
 import io.github.positionpal.location.presentation.ModelCodecs
@@ -25,9 +25,9 @@ object WebSockets:
     import akka.http.scaladsl.server.Route
 
     def groupRoute(service: ActorBasedRealTimeTracking.Service[IO, UserId]): Route =
-      path("group" / Segment / Segment): (groupId, userId) =>
+      path("group" / Segment / Segment): (guid, uid) =>
         handleWebSocketMessages:
-          handleGroupRoute(groupId, userId, service)
+          handleGroupRoute(GroupId(guid), UserId(uid), service)
 
   object Handlers extends ModelCodecs:
 
@@ -36,11 +36,11 @@ object WebSockets:
     import akka.stream.typed.scaladsl.ActorSource
     import io.bullet.borer.Json
 
-    private val activeSessions = scala.collection.mutable.Map[String, Set[(String, ActorRef[Protocol])]]()
+    private val activeSessions = scala.collection.mutable.Map[GroupId, Set[(UserId, ActorRef[Protocol])]]()
 
     def handleGroupRoute(
-        groupId: String,
-        userId: String,
+        groupId: GroupId,
+        userId: UserId,
         service: ActorBasedRealTimeTracking.Service[IO, UserId],
     ): Flow[Message, Message, ?] =
       val routeToGroupActor: Sink[Message, Unit] =
@@ -50,7 +50,7 @@ object WebSockets:
         .collect { case Right(e) => e }.watchTermination(): (_, done) =>
           done.onComplete: _ =>
             activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, ref) =>
-              service.removeObserverFor(UserId(uid))(Set(ref)).unsafeRunSync()
+              service.removeObserverFor(uid)(Set(ref)).unsafeRunSync()
             activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
             println(s"Active sessions: $activeSessions")
         .to(Sink.foreach(e => service.handle(e).unsafeRunSync()))
@@ -62,10 +62,10 @@ object WebSockets:
           overflowStrategy = OverflowStrategy.fail,
         ).mapMaterializedValue: ref =>
           activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, _) =>
-            service.addObserverFor(UserId(uid))(Set(ref)).unsafeRunSync()
+            service.addObserverFor(uid)(Set(ref)).unsafeRunSync()
           activeSessions.updateWith(groupId)(existing => Some(existing.getOrElse(Set.empty) + ((userId, ref))))
           println(s"Active sessions: $activeSessions")
-          service.addObserverFor(UserId(userId))(activeSessions(groupId).map(_._2)).unsafeRunSync()
+          service.addObserverFor(userId)(activeSessions(groupId).map(_._2)).unsafeRunSync()
           ref
         .map(msg => TextMessage.Strict(msg.toString))
       Flow.fromSinkAndSource(routeToGroupActor, routeToClient)

@@ -29,12 +29,12 @@ object RealTimeUserTracker:
   /** Uniquely identifies the types of this entity instances (actors) that will be managed by cluster sharding. */
   val key: EntityTypeKey[Command] = EntityTypeKey(getClass.getName)
 
-  case object Ignore
-  case object AliveCheck
-
   sealed trait ProtocolCommand extends AkkaSerializable
   case class Wire(observer: ActorRef[WebSockets.Protocol]) extends ProtocolCommand
   case class UnWire(observer: ActorRef[WebSockets.Protocol]) extends ProtocolCommand
+
+  case object Ignore
+  case object AliveCheck
 
   type Command = DrivingEvent | Ignore.type | AliveCheck.type | ProtocolCommand
   type Event = DrivingEvent | ProtocolCommand
