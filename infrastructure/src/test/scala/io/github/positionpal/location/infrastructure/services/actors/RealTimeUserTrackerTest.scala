@@ -1,6 +1,4 @@
-package io.github.positionpal.location.infrastructure.services
-
-import scala.language.postfixOps
+package io.github.positionpal.location.infrastructure.services.actors
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
@@ -16,6 +14,8 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpecLike
+
+import scala.language.postfixOps
 
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)

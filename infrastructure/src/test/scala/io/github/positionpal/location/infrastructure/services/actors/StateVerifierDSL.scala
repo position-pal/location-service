@@ -1,4 +1,4 @@
-package io.github.positionpal.location.infrastructure.services
+package io.github.positionpal.location.infrastructure.services.actors
 
 import org.scalatest.concurrent.Eventually.PatienceConfig
 import org.scalatest.matchers.should.Matchers
@@ -18,10 +18,9 @@ trait RealTimeUserTrackerVerifierDSL:
   context: ActorTestKitBase & Matchers =>
 
   import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
-  import org.scalatest.concurrent.Eventually.eventually
-  import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
-  import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.{Command, State, Event}
   import io.github.positionpal.location.domain.{DrivingEvent, UserState}
+  import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.{Command, Event, State}
+  import org.scalatest.concurrent.Eventually.eventually
 
   given Conversion[UserState, List[UserState]] = _ :: Nil
   given Conversion[DrivingEvent, List[DrivingEvent]] = _ :: Nil
