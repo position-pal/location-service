@@ -3,8 +3,8 @@ package io.github.positionpal.location.infrastructure.services.actors
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.scaladsl.adapter.*
 import akka.actor.typed.{ActorRef, ActorRefResolver}
-import io.bullet.borer.{Codec, Decoder, Encoder}
 import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
+import io.bullet.borer.{Codec, Decoder, Encoder}
 import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent}
 import io.github.positionpal.location.infrastructure.ws.WebSockets
 import io.github.positionpal.location.presentation.*

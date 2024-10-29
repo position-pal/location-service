@@ -1,10 +1,11 @@
 package io.github.positionpal.location.infrastructure.ws
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import akka.actor.typed.ActorRef
 import akka.stream.OverflowStrategy
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, UserId}
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
@@ -37,13 +38,16 @@ object WebSockets:
 
     private val activeSessions = scala.collection.mutable.Map[String, Set[(String, ActorRef[Protocol])]]()
 
-    def handleGroupRoute(groupId: String, userId: String, service: ActorBasedRealTimeTracking.Service[IO, UserId]): Flow[Message, Message, ?] =
+    def handleGroupRoute(
+        groupId: String,
+        userId: String,
+        service: ActorBasedRealTimeTracking.Service[IO, UserId],
+    ): Flow[Message, Message, ?] =
       val routeToGroupActor: Sink[Message, Unit] =
         Flow[Message].map:
           case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
           case _ => Left("Invalid message")
-        .collect { case Right(e) => e }
-        .watchTermination(): (_, done) =>
+        .collect { case Right(e) => e }.watchTermination(): (_, done) =>
           done.onComplete: _ =>
             activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, ref) =>
               service.removeObserverFor(UserId(uid))(Set(ref)).unsafeRunSync()

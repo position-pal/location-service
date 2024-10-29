@@ -2,10 +2,12 @@ package io.github.positionpal.location.infrastructure.services.actors
 
 import java.time.Instant
 import java.util.Date
+
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
-import akka.actor.typed.{ActorRef, Behavior}
+
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.cluster.Cluster
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.*
@@ -61,11 +63,13 @@ object RealTimeUserTracker:
     event match
       case ev: RoutingStarted =>
         val newState = State(Routing, Some(ev.toMonitorableTracking), state.lastSample, state.observers)
-        state.observers.notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
+        state.observers
+          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
       case ev: SOSAlertTriggered =>
         val newState = State(SOS, Some(Tracking(ev.user)), Some(ev), state.observers)
-        state.observers.notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
+        state.observers
+          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
       case ev: SampledLocation =>
         val newState = state match
@@ -73,20 +77,23 @@ object RealTimeUserTracker:
           case _ => State(Active, None, Some(ev), state.observers)
         ctx.log.debug("New location sample for user {}", ev.user)
         ctx.log.debug("Notifying observers {}", state.observers)
-        state.observers.notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
+        state.observers
+          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
       case ev: (SOSAlertStopped | RoutingStopped) =>
         val newState = State(Active, None, state.lastSample, state.observers)
-        state.observers.notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
+        state.observers
+          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
       case ev: WentOffline =>
         val newState = State(Inactive, state.tracking, state.lastSample, state.observers)
-        state.observers.notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
+        state.observers
+          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
       case Wire(observer) =>
         ctx.log.debug("Wiring observer {}", observer)
         State(state.userState, state.tracking, state.lastSample, state.observers + observer)
-      case UnWire(observer) => 
+      case UnWire(observer) =>
         ctx.log.debug("Unwiring observer {}", observer)
         State(state.userState, state.tracking, state.lastSample, state.observers - observer)
 
