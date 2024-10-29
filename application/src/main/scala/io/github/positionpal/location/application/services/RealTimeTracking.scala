@@ -2,7 +2,7 @@ package io.github.positionpal.location.application.services
 
 import io.github.positionpal.location
 import io.github.positionpal.location.application.services
-import io.github.positionpal.location.domain.{DrivingEvent, GroupId}
+import io.github.positionpal.location.domain.DrivingEvent
 
 trait RealTimeTracking:
 
@@ -13,13 +13,13 @@ trait RealTimeTracking:
   type OutcomeObserver
 
   /** The real-time tracking service in charge of handling the [[DrivingEvent]]. */
-  trait Service[F[_]]:
+  trait Service[F[_], G]:
 
-    /** Handle the [[event]] for the given [[groupId]]. */
-    def handleFor(groupId: GroupId)(event: DrivingEvent): F[Unit]
+    /** Handle the [[event]]. */
+    def handle(event: DrivingEvent): F[Unit]
 
-    /** Add an observer for the given [[groupId]]. */
-    def addObserverFor(groupId: GroupId)(observer: OutcomeObserver): F[Unit]
+    /** Add an observer for the given [[resource]]. */
+    def addObserverFor(resource: G)(observer: OutcomeObserver): F[Unit]
 
-    /** Remove the observer for the given [[groupId]]. */
-    def removeObserverFor(groupId: GroupId)(observer: OutcomeObserver): F[Unit]
+    /** Remove the observer for the given [[resource]]. */
+    def removeObserverFor(resource: G)(observer: OutcomeObserver): F[Unit]

@@ -29,7 +29,7 @@ class RealTimeUserTrackerTest
   private val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
   private val longLastingPatience = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
 
-  given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None))
+  given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None, Set.empty))
 
   "RealTimeUserTracker" when:
     "in inactive or active state" when:

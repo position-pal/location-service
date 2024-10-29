@@ -6,6 +6,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.Http
 import cats.effect.{IO, Resource}
 import com.typesafe.config.{Config, ConfigFactory}
+import io.github.positionpal.location.domain.UserId
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.services.actors.{GroupManager, RealTimeUserTracker}
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
@@ -35,6 +36,6 @@ def configureSharding(sharding: ClusterSharding)(using actorSystem: ActorSystem[
   IO(sharding.init(GroupManager())) *> IO(sharding.init(RealTimeUserTracker()))
 
 def configureHttpServer(port: Int)(
-    service: ActorBasedRealTimeTracking.Service[IO],
+    service: ActorBasedRealTimeTracking.Service[IO, UserId],
 )(using actorSystem: ActorSystem[?]) =
   Http(actorSystem.classicSystem).newServerAt("localhost", port).bind(WebSockets.Routes.groupRoute(service))

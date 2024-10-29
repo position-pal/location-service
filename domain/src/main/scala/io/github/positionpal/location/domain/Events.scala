@@ -44,6 +44,6 @@ sealed trait DrivenEvent extends DomainEvent
 case class UserUpdate(
     timestamp: Date,
     user: UserId,
-    position: GPSLocation,
+    position: Option[GPSLocation],
     status: UserState,
 ) extends DrivenEvent
