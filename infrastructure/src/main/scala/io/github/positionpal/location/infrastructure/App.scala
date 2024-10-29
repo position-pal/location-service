@@ -8,7 +8,7 @@ import cats.effect.{IO, Resource}
 import com.typesafe.config.{Config, ConfigFactory}
 import io.github.positionpal.location.domain.UserId
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
-import io.github.positionpal.location.infrastructure.services.actors.{GroupManager, RealTimeUserTracker}
+import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
 import io.github.positionpal.location.infrastructure.ws.WebSockets
 
@@ -33,7 +33,7 @@ def startup(port: Int)(config: Config) =
   result.use(_ => IO.never).unsafeRunSync()
 
 def configureSharding(sharding: ClusterSharding)(using actorSystem: ActorSystem[?]) =
-  IO(sharding.init(GroupManager())) *> IO(sharding.init(RealTimeUserTracker()))
+  IO(sharding.init(RealTimeUserTracker()))
 
 def configureHttpServer(port: Int)(
     service: ActorBasedRealTimeTracking.Service[IO, UserId],
