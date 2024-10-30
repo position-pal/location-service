@@ -24,13 +24,11 @@ jobs:
           java-version: ${{ matrix.jvm-version }}
       - name: Assemble main and test classes
         run: ./gradlew classes testClasses
-      - name: Test infrastructure independent code
-        run: ./gradlew test -x infrastructure:test
-      - name: Test infrastructure dependent code
+      - name: Check infrastructure independent code
+        run: ./gradlew check -x infrastructure:check
+      - name: Check infrastructure dependent code
         if: contains('ubuntu', matrix.os)
-        run: ./gradlew infrastructure:test
-      - name: Check
-        run: ./gradlew check
+        run: ./gradlew infrastructure:check
 
   success:
     needs:
