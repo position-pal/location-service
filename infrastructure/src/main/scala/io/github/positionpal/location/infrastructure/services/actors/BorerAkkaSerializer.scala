@@ -9,7 +9,7 @@ import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent}
 import io.github.positionpal.location.infrastructure.ws.WebSockets
 import io.github.positionpal.location.presentation.*
 
-/** Custom Akka serializer for the RealTimeUserTracker actor. */
+/** Custom Akka serializer for the actor entities. */
 class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSerializer with ModelCodecs:
   private val actorRefResolver = ActorRefResolver(system.toTyped)
 

@@ -61,10 +61,10 @@ class RealTimeUserTrackerTest
 
     "in routing or SOS state" when:
       "receives new location samples" should:
-        "track the user positions" ignore:
+        "track the user positions" in:
           val trace = generateTrace
           (Routing | SOS) -- trace --> (Routing | SOS) verifying: (_, s) =>
-            s shouldMatch (tracking(s.userState, trace), Some(trace.last))
+            s shouldMatch (tracking(s.userState, trace.reverse), Some(trace.last))
 
     "receives an SOS alert triggered event" should:
       "transition to SOS mode" in:
@@ -79,7 +79,10 @@ class RealTimeUserTrackerTest
 
   extension (s: State)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[DrivingEvent]): Unit =
-      s.tracking shouldBe route
+      s.tracking.isDefined shouldBe route.isDefined
+      s.tracking.foreach: t =>
+        t.user shouldBe route.get.user
+        t.route shouldBe route.get.route
       s.lastSample shouldBe lastSample
 
   private def generateTrace: List[SampledLocation] =

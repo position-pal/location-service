@@ -45,7 +45,13 @@ object RealTimeUserTracker:
       tracking: Option[T],
       lastSample: Option[SampledLocation],
       observers: Set[ActorRef[WebSockets.Protocol]],
-  ) extends AkkaSerializable
+  ) extends AkkaSerializable:
+    def update(state: UserState, tracking: Option[T], sample: Option[SampledLocation]): State =
+      State(state, tracking, sample, observers)
+
+    def addObservers(observers: Set[ActorRef[WebSockets.Protocol]]): State =
+      ???
+
   object State:
     def empty: State = State(UserState.Inactive, None, None, Set.empty)
 
@@ -73,7 +79,7 @@ object RealTimeUserTracker:
         newState
       case ev: SampledLocation =>
         val newState = state match
-          case State(Routing | SOS, Some(tracking), _, obs) => State(Routing, Some(tracking + ev), Some(ev), obs)
+          case s @ State(Routing | SOS, Some(tracking), _, obs) => State(s.userState, Some(tracking + ev), Some(ev), obs)
           case _ => State(Active, None, Some(ev), state.observers)
         ctx.log.debug("[{}] New location sample for user {}", Cluster(ctx.system).selfMember.address, ev.user)
         ctx.log.debug("[{}] Notifying observers {}", Cluster(ctx.system).selfMember.address, state.observers)
