@@ -9,23 +9,31 @@ import io.github.positionpal.location.infrastructure.services.ActorBasedRealTime
 import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
 import io.github.positionpal.location.presentation.ModelCodecs
 
+/** Web socket port service implementation for real time tracking. */
 object WebSockets:
 
+  /** The protocol for the web socket communication. */
   sealed trait Protocol extends AkkaSerializable
+
+  /** Replies to a client with the given [[event]]. */
   case class Reply(event: DrivenEvent) extends Protocol
+
+  /** Completes the web socket connection. */
   case object Complete extends Protocol
+
+  /** Fails the web socket connection with the given [[ex]]. */
   case class Failure(ex: Throwable) extends Protocol
 
+  /** The routes for the web socket communication. */
   object Routes:
 
-    import Handlers.*
     import akka.http.scaladsl.server.Directives.*
     import akka.http.scaladsl.server.Route
 
     def groupRoute(service: ActorBasedRealTimeTracking.Service[IO, UserId]): Route =
       path("group" / Segment / Segment): (guid, uid) =>
         handleWebSocketMessages:
-          handleGroupRoute(GroupId(guid), UserId(uid), service)
+          Handlers.handleGroupRoute(GroupId(guid), UserId(uid), service)
 
   object Handlers extends ModelCodecs:
 
@@ -53,7 +61,6 @@ object WebSockets:
             activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, ref) =>
               service.removeObserverFor(uid)(Set(ref)).unsafeRunSync()
             activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
-            println(s"Active sessions: $activeSessions")
         .to(Sink.foreach(e => service.handle(e).unsafeRunSync()))
       val routeToClient: Source[Message, ActorRef[Protocol]] =
         ActorSource.actorRef(
@@ -62,12 +69,9 @@ object WebSockets:
           bufferSize = 1_000,
           overflowStrategy = OverflowStrategy.fail,
         ).mapMaterializedValue: ref =>
-          println(s">>> Creation of a Source for ws for $userId")
           activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, _) =>
             service.addObserverFor(uid)(Set(ref)).unsafeRunSync()
-          println(s">>> Active sessions: ${activeSessions.getOrElse(groupId, Set.empty)}")
           activeSessions.updateWith(groupId)(existing => Some(existing.getOrElse(Set.empty) + ((userId, ref))))
-          println(s">>> Active sessions: $activeSessions")
           service.addObserverFor(userId)(activeSessions(groupId).map(_._2)).unsafeRunSync()
           ref
         .map:

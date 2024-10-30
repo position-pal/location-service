@@ -46,11 +46,19 @@ object RealTimeUserTracker:
       lastSample: Option[SampledLocation],
       observers: Set[ActorRef[WebSockets.Protocol]],
   ) extends AkkaSerializable:
-    def update(state: UserState, tracking: Option[T], sample: Option[SampledLocation]): State =
-      State(state, tracking, sample, observers)
-
-    def addObservers(observers: Set[ActorRef[WebSockets.Protocol]]): State =
-      ???
+    def update(e: DrivingEvent): State =
+      val newState = e match
+        case ev: SampledLocation =>
+          userState match
+            case Routing | SOS => copy(tracking = tracking.map(_ + ev), lastSample = Some(ev))
+            case _ => copy(userState = Active, tracking = tracking.map(_ + ev), lastSample = Some(ev))
+        case ev: RoutingStarted => copy(userState = Routing, tracking = Some(ev.toMonitorableTracking))
+        case ev: SOSAlertTriggered => copy(userState = SOS, tracking = Some(ev.toTracking), lastSample = Some(ev))
+        case _: (SOSAlertStopped | RoutingStopped) => copy(userState = Active, tracking = None)
+        case _: WentOffline => copy(userState = Inactive)
+      observers.foreach:
+        _ ! WebSockets.Reply(UserUpdate(e.timestamp, e.user, newState.lastSample.map(_.position), newState.userState))
+      newState
 
   object State:
     def empty: State = State(UserState.Inactive, None, None, Set.empty)
@@ -65,43 +73,11 @@ object RealTimeUserTracker:
       timer.startTimerAtFixedRate(AliveCheck, 10.seconds)
       EventSourcedBehavior(PersistenceId(key.name, entityId), State.empty, commandHandler(timer), eventHandler)
 
-  private def eventHandler(using ctx: ActorContext[Command]): (State, Event) => State = (state, event) =>
+  private def eventHandler: (State, Event) => State = (state, event) =>
     event match
-      case ev: RoutingStarted =>
-        val newState = State(Routing, Some(ev.toMonitorableTracking), state.lastSample, state.observers)
-        state.observers
-          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
-        newState
-      case ev: SOSAlertTriggered =>
-        val newState = State(SOS, Some(Tracking(ev.user)), Some(ev), state.observers)
-        state.observers
-          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
-        newState
-      case ev: SampledLocation =>
-        val newState = state match
-          case s @ State(Routing | SOS, Some(tracking), _, obs) => State(s.userState, Some(tracking + ev), Some(ev), obs)
-          case _ => State(Active, None, Some(ev), state.observers)
-        ctx.log.debug("[{}] New location sample for user {}", Cluster(ctx.system).selfMember.address, ev.user)
-        ctx.log.debug("[{}] Notifying observers {}", Cluster(ctx.system).selfMember.address, state.observers)
-        state.observers
-          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
-        newState
-      case ev: (SOSAlertStopped | RoutingStopped) =>
-        val newState = State(Active, None, state.lastSample, state.observers)
-        state.observers
-          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
-        newState
-      case ev: WentOffline =>
-        val newState = State(Inactive, state.tracking, state.lastSample, state.observers)
-        state.observers
-          .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
-        newState
-      case Wire(observer) =>
-        ctx.log.debug("[{}] New observer {}", Cluster(ctx.system).selfMember.address, observer)
-        State(state.userState, state.tracking, state.lastSample, state.observers + observer)
-      case UnWire(observer) =>
-        ctx.log.debug("[{}] Removing observer {}", Cluster(ctx.system).selfMember.address, observer)
-        State(state.userState, state.tracking, state.lastSample, state.observers - observer)
+      case Wire(observer) => State(state.userState, state.tracking, state.lastSample, state.observers + observer)
+      case UnWire(observer) => State(state.userState, state.tracking, state.lastSample, state.observers - observer)
+      case ev: DrivingEvent => state.update(ev)
 
   private def commandHandler(
       timer: TimerScheduler[Command],
@@ -158,7 +134,3 @@ object RealTimeUserTracker:
           ctx.log.info("User {} went offline", state.lastSample.get.user)
         Effect.persist(WentOffline(state.lastSample.get.timestamp, state.lastSample.get.user))
       else Effect.none
-
-  extension (observers: Set[ActorRef[WebSockets.Protocol]])
-    private def notify(event: DrivenEvent): Unit =
-      observers.foreach(_ ! WebSockets.Reply(event))
