@@ -40,10 +40,7 @@ class WebSocketClient:
     val flow = Http().webSocketClientFlow(WebSocketRequest(url))
     webSocketFlow = Some(flow)
     val outgoing = Source.queue[Message](bufferSize = 100, overflowStrategy = OverflowStrategy.dropHead)
-    val (sourceQueue, upgradeResponse) = outgoing
-      .viaMat(flow)(Keep.both)
-      .toMat(incoming)(Keep.left)
-      .run()
+    val (sourceQueue, upgradeResponse) = outgoing.viaMat(flow)(Keep.both).toMat(incoming)(Keep.left).run()
     messageSink = Some(sourceQueue)
     upgradeResponse.map: upgrade =>
       upgrade.response.status.isSuccess

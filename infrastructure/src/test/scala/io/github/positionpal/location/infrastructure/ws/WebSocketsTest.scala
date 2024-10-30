@@ -1,16 +1,15 @@
 package io.github.positionpal.location.infrastructure.ws
 
+import scala.collection.mutable
+import scala.concurrent.Future
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
+
 import io.github.positionpal.location.domain.UserState.Active
 import io.github.positionpal.location.presentation.ModelCodecs
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-
-import scala.collection.mutable
-import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.duration.DurationInt
 
 class WebSocketsTest extends AnyWordSpecLike with BeforeAndAfterEach with Matchers with ModelCodecs with ScalaFutures:
 
@@ -55,9 +54,9 @@ class WebSocketsTest extends AnyWordSpecLike with BeforeAndAfterEach with Matche
 
   class WebSocketGroupTest(config: WebSocketTestConfig):
     final case class Client(
-      id: UserId,
-      websocket: WebSocketClient = WebSocketClient(),
-      responses: mutable.Set[DrivenEvent] = mutable.Set.empty,
+        id: UserId,
+        websocket: WebSocketClient = WebSocketClient(),
+        responses: mutable.Set[DrivenEvent] = mutable.Set.empty,
     )
     final case class Scenario[E <: DrivingEvent](group: GroupId, clients: List[Client], events: List[E])
 

@@ -1,13 +1,13 @@
 package io.github.positionpal.location.infrastructure.ws
 
+import scala.collection.concurrent.TrieMap
 import scala.concurrent.ExecutionContext.Implicits.global
+
 import cats.effect.IO
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
 import io.github.positionpal.location.presentation.ModelCodecs
-
-import scala.collection.concurrent.TrieMap
 
 object WebSockets:
 
