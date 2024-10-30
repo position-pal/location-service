@@ -1,13 +1,13 @@
 package io.github.positionpal.location.infrastructure.ws
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import cats.effect.IO
-
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
 import io.github.positionpal.location.presentation.ModelCodecs
+
+import scala.collection.concurrent.TrieMap
 
 object WebSockets:
 
@@ -37,7 +37,7 @@ object WebSockets:
     import cats.effect.unsafe.implicits.global
     import io.bullet.borer.Json
 
-    private val activeSessions = scala.collection.mutable.Map[GroupId, Set[(UserId, ActorRef[Protocol])]]()
+    private val activeSessions = TrieMap[GroupId, Set[(UserId, ActorRef[Protocol])]]()
 
     def handleGroupRoute(
         groupId: GroupId,
@@ -62,10 +62,12 @@ object WebSockets:
           bufferSize = 1_000,
           overflowStrategy = OverflowStrategy.fail,
         ).mapMaterializedValue: ref =>
+          println(s">>> Creation of a Source for ws for $userId")
           activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, _) =>
             service.addObserverFor(uid)(Set(ref)).unsafeRunSync()
+          println(s">>> Active sessions: ${activeSessions.getOrElse(groupId, Set.empty)}")
           activeSessions.updateWith(groupId)(existing => Some(existing.getOrElse(Set.empty) + ((userId, ref))))
-          println(s"Active sessions: $activeSessions")
+          println(s">>> Active sessions: $activeSessions")
           service.addObserverFor(userId)(activeSessions(groupId).map(_._2)).unsafeRunSync()
           ref
         .map:

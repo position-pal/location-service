@@ -30,7 +30,7 @@ fun Task.compose(vararg args: String) {
     doLast {
         exec {
             workingDir = project.rootDir
-            commandLine("docker", "compose", *args)
+            commandLine("/usr/local/bin/docker", "compose", *args)
         }
     }
 }

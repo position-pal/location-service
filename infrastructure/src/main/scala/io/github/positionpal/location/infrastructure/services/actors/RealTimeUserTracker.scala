@@ -75,8 +75,8 @@ object RealTimeUserTracker:
         val newState = state match
           case State(Routing | SOS, Some(tracking), _, obs) => State(Routing, Some(tracking + ev), Some(ev), obs)
           case _ => State(Active, None, Some(ev), state.observers)
-        ctx.log.debug("New location sample for user {}", ev.user)
-        ctx.log.debug("Notifying observers {}", state.observers)
+        ctx.log.debug("[{}] New location sample for user {}", Cluster(ctx.system).selfMember.address, ev.user)
+        ctx.log.debug("[{}] Notifying observers {}", Cluster(ctx.system).selfMember.address, state.observers)
         state.observers
           .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
@@ -90,8 +90,12 @@ object RealTimeUserTracker:
         state.observers
           .notify(UserUpdate(ev.timestamp, ev.user, newState.lastSample.map(_.position), newState.userState))
         newState
-      case Wire(observer) => State(state.userState, state.tracking, state.lastSample, state.observers + observer)
-      case UnWire(observer) => State(state.userState, state.tracking, state.lastSample, state.observers - observer)
+      case Wire(observer) =>
+        ctx.log.debug("[{}] New observer {}", Cluster(ctx.system).selfMember.address, observer)
+        State(state.userState, state.tracking, state.lastSample, state.observers + observer)
+      case UnWire(observer) =>
+        ctx.log.debug("[{}] Removing observer {}", Cluster(ctx.system).selfMember.address, observer)
+        State(state.userState, state.tracking, state.lastSample, state.observers - observer)
 
   private def commandHandler(
       timer: TimerScheduler[Command],
