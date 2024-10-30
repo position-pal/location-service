@@ -6,23 +6,13 @@ import akka.http.scaladsl.Http
 import cats.effect.kernel.Async
 import cats.effect.{IO, Resource}
 import cats.implicits.toFunctorOps
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 import io.github.positionpal.location.domain.UserId
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
 import io.github.positionpal.location.infrastructure.ws.WebSockets
 
 object EndOfWorld:
-
-  @main def main1(): Unit =
-    import cats.effect.unsafe.implicits.global
-    startup(8080)(ConfigFactory.load("akka.conf")).use(_ => IO.never).unsafeRunSync()
-
-  @main def main2(): Unit =
-    import cats.effect.unsafe.implicits.global
-    val config = ConfigFactory.parseString("akka.remote.artery.canonical.port = 2552")
-      .withFallback(ConfigFactory.load("akka.conf"))
-    startup(8081)(config).use(_ => IO.never).unsafeRunSync()
 
   def startup(port: Int)(config: Config): Resource[IO, ActorSystem[Any]] =
     for

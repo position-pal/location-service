@@ -35,6 +35,7 @@ object WebSockets:
         handleWebSocketMessages:
           Handlers.handleGroupRoute(GroupId(guid), UserId(uid), service)
 
+  /** The handlers for the web socket communication. */
   object Handlers extends ModelCodecs:
 
     import akka.actor.typed.ActorRef
@@ -52,16 +53,15 @@ object WebSockets:
         userId: UserId,
         service: ActorBasedRealTimeTracking.Service[IO, UserId],
     ): Flow[Message, Message, ?] =
-      val routeToGroupActor: Sink[Message, Unit] =
-        Flow[Message].map:
-          case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
-          case _ => Left("Invalid message")
-        .collect { case Right(e) => e }.watchTermination(): (_, done) =>
-          done.onComplete: _ =>
-            activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, ref) =>
-              service.removeObserverFor(uid)(Set(ref)).unsafeRunSync()
-            activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
-        .to(Sink.foreach(e => service.handle(e).unsafeRunSync()))
+      val routeToGroupActor: Sink[Message, Unit] = Flow[Message].map:
+        case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
+        case _ => Left("Invalid message")
+      .collect { case Right(e) => e }.watchTermination(): (_, done) =>
+        done.onComplete: _ =>
+          activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, ref) =>
+            service.removeObserverFor(uid)(Set(ref)).unsafeRunSync()
+          activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
+      .to(Sink.foreach(e => service.handle(e).unsafeRunSync()))
       val routeToClient: Source[Message, ActorRef[Protocol]] =
         ActorSource.actorRef(
           completionMatcher = { case Complete => },
@@ -76,5 +76,4 @@ object WebSockets:
           ref
         .map:
           case Reply(event) => TextMessage(Json.encode(event).toUtf8String)
-          case _ => ???
       Flow.fromSinkAndSource(routeToGroupActor, routeToClient)
