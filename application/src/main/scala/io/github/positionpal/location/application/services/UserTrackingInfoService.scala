@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.services
 
-import io.github.positionpal.location.domain.{GPSLocation, Route, UserId}
+import io.github.positionpal.location.domain.{GPSLocation, Route, UserId, UserState}
 
 /** A service to query and retrieve the tracking information of a user. */
 trait UserTrackingInfoService[F[_]]:

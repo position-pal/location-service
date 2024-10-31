@@ -1,19 +1,17 @@
-package io.github.positionpal.location.infrastructure.services
+package io.github.positionpal.location.infrastructure.services.actors
 
 import scala.language.postfixOps
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import com.typesafe.config.{Config, ConfigFactory}
-import io.github.positionpal.location.application.services.UserState
-import io.github.positionpal.location.application.services.UserState.*
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.RoutingMode.*
+import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
-import io.github.positionpal.location.infrastructure.services.RealTimeUserTracker.*
-import org.scalatest.BeforeAndAfterEach
+import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.*
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -21,7 +19,6 @@ import org.scalatest.wordspec.AnyWordSpecLike
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)
     with AnyWordSpecLike
-    with BeforeAndAfterEach
     with RealTimeUserTrackerVerifierDSL:
 
   private val testUser = UserId("user-test")
@@ -30,7 +27,7 @@ class RealTimeUserTrackerTest
   private val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
   private val longLastingPatience = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
 
-  given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None))
+  given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None, Set.empty))
 
   "RealTimeUserTracker" when:
     "in inactive or active state" when:
@@ -64,10 +61,10 @@ class RealTimeUserTrackerTest
 
     "in routing or SOS state" when:
       "receives new location samples" should:
-        "track the user positions" ignore:
+        "track the user positions" in:
           val trace = generateTrace
           (Routing | SOS) -- trace --> (Routing | SOS) verifying: (_, s) =>
-            s shouldMatch (tracking(s.userState, trace), Some(trace.last))
+            s shouldMatch (tracking(s.userState, trace.reverse), Some(trace.last))
 
     "receives an SOS alert triggered event" should:
       "transition to SOS mode" in:
@@ -81,8 +78,11 @@ class RealTimeUserTrackerTest
           s.lastSample shouldBe Some(sampledLocationEvent)
 
   extension (s: State)
-    infix def shouldMatch(route: Option[Tracking], lastSample: Option[DomainEvent]): Unit =
-      s.tracking shouldBe route
+    infix def shouldMatch(route: Option[Tracking], lastSample: Option[DrivingEvent]): Unit =
+      s.tracking.isDefined shouldBe route.isDefined
+      s.tracking.foreach: t =>
+        t.user shouldBe route.get.user
+        t.route shouldBe route.get.route
       s.lastSample shouldBe lastSample
 
   private def generateTrace: List[SampledLocation] =
@@ -106,11 +106,11 @@ object RealTimeUserTrackerTest:
       }
       akka.actor {
         serializers {
-          borer-json = "io.github.positionpal.location.infrastructure.services.BorerAkkaSerializer"
+          borer-json = "io.github.positionpal.location.infrastructure.services.actors.BorerAkkaSerializer"
         }
         serialization-bindings {
-          "io.github.positionpal.location.infrastructure.services.AkkaSerializable" = borer-json
-          "io.github.positionpal.location.domain.DomainEvent" = borer-json
+          "io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable" = borer-json
+          "io.github.positionpal.location.domain.DrivingEvent" = borer-json
         }
       }
     """).withFallback(EventSourcedBehaviorTestKit.config).resolve()

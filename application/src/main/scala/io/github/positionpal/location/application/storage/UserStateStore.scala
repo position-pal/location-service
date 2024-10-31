@@ -1,7 +1,6 @@
 package io.github.positionpal.location.application.storage
 
-import io.github.positionpal.location.application.services.UserState
-import io.github.positionpal.location.domain.UserId
+import io.github.positionpal.location.domain.{UserId, UserState}
 
 /** The reading model projection for [[UserState]].
   * It encapsulates the read-side operations for querying and retrieving
