@@ -1,6 +1,6 @@
 package io.github.positionpal.location.presentation
 
-import java.util.Date
+import java.time.Instant
 
 import scala.reflect.ClassTag
 
@@ -10,7 +10,8 @@ import io.github.positionpal.location.domain.*
 
 /** Provides codecs for the domain model and application services. */
 trait ModelCodecs:
-  given dateCoded: Codec[Date] = Codec.bimap[Long, Date](_.getTime, new Date(_))
+
+  given instantsCodec: Codec[Instant] = Codec.bimap[String, Instant](_.toString, Instant.parse)
 
   given userIdCodec: Codec[UserId] = deriveCodec[UserId]
 
@@ -59,7 +60,7 @@ trait ModelCodecs:
             case s @ "route" => data + (s -> reader.read[Route]())
             case s @ "mode" => data + (s -> reader.read[RoutingMode]())
             case s @ "destination" => data + (s -> reader.read[GPSLocation]())
-            case s @ "expectedArrival" => data + (s -> reader.read[Date]())
+            case s @ "expectedArrival" => data + (s -> reader.read[Instant]())
             case _ => reader.unexpectedDataItem(expected = "`user`, `route`, `mode`, `destination`, `expectedArrival`")
         reader.readMapClose(
           unbounded,
@@ -67,7 +68,7 @@ trait ModelCodecs:
             fields.at[UserId]("user"),
             fields.at[RoutingMode]("mode"),
             fields.at[GPSLocation]("destination"),
-            fields.at[Date]("expectedArrival"),
+            fields.at[Instant]("expectedArrival"),
             fields.at[Route]("route"),
           ),
         ),

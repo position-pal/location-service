@@ -22,9 +22,6 @@ class RealTimeUserTrackerTest
     with RealTimeUserTrackerVerifierDSL:
 
   private val testUser = UserId("user-test")
-  private val routingStartedEvent = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
-  private val sampledLocationEvent = SampledLocation(now, testUser, cesenaCampusLocation)
-  private val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
   private val longLastingPatience = Eventually.PatienceConfig(Span(60, Seconds), Span(5, Seconds))
 
   given Context[UserState, State] = ins => ins.map(s => State(s, tracking(s), None, Set.empty))
@@ -33,13 +30,15 @@ class RealTimeUserTrackerTest
     "in inactive or active state" when:
       "receives a new location sample" should:
         "update the last known location" in:
-          (Active | Inactive) -- sampledLocationEvent --> Active verifying: (e, s) =>
+          val sampledLocation = SampledLocation(now, testUser, cesenaCampusLocation)
+          (Active | Inactive) -- sampledLocation --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing started event" should:
         "transition to routing mode" in:
-          (Active | Inactive) -- routingStartedEvent --> Routing verifying: (_, s) =>
-            s shouldMatch (Some(routingStartedEvent.toMonitorableTracking), None)
+          val routingStarted = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
+          (Active | Inactive) -- routingStarted --> Routing verifying: (_, s) =>
+            s shouldMatch (Some(routingStarted.toMonitorableTracking), None)
 
     "in routing state" when:
       "reaching the destination" should:
@@ -68,21 +67,20 @@ class RealTimeUserTrackerTest
 
     "receives an SOS alert triggered event" should:
       "transition to SOS mode" in:
+        val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
         (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
           s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
     "inactive for a while" should:
       "transition to inactive mode" in:
         given Eventually.PatienceConfig = longLastingPatience
-        (Active | Routing | SOS) -- sampledLocationEvent --> Inactive verifying: (_, s) =>
-          s.lastSample shouldBe Some(sampledLocationEvent)
+        val sampledLocation = SampledLocation(now, testUser, cesenaCampusLocation)
+        (Active | Routing | SOS) -- sampledLocation --> Inactive verifying: (_, s) =>
+          s.lastSample shouldBe Some(sampledLocation)
 
   extension (s: State)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[DrivingEvent]): Unit =
-      s.tracking.isDefined shouldBe route.isDefined
-      s.tracking.foreach: t =>
-        t.user shouldBe route.get.user
-        t.route shouldBe route.get.route
+      s.tracking shouldBe route
       s.lastSample shouldBe lastSample
 
   private def generateTrace: List[SampledLocation] =
@@ -91,7 +89,7 @@ class RealTimeUserTrackerTest
       :: SampledLocation(now, testUser, GPSLocation(42, 14))
       :: Nil
 
-  private def tracking(state: UserState, trace: List[SampledLocation] = Nil): Option[Tracking | MonitorableTracking] =
+  private def tracking(state: UserState, trace: List[SampledLocation] = Nil): Option[Tracking] =
     state match
       case SOS => Some(Tracking(testUser, trace))
       case Routing => Some(Tracking.withMonitoring(testUser, Driving, cesenaCampusLocation, inTheFuture, trace))

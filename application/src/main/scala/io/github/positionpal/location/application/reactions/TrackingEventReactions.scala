@@ -58,6 +58,6 @@ object ArrivalTimeoutCheck:
   private val alertMessage = "User has not reached the destination within the expected time."
 
   def apply[M[_]: Monad](): EventReaction[M] = on[M]: (monitoredTracking, event) =>
-    if event.timestamp.after(monitoredTracking.expectedArrival)
+    if event.timestamp.isAfter(monitoredTracking.expectedArrival)
     then Monad[M].pure(Left(Alert(alertMessage)))
     else Monad[M].pure(Right(Continue))

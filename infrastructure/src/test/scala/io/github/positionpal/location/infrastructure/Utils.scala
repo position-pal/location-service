@@ -8,11 +8,11 @@ object GeoUtils:
 end GeoUtils
 
 object TimeUtils:
-  import java.util.Date
+  import java.time.Instant
 
-  def now: Date = Date()
-  def inTheFuture: Date = Date.from(now.toInstant.plusSeconds(90))
-  def inThePast: Date = Date.from(now.toInstant.minusSeconds(90))
+  def now: Instant = Instant.now()
+  def inTheFuture: Instant = Instant.parse("2100-12-31T23:59:59Z")
+  def inThePast: Instant = Instant.parse("2000-01-01T00:00:00Z")
 end TimeUtils
 
 class WebSocketClient:

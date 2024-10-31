@@ -1,7 +1,5 @@
 package io.github.positionpal.location.infrastructure.reactions
 
-import java.util.Date
-
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.reactions.*
@@ -29,17 +27,17 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers:
         val tracking = List.fill(20)(SampledLocation(now, UserId("test"), bolognaCampusLocation)).foldLeft(
           Tracking.withMonitoring(UserId("test"), RoutingMode.Driving, cesenaCampusLocation, inTheFuture),
         )((tracking, sample) => tracking.addSample(sample))
-        val event: SampledLocation = SampledLocation(Date(), UserId("test"), bolognaCampusLocation)
+        val event: SampledLocation = SampledLocation(now, UserId("test"), bolognaCampusLocation)
         checksFor(tracking, event).unsafeRunSync() should matchPattern { case Right(Left(Notification.Alert(_))) => }
 
       it("if the user has not reached the destination within the expected time"):
         val tracking = Tracking.withMonitoring(UserId("test"), RoutingMode.Driving, cesenaCampusLocation, inThePast)
-        val event: SampledLocation = SampledLocation(Date(), UserId("test"), bolognaCampusLocation)
+        val event: SampledLocation = SampledLocation(now, UserId("test"), bolognaCampusLocation)
         checksFor(tracking, event).unsafeRunSync() should matchPattern { case Right(Left(Notification.Alert(_))) => }
 
       it("if the user has arrived to the expected destination in time"):
         val tracking = Tracking.withMonitoring(UserId("test"), RoutingMode.Driving, cesenaCampusLocation, inTheFuture)
-        val event: SampledLocation = SampledLocation(Date(), UserId("test"), cesenaCampusLocation)
+        val event: SampledLocation = SampledLocation(now, UserId("test"), cesenaCampusLocation)
         checksFor(tracking, event).unsafeRunSync() should matchPattern { case Right(Left(Notification.Success(_))) => }
 
   private def checksFor(tracking: MonitorableTracking, event: SampledLocation) =

@@ -1,6 +1,6 @@
 package io.github.positionpal.location.domain
 
-import java.util.Date
+import java.time.Instant
 
 /** A list of ordered [[SampledLocation]]s that can be interpolated
   * forming a path between two geographical positions.
@@ -32,7 +32,7 @@ trait MonitorableTracking extends Tracking:
   def destination: GPSLocation
 
   /** @return the expected arrival time at the destination. */
-  def expectedArrival: Date
+  def expectedArrival: Instant
 
   /** @return a new [[MonitorableTracking]] with the added sample at the beginning of the route. */
   override def addSample(sample: SampledLocation): MonitorableTracking
@@ -54,7 +54,7 @@ object Tracking:
       userId: UserId,
       routingMode: RoutingMode,
       arrivalLocation: GPSLocation,
-      estimatedArrival: Date,
+      estimatedArrival: Instant,
       route: Route = List(),
   ): MonitorableTracking = MonitorableTrackingImpl(route, userId, routingMode, arrivalLocation, estimatedArrival)
 
@@ -66,7 +66,7 @@ object Tracking:
       override val user: UserId,
       override val mode: RoutingMode,
       override val destination: GPSLocation,
-      override val expectedArrival: Date,
+      override val expectedArrival: Instant,
   ) extends MonitorableTracking:
     override def addSample(sample: SampledLocation): MonitorableTracking =
       MonitorableTrackingImpl(sample :: route, user, mode, destination, expectedArrival)

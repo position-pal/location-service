@@ -1,6 +1,6 @@
 package io.github.positionpal.location.presentation
 
-import java.util.Date
+import java.time.Instant
 
 import io.bullet.borer.Cbor
 import io.github.positionpal.location.domain.*
@@ -12,8 +12,8 @@ class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
   "`Tracking`" should "be correctly serialized and deserialized" in:
     val user = UserId("test-user")
     val route = List(
-      SampledLocation(Date(), user, GPSLocation(44.139, 12.243)),
-      SampledLocation(Date(), user, GPSLocation(44.140, 12.244)),
+      SampledLocation(Instant.now(), user, GPSLocation(44.139, 12.243)),
+      SampledLocation(Instant.now(), user, GPSLocation(44.140, 12.244)),
     )
     val tracking = Tracking(user, route)
     val serialized = Cbor.encode(tracking).toByteArray
@@ -24,10 +24,10 @@ class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
   "`MonitorableTracking`" should "be correctly serialized and deserialized" in:
     val user = UserId("test-user")
     val route = List(
-      SampledLocation(Date(), user, GPSLocation(44.139, 12.243)),
-      SampledLocation(Date(), user, GPSLocation(44.140, 12.244)),
+      SampledLocation(Instant.now(), user, GPSLocation(44.139, 12.243)),
+      SampledLocation(Instant.now(), user, GPSLocation(44.140, 12.244)),
     )
-    val expectedArrival = Date()
+    val expectedArrival = Instant.now()
     val destination = GPSLocation(44.141, 12.245)
     val tracking = Tracking.withMonitoring(user, RoutingMode.Driving, destination, expectedArrival, route)
     val serialized = Cbor.encode(tracking).toByteArray

@@ -12,10 +12,10 @@ class EventReactionsTest extends AnyFunSpec with Matchers:
   import io.github.positionpal.location.domain.*
   import io.github.positionpal.location.domain.RoutingMode.Driving
 
-  import java.util.Date
+  import java.time.Instant.now
 
-  private val tracking = Tracking.withMonitoring(UserId("test"), Driving, GPSLocation(0.0, 0.0), Date())
-  private val event = SampledLocation(Date(), UserId("test"), GPSLocation(0.1, 0.1))
+  private val tracking = Tracking.withMonitoring(UserId("test"), Driving, GPSLocation(0.0, 0.0), now)
+  private val event = SampledLocation(now, UserId("test"), GPSLocation(0.1, 0.1))
 
   describe("`TrackingEventReaction`s"):
     it("should be able to be composed"):
