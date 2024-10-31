@@ -27,7 +27,7 @@ jobs:
       - name: Check infrastructure independent code
         run: ./gradlew check -x infrastructure:check
       - name: Check infrastructure dependent code
-        if: contains('ubuntu', matrix.os)
+        if: contains(matrix.os, 'ubuntu')
         run: ./gradlew infrastructure:check
 
   success:
