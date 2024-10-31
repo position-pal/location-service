@@ -1,3 +1,30 @@
+## [0.5.0](https://github.com/position-pal/location-service/compare/0.4.0...0.5.0) (2024-10-31)
+
+### Features
+
+* **infrastructure:** add web socket service ([#67](https://github.com/position-pal/location-service/issues/67)) ([319d1c2](https://github.com/position-pal/location-service/commit/319d1c207d89bdb06dd662ec79d69be5b6ce071e))
+
+### Dependency updates
+
+* **deps:** pin postgres docker tag to 6b3d44b ([e6cdaf5](https://github.com/position-pal/location-service/commit/e6cdaf513dcbcdb965e3e657e06af24a7832579d))
+* **deps:** update akka to v2.10.0 ([f24a79d](https://github.com/position-pal/location-service/commit/f24a79dc01fc243b718dc2de44399a015732c3b1))
+* **deps:** update akka to v2.9.7 ([73b9e03](https://github.com/position-pal/location-service/commit/73b9e03559e36f1ce70e0eb3c49daae494b30fed))
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.11 ([18e18d6](https://github.com/position-pal/location-service/commit/18e18d68c4d700e3ebd0dd5ae9f5466d77ca3082))
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.12 ([f4b56e1](https://github.com/position-pal/location-service/commit/f4b56e1d490b8a02f048d02dd7730405e6796967))
+* **deps:** update dependency com.lightbend.akka:akka-persistence-r2dbc_3 to v1.2.6 ([2b5e07b](https://github.com/position-pal/location-service/commit/2b5e07b6c1081571af044e1d1295198166bd74c3))
+* **deps:** update dependency com.lightbend.akka:akka-persistence-r2dbc_3 to v1.3.0 ([186a492](https://github.com/position-pal/location-service/commit/186a49237877cb8cebeb142c638ff3e1b78b303c))
+* **deps:** update dependency io.cucumber:cucumber-scala_3 to v8.25.1 ([dd83ea0](https://github.com/position-pal/location-service/commit/dd83ea0cb64d4e84bf9bf43a4715522680d1ffc9))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.112 ([104d4d4](https://github.com/position-pal/location-service/commit/104d4d4bdf98f8e4cd30a15dd192f99695466b75))
+* **deps:** update junit5 monorepo to v1.11.3 ([f44a86a](https://github.com/position-pal/location-service/commit/f44a86ab499c4a55374bc0abd75fbdc0768a839a))
+* **deps:** update postgres:17.0 docker digest to 8d3be35 ([2cad31b](https://github.com/position-pal/location-service/commit/2cad31be2ca189906e45d920cb62db35f9613932))
+
+### Build and continuous integration
+
+* **deps:** update actions/checkout digest to 11bd719 ([f0cf486](https://github.com/position-pal/location-service/commit/f0cf486a6763c744fa9621e607c566f300c58f07))
+* **deps:** update actions/setup-java digest to 8df1039 ([9218648](https://github.com/position-pal/location-service/commit/921864852ccc665079c4aef85fd2eac0a23fbebb))
+* **deps:** update actions/setup-node action to v4.1.0 ([1811e27](https://github.com/position-pal/location-service/commit/1811e2792602b1115be63120237943350f9f833b))
+* move .env management to buildSrc ([#56](https://github.com/position-pal/location-service/issues/56)) ([c681774](https://github.com/position-pal/location-service/commit/c6817741d0323a39dec43933718062f33c937d30))
+
 ## [0.4.0](https://github.com/position-pal/location-service/compare/0.3.0...0.4.0) (2024-10-17)
 
 ### Features
