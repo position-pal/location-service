@@ -2,7 +2,7 @@
 akka = "2.9.7"
 borer = "1.14.1"
 circe = "0.14.10"
-http4s = "1.0.0-M42"
+http4s = "1.0.0-M43"
 junit = "1.11.3"
 pureconfig = "0.17.7"
 scala = "3.5.2"
