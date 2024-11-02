@@ -6,10 +6,10 @@ import io.github.positionpal.location.domain.DrivingEvent
 
 trait RealTimeTracking:
 
-  /** The type of the outcome. */
+  /** A type representing the outcome the [[Service]] can produce. */
   type Outcome
 
-  /** An observer that listens to the outcome of a process following the Observer pattern. */
+  /** An observer that listens for [[Outcome]]s. */
   type OutcomeObserver
 
   /** The real-time tracking service in charge of handling the [[DrivingEvent]]. */
