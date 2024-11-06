@@ -6,7 +6,7 @@ http4s = "1.0.0-M43"
 junit = "1.11.3"
 pureconfig = "0.17.7"
 scala = "3.5.2"
-scalamock = "0.6.5"
+scalamock = "0.6.6"
 scalatest = "3.3.0-SNAP4"
 
 [libraries]
