@@ -36,7 +36,8 @@ class RealTimeUserTrackerTest
 
       "receives a routing started event" should:
         "transition to routing mode" in:
-          val routingStarted = RoutingStarted(now, testUser, bolognaCampusLocation, Driving, cesenaCampusLocation, inTheFuture)
+          val routingStarted =
+            RoutingStarted(now, testUser, bolognaCampusLocation, Driving, cesenaCampusLocation, inTheFuture)
           (Active | Inactive) -- routingStarted --> Routing verifying: (_, s) =>
             s shouldMatch (Some(routingStarted.toMonitorableTracking), None)
 
@@ -69,7 +70,7 @@ class RealTimeUserTrackerTest
       "transition to SOS mode" in:
         val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampusLocation)
         (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
-          s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
+          s shouldMatch (Some(Tracking()), Some(sosAlertTriggered: SampledLocation))
 
     "inactive for a while" should:
       "transition to inactive mode" in:
@@ -91,8 +92,8 @@ class RealTimeUserTrackerTest
 
   private def tracking(state: UserState, trace: List[SampledLocation] = Nil): Option[Tracking] =
     state match
-      case SOS => Some(Tracking(testUser, trace))
-      case Routing => Some(Tracking.withMonitoring(testUser, Driving, cesenaCampusLocation, inTheFuture, trace))
+      case SOS => Some(Tracking(trace))
+      case Routing => Some(Tracking.withMonitoring(Driving, cesenaCampusLocation, inTheFuture, trace))
       case _ => None
 
 object RealTimeUserTrackerTest:

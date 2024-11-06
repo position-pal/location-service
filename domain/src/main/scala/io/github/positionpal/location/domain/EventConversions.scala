@@ -8,8 +8,4 @@ object EventConversions:
   extension (ev: RoutingStarted)
     /** Creates a [[MonitorableTracking]] from the given [[RoutingStarted]] event. */
     def toMonitorableTracking: MonitorableTracking =
-      Tracking.withMonitoring(ev.user, ev.mode, ev.destination, ev.expectedArrival)
-
-  extension (ev: SOSAlertTriggered)
-    /** Creates a [[Tracking]] from the given [[SOSAlertTriggered]] event. */
-    def toTracking: Tracking = Tracking(ev.user)
+      Tracking.withMonitoring(ev.mode, ev.destination, ev.expectedArrival)

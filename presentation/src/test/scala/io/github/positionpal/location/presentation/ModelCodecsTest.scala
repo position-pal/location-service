@@ -15,10 +15,8 @@ class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
       SampledLocation(Instant.now(), user, GPSLocation(44.139, 12.243)),
       SampledLocation(Instant.now(), user, GPSLocation(44.140, 12.244)),
     )
-    val tracking = Tracking(user, route)
-    val serialized = Cbor.encode(tracking).toByteArray
+    val serialized = Cbor.encode(Tracking(route)).toByteArray
     val deserialized = Cbor.decode(serialized).to[Tracking].value
-    deserialized.user shouldBe user
     deserialized.route shouldBe route
 
   "`MonitorableTracking`" should "be correctly serialized and deserialized" in:
@@ -29,10 +27,9 @@ class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
     )
     val expectedArrival = Instant.now()
     val destination = GPSLocation(44.141, 12.245)
-    val tracking = Tracking.withMonitoring(user, RoutingMode.Driving, destination, expectedArrival, route)
+    val tracking = Tracking.withMonitoring(RoutingMode.Driving, destination, expectedArrival, route)
     val serialized = Cbor.encode(tracking).toByteArray
     val deserialized = Cbor.decode(serialized).to[MonitorableTracking].value
-    deserialized.user shouldBe user
     deserialized.route shouldBe route
     deserialized.destination shouldBe destination
     deserialized.mode shouldBe RoutingMode.Driving
