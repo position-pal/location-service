@@ -20,6 +20,7 @@ case class SampledLocation(timestamp: Instant, user: UserId, position: GPSLocati
 case class RoutingStarted(
     timestamp: Instant,
     user: UserId,
+    position: GPSLocation,
     mode: RoutingMode,
     destination: GPSLocation,
     expectedArrival: Instant,

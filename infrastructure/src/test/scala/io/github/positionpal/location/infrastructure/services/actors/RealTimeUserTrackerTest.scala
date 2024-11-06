@@ -36,7 +36,7 @@ class RealTimeUserTrackerTest
 
       "receives a routing started event" should:
         "transition to routing mode" in:
-          val routingStarted = RoutingStarted(now, testUser, Driving, cesenaCampusLocation, inTheFuture)
+          val routingStarted = RoutingStarted(now, testUser, bolognaCampusLocation, Driving, cesenaCampusLocation, inTheFuture)
           (Active | Inactive) -- routingStarted --> Routing verifying: (_, s) =>
             s shouldMatch (Some(routingStarted.toMonitorableTracking), None)
 
