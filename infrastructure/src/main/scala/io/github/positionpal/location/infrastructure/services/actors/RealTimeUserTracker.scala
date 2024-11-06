@@ -52,7 +52,7 @@ object RealTimeUserTracker:
             case Routing | SOS => copy(tracking = tracking.map(_ + ev), lastSample = Some(ev))
             case _ => copy(userState = Active, tracking = tracking.map(_ + ev), lastSample = Some(ev))
         case ev: RoutingStarted => copy(userState = Routing, tracking = Some(ev.toMonitorableTracking))
-        case ev: SOSAlertTriggered => copy(userState = SOS, tracking = Some(ev.toTracking), lastSample = Some(ev))
+        case ev: SOSAlertTriggered => copy(userState = SOS, tracking = Some(Tracking()), lastSample = Some(ev))
         case _: (SOSAlertStopped | RoutingStopped) => copy(userState = Active, tracking = None)
         case _: WentOffline => copy(userState = Inactive)
       observers.foreach:

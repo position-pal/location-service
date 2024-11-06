@@ -24,6 +24,11 @@ object Session:
   import io.github.positionpal.location.domain.EventConversions.*
   import io.github.positionpal.location.domain.EventConversions.given
 
+  /** A snapshot of the user's state and tracking information. */
+  final case class Snapshot(userId: UserId, userState: UserState, lastSampledLocation: Option[SampledLocation])
+
+  extension (s: Session) def toSnapshot: Snapshot = Snapshot(s.userId, s.userState, s.lastSampledLocation)
+
   def of(userId: UserId): Session = SessionImpl(userId, Inactive, None, None)
 
   def from(userId: UserId, state: UserState, lastSample: Option[SampledLocation], tracking: Option[Tracking]): Session =
@@ -41,11 +46,6 @@ object Session:
           case Routing | SOS => copy(tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
           case _ => copy(userState = Active, tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
       case e: RoutingStarted => copy(userState = Routing, tracking = Some(e.toMonitorableTracking))
-      case e: SOSAlertTriggered => copy(userState = SOS, tracking = Some(e.toTracking), lastSampledLocation = Some(e))
+      case e: SOSAlertTriggered => copy(userState = SOS, tracking = Some(Tracking()), lastSampledLocation = Some(e))
       case _: (SOSAlertStopped | RoutingStopped) => copy(userState = Active, tracking = None)
       case _: WentOffline => copy(userState = Inactive)
-
-  type Snapshot = (UserId, UserState, Option[SampledLocation])
-
-  extension (s: Session)
-    def toSnapshot: Snapshot = (s.userId, s.userState, s.lastSampledLocation)

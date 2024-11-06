@@ -14,7 +14,7 @@ class EventReactionsTest extends AnyFunSpec with Matchers:
 
   import java.time.Instant.now
 
-  private val tracking = Tracking.withMonitoring(UserId("test"), Driving, GPSLocation(0.0, 0.0), now)
+  private val tracking = Tracking.withMonitoring(Driving, GPSLocation(0.0, 0.0), now)
   private val event = SampledLocation(now, UserId("test"), GPSLocation(0.1, 0.1))
 
   describe("`TrackingEventReaction`s"):

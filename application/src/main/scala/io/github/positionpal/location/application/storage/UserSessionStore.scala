@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.storage
 
-import io.github.positionpal.location.domain.{UserId, Session}
+import io.github.positionpal.location.domain.{Session, UserId}
 
 trait UserSessionReader[F[_]]:
   def sessionOf(userId: UserId): F[Option[Session]]
