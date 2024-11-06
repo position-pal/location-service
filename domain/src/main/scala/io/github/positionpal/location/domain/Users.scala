@@ -22,3 +22,8 @@ enum UserState:
 
   /** The user is currently routing to a destination. */
   case Routing
+
+trait Identifiable[A]:
+  def id: A
+  
+trait UserIdentifiable extends Identifiable[UserId]

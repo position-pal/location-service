@@ -7,7 +7,8 @@ type Latitude = Double
 type Longitude = Double
 
 /** A GPS location, identified by a [[Latitude]] and a [[Longitude]]. */
-final case class GPSLocation(latitude: Latitude, longitude: Longitude)
+final case class GPSLocation(latitude: Latitude, longitude: Longitude):
+  override def toString: String = s"($latitude $longitude)"
 
 /** A type class providing the ability to locate an object of type [[A]]. */
 trait Geolocatable[A]:
