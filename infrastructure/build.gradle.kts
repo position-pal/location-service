@@ -24,6 +24,7 @@ tasks.create("composeDown") {
 
 tasks.create("composeUp") {
     compose("up", "-d")
+    doLast { Thread.sleep(6_000) }
 }
 
 fun Task.compose(vararg args: String) {

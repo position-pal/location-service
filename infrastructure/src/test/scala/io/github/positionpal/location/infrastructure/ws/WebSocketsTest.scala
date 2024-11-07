@@ -21,7 +21,7 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
   private val config = WebSocketTestConfig("ws://localhost:8080/group", 5.seconds)
   private val systemResource = EndOfWorld.startup(8080)(ConfigFactory.load("akka.conf"))
 
-  given PatienceConfig = PatienceConfig(timeout = Span(10, Seconds), interval = Span(500, Milliseconds))
+  given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(10, Seconds), Span(500, Milliseconds))
 
   "WebSocket clients" when:
     "attempting to connect the web socket backend service" should:
@@ -36,7 +36,7 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
         .unsafeRunSync()
 
     "successfully connected" should:
-      "receive updates from all members of the same group" ignore:
+      "receive updates from all members of the same group" in:
         systemResource.use: _ =>
           IO:
             val test = WebSocketTest(config)
