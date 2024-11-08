@@ -43,7 +43,7 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
             val scenario = test.Scenario(
               group = GroupId("test-group"),
               clients = test.Client(UserId("u1")) :: test.Client(UserId("u2")) :: Nil,
-              events = sample(UserId("u1"), cesenaCampusLocation) :: sample(UserId("u2"), bolognaCampusLocation) :: Nil,
+              events = sample(UserId("u1"), cesenaCampus) :: sample(UserId("u2"), bolognaCampus) :: Nil,
             )
             val expectedEvents = scenario.events.map(_.toUserUpdate)
             val result = test.runTest(scenario)

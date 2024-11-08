@@ -43,6 +43,11 @@ enum RoutingMode:
 
 object Tracking:
 
+  extension (t: Tracking | MonitorableTracking)
+    def isMonitorable: Boolean = t match
+      case _: MonitorableTracking => true
+      case _ => false
+
   /** Creates a new [[Tracking]]. */
   def apply(route: Route = List()): Tracking = TrackingImpl(route)
 
