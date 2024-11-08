@@ -5,13 +5,15 @@ import java.time.Instant
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
+import akka.actor.typed.SupervisorStrategy.restartWithBackoff
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 import akka.cluster.Cluster
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.*
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.RetentionCriteria.snapshotEvery
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import io.github.positionpal.location.application.reactions.*
 import io.github.positionpal.location.application.reactions.TrackingEventReaction.*
 import io.github.positionpal.location.domain.*
@@ -57,12 +59,11 @@ object RealTimeUserTracker:
     Behaviors.withTimers: timer =>
       ctx.log.debug("Starting RealTimeUserTracker::{}@{}", userId, Cluster(ctx.system).selfMember.address)
       timer.startTimerAtFixedRate(AliveCheck, 10.seconds)
-      EventSourcedBehavior(
-        PersistenceId(key.name, userId),
-        ObservableSession.of(userId),
-        commandHandler(timer),
-        eventHandler,
-      )
+      val persistenceId = PersistenceId(key.name, userId)
+      EventSourcedBehavior(persistenceId, ObservableSession.of(userId), commandHandler(timer), eventHandler)
+        .snapshotWhen((_, event, _) => event == RoutingStopped, deleteEventsOnSnapshot = true)
+        .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
+        .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
 
   private def eventHandler: (ObservableSession, Event) => ObservableSession = (state, event) =>
     event match
