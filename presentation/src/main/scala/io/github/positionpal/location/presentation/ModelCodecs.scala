@@ -2,8 +2,9 @@ package io.github.positionpal.location.presentation
 
 import java.time.Instant
 
-import scala.reflect.ClassTag
+import scala.Option.empty
 
+import cats.implicits.catsSyntaxTuple4Semigroupal
 import io.bullet.borer.derivation.MapBasedCodecs.{deriveAllCodecs, deriveCodec}
 import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
 import io.github.positionpal.location.domain.*
@@ -31,44 +32,66 @@ trait ModelCodecs:
 
   given drivenEventCodec: Codec[DrivenEvent] = deriveAllCodecs[DrivenEvent]
 
-  given trackingCodec: Codec[Tracking] =
-    Codec[Tracking](
-      Encoder[Tracking]: (writer, tracking) =>
-        writer.writeMapOpen(1).writeString("route").write(tracking.route).writeMapClose(),
-      Decoder[Tracking]: reader =>
-        val unbounded = reader.readMapOpen(1)
-        val tracking = reader.readString() match
-          case "route" => Tracking(reader.read[Route]())
-          case _ => reader.unexpectedDataItem(expected = "`user`")
-        reader.readMapClose(unbounded, tracking),
-    )
+  given trackingCodec: Codec[Tracking] = Codec[Tracking](
+    Encoder[Tracking]: (writer, tracking) =>
+      writer.writeMapOpen(1).writeString("route").write(tracking.route).writeMapClose(),
+    Decoder[Tracking]: reader =>
+      val unbounded = reader.readMapOpen(1)
+      val tracking = reader.readString() match
+        case "route" => Tracking(reader.read[Route]())
+        case _ => reader.unexpectedDataItem(expected = "`user`")
+      reader.readMapClose(unbounded, tracking),
+  )
 
-  given monitorableTrackingCodec: Codec[MonitorableTracking] =
-    Codec[MonitorableTracking](
-      Encoder[MonitorableTracking]: (writer, tracking) =>
-        writer.writeMapOpen(4).writeString("route").write(tracking.route).writeString("mode").write(tracking.mode)
-          .writeString("destination").write(tracking.destination).writeString("expectedArrival")
-          .write(tracking.expectedArrival).writeMapClose(),
-      Decoder[MonitorableTracking]: reader =>
-        val unbounded = reader.readMapOpen(4)
-        val fields = (0 until 4).foldLeft(Map.empty[String, Any]): (data, _) =>
+  given monitorableTrackingCodec: Codec[MonitorableTracking] = Codec[MonitorableTracking](
+    Encoder[MonitorableTracking]: (writer, tracking) =>
+      writer.writeMapOpen(4).writeString("route").write(tracking.route).writeString("mode").write(tracking.mode)
+        .writeString("destination").write(tracking.destination).writeString("expectedArrival")
+        .write(tracking.expectedArrival).writeMapClose(),
+    Decoder[MonitorableTracking]: reader =>
+      val unbounded = reader.readMapOpen(4)
+      val fields = (0 until 4).foldLeft((empty[RoutingMode], empty[GPSLocation], empty[Instant], empty[Route])):
+        (d, _) =>
           reader.readString() match
-            case s @ "route" => data + (s -> reader.read[Route]())
-            case s @ "mode" => data + (s -> reader.read[RoutingMode]())
-            case s @ "destination" => data + (s -> reader.read[GPSLocation]())
-            case s @ "expectedArrival" => data + (s -> reader.read[Instant]())
+            case "mode" => d.copy(_1 = Some(reader.read[RoutingMode]()))
+            case "destination" => d.copy(_2 = Some(reader.read[GPSLocation]()))
+            case "expectedArrival" => d.copy(_3 = Some(reader.read[Instant]()))
+            case "route" => d.copy(_4 = Some(reader.read[Route]()))
             case _ => reader.unexpectedDataItem(expected = "`route`, `mode`, `destination` or `expectedArrival`")
-        reader.readMapClose(
-          unbounded,
-          Tracking.withMonitoring(
-            fields.at[RoutingMode]("mode"),
-            fields.at[GPSLocation]("destination"),
-            fields.at[Instant]("expectedArrival"),
-            fields.at[Route]("route"),
-          ),
-        ),
-    )
+      val res = fields.mapN(Tracking.withMonitoring.apply)
+        .getOrElse(reader.validationFailure("Missing required fields"))
+      reader.readMapClose(unbounded, res),
+  )
 
-  extension (m: Map[String, Any])
-    private def at[T](s: String)(using ClassTag[T]): T =
-      m.get(s).collect { case t: T => t }.get
+  given sessionCodec: Codec[Session] = Codec[Session](
+    Encoder[Session]: (writer, session) =>
+      writer.writeMapOpen(4).writeString("userId").write(session.userId).writeString("state").write(session.userState)
+        .writeString("lastSampledLocation").write(session.lastSampledLocation)
+      if session.tracking.exists(_.isMonitorable) then
+        writer.writeString("monitorableTracking").write(session.tracking.map(_.asMonitorable))
+      else writer.writeString("tracking").write(session.tracking)
+      writer.writeMapClose()
+    ,
+    Decoder[Session]: reader =>
+      val unbounded = reader.readMapOpen(4)
+      val fields = (0 until 4).foldLeft(
+        (
+          empty[UserId],
+          empty[UserState],
+          empty[Option[SampledLocation]],
+          empty[Option[Tracking | MonitorableTracking]],
+        ),
+      ): (d, _) =>
+        reader.readString() match
+          case "userId" => d.copy(_1 = Some(reader.read[UserId]()))
+          case "state" => d.copy(_2 = Some(reader.read[UserState]()))
+          case "lastSampledLocation" => d.copy(_3 = Some(reader.read[Option[SampledLocation]]()))
+          case "monitorableTracking" => d.copy(_4 = Some(reader.read[Option[MonitorableTracking]]()))
+          case "tracking" => d.copy(_4 = Some(reader.read[Option[Tracking]]()))
+          case _ => reader.unexpectedDataItem(expected = "`userId`, `state`, `lastSampledLocation` or `tracking`")
+      val res = fields.mapN(Session.from).getOrElse(reader.validationFailure("Missing required fields"))
+      reader.readMapClose(unbounded, res),
+  )
+
+  extension (t: Tracking | MonitorableTracking)
+    private def asMonitorable: MonitorableTracking = t.asInstanceOf[MonitorableTracking]

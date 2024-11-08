@@ -19,7 +19,7 @@ trait RealTimeUserTrackerVerifierDSL:
 
   import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
   import io.github.positionpal.location.domain.{DrivingEvent, UserState}
-  import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.{Command, Event, State}
+  import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.*
   import org.scalatest.concurrent.Eventually.eventually
 
   given Conversion[UserState, List[UserState]] = _ :: Nil
@@ -28,22 +28,26 @@ trait RealTimeUserTrackerVerifierDSL:
   extension (us: List[UserState]) infix def |(other: UserState): List[UserState] = us :+ other
 
   extension (xs: List[UserState])
-    infix def --(events: List[DrivingEvent]): SystemVerifier[UserState, DrivingEvent, State] =
+    infix def --(events: List[DrivingEvent]): SystemVerifier[UserState, DrivingEvent, ObservableSession] =
       RealTimeUserTrackerVerifier(xs, events)
 
   private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DrivingEvent])
-      extends SystemVerifier[UserState, DrivingEvent, State](ins, events):
+      extends SystemVerifier[UserState, DrivingEvent, ObservableSession](ins, events):
 
     override infix def -->(
         outs: List[UserState],
-    )(using ctx: Context[UserState, State]): Verification[DrivingEvent, State] =
-      new Verification[DrivingEvent, State]:
-        override infix def verifying(verifyLast: (DrivingEvent, State) => Unit)(using patience: PatienceConfig): Unit =
-          val testKit = EventSourcedBehaviorTestKit[Command, Event, State](system, RealTimeUserTracker("userTest"))
+    )(using ctx: Context[UserState, ObservableSession]): Verification[DrivingEvent, ObservableSession] =
+      new Verification[DrivingEvent, ObservableSession]:
+        override infix def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using
+            patience: PatienceConfig,
+        ): Unit =
+          val testKit =
+            EventSourcedBehaviorTestKit[Command, Event, ObservableSession](system, RealTimeUserTracker("userTest"))
+          println(s"Initializing with ${ctx.initialStates(ins)}")
           ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
             testKit.initialize(state)
             events.foreach(ev => testKit.runCommand(ev).events should contain only ev)
             eventually:
               val currentState = testKit.getState()
-              currentState.userState shouldBe outs(if outs.size == 1 then 0 else idx)
+              currentState.session.userState shouldBe outs(if outs.size == 1 then 0 else idx)
               verifyLast(events.last, currentState)

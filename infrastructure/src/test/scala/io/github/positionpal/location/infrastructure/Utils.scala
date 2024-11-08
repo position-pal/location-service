@@ -3,8 +3,8 @@ package io.github.positionpal.location.infrastructure
 object GeoUtils:
   import io.github.positionpal.location.domain.GPSLocation
 
-  val cesenaCampusLocation: GPSLocation = GPSLocation(44.1476299926484, 12.2357184467018)
-  val bolognaCampusLocation: GPSLocation = GPSLocation(44.487912, 11.32885)
+  val cesenaCampus: GPSLocation = GPSLocation(44.1476299926484, 12.2357184467018)
+  val bolognaCampus: GPSLocation = GPSLocation(44.487912, 11.32885)
 end GeoUtils
 
 object TimeUtils:

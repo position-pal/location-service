@@ -29,6 +29,11 @@ object Session:
 
   extension (s: Session) def toSnapshot: Snapshot = Snapshot(s.userId, s.userState, s.lastSampledLocation)
 
+  def unapply(
+      s: Session,
+  ): Option[(UserId, UserState, Option[SampledLocation], Option[Tracking | MonitorableTracking])] =
+    Some((s.userId, s.userState, s.lastSampledLocation, s.tracking))
+
   def of(userId: UserId): Session = SessionImpl(userId, Inactive, None, None)
 
   def from(userId: UserId, state: UserState, lastSample: Option[SampledLocation], tracking: Option[Tracking]): Session =
@@ -45,7 +50,8 @@ object Session:
         userState match
           case Routing | SOS => copy(tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
           case _ => copy(userState = Active, tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
-      case e: RoutingStarted => copy(userState = Routing, tracking = Some(e.toMonitorableTracking))
+      case e: RoutingStarted =>
+        copy(userState = Routing, tracking = Some(e.toMonitorableTracking), lastSampledLocation = Some(e))
       case e: SOSAlertTriggered => copy(userState = SOS, tracking = Some(Tracking()), lastSampledLocation = Some(e))
       case _: (SOSAlertStopped | RoutingStopped) => copy(userState = Active, tracking = None)
       case _: WentOffline => copy(userState = Inactive)
