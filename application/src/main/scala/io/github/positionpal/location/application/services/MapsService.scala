@@ -1,10 +1,10 @@
-package io.github.positionpal.location.application.geo
+package io.github.positionpal.location.application.services
 
 import scala.concurrent.duration.FiniteDuration
 
 import cats.effect.Async
 import io.github.positionpal.location.commons.CanRaise
-import io.github.positionpal.location.domain.{GPSLocation, RoutingMode}
+import io.github.positionpal.location.domain.{Distance, GPSLocation, RoutingMode}
 
 /** An alias for the map service error. */
 type MapsServiceError = String

@@ -8,6 +8,7 @@ plugins {
     `java-library`
     id("scala")
     alias(libs.plugins.scala.extras)
+    alias(libs.plugins.docker.compose)
 }
 
 allprojects {
@@ -17,6 +18,7 @@ allprojects {
         apply(plugin = "java-library")
         apply(plugin = "scala")
         apply(plugin = scala.extras.get().pluginId)
+        apply(plugin = docker.compose.get().pluginId)
     }
 
     repositories {

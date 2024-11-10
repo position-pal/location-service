@@ -6,10 +6,10 @@ import cats.data.{EitherT, ReaderT}
 import cats.effect.IO
 import cats.implicits.catsSyntaxEither
 import io.circe.Json
-import io.github.positionpal.location.application.geo.Distance.meters
-import io.github.positionpal.location.application.geo.{Distance, MapsService, MapsServiceError}
+import io.github.positionpal.location.application.services.{MapsService, MapsServiceError}
+import io.github.positionpal.location.domain.Distance.meters
 import io.github.positionpal.location.domain.RoutingMode.Driving
-import io.github.positionpal.location.domain.{GPSLocation, RoutingMode}
+import io.github.positionpal.location.domain.{Distance, GPSLocation, RoutingMode}
 import org.http4s.Uri
 import org.http4s.circe.jsonOf
 import org.http4s.client.Client

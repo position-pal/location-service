@@ -11,6 +11,8 @@ include(
     "application",
     "presentation",
     "infrastructure",
+    "storage",
+    "ws",
     "entrypoint",
 )
 
