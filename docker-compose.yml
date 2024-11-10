@@ -1,17 +1,26 @@
 services:
-  postgres-db:
-    build:
-      context: .
-      dockerfile: Dockerfile-db
-    container_name: postgres-db
+  cassandra-db:
+    image: cassandra:latest
+    container_name: cassandra-db
     ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      - "9042:9042"
     healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres"]
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
       interval: 5s
       timeout: 5s
-      retries: 5
-      start_period: 5s
+      retries: 60
+
+  # This exists to force the condition of having the Cassandra service is up before starting the tests.
+  # The healthcheck above is not enough because it does not provide a condition to wait for the service
+  # to be up. And this is simpler than installing cqlsh and using it to check the service status on the
+  # CI server.
+  cassandra-init:
+    image: cassandra:latest
+    depends_on:
+      cassandra-db:
+        condition: service_healthy
+    volumes:
+      - ./infrastructure/src/main/resources/db-scripts/create-tables.cql:/create-actor-tables.cql
+      - ./storage/src/main/resources/db-scripts/create-tables.cql:/create-storage-tables.cql
+    command:
+      /bin/sh -c "cqlsh cassandra-db -f /create-actor-tables.cql && cqlsh cassandra-db -f /create-storage-tables.cql"

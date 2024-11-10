@@ -1,4 +1,4 @@
-package io.github.positionpal.location.application.geo
+package io.github.positionpal.location.domain
 
 /** A distance record, identified by a [[value]] and a [[unit]] of measurement. */
 final case class Distance(value: Double, unit: Distance.DistanceUnit = Distance.DistanceUnit.Meters)

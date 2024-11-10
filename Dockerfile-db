@@ -1,3 +1,0 @@
-FROM postgres:17.0@sha256:f176fef320ed02c347e9f85352620945547a9a23038f02b57cf7939a198182ae
-COPY infrastructure/src/main/resources/ddl-scripts/create-tables-postgres.sql /docker-entrypoint-initdb.d/
-EXPOSE 5432

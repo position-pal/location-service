@@ -1,11 +1,11 @@
-package io.github.positionpal.location.application.geo
+package io.github.positionpal.location.domain
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class DistanceTest extends AnyFlatSpec with Matchers:
 
-  import io.github.positionpal.location.application.geo.Distance.{meters, kilometers}
+  import io.github.positionpal.location.domain.Distance.{kilometers, meters}
 
   "It" should "be possible to obtain a `Distance` object from `Double`s" in:
     val distance = 10.meters

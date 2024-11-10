@@ -22,8 +22,8 @@ import Notification.*
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is near the arrival position. */
 object ArrivalCheck:
-  import io.github.positionpal.location.application.geo.Distance.*
-  import io.github.positionpal.location.application.geo.MapsService
+  import io.github.positionpal.location.domain.Distance.*
+  import io.github.positionpal.location.application.services.MapsService
 
   private val successMessage = "User has arrived at the expected destination on time!"
 

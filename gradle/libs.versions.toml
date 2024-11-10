@@ -15,7 +15,8 @@ akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", 
 akka-cluster-typed = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
 akka-cluster-sharding-typed = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
 akka-http = "com.typesafe.akka:akka-http_3:10.6.3"
-akka-persistence-r2dbc = "com.lightbend.akka:akka-persistence-r2dbc_3:1.2.6"
+akka-persistence-cassandra = "com.typesafe.akka:akka-persistence-cassandra_3:1.2.1"
+akka-persistence-query = { module = "com.typesafe.akka:akka-persistence-query_3", version.ref = "akka" }
 akka-persistence-typed = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
 akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testkit_3", version.ref = "akka" }
 akka-stream = { module = "com.typesafe.akka:akka-stream_3", version.ref = "akka" }
@@ -36,7 +37,6 @@ junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", v
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 logback-classic = "ch.qos.logback:logback-classic:1.5.12"
 log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
-postgis-jdbc = "net.postgis:postgis-jdbc:2024.1.0"
 pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
 pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.ref = "pureconfig" }
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
@@ -63,4 +63,5 @@ scala-testing = [
 
 [plugins]
 cucumber-jvm = "se.thinkcode.cucumber-runner:0.0.11"
+docker-compose = "com.avast.gradle.docker-compose:0.17.10"
 scala-extras = "io.github.tassiluca.gradle-scala-extras:2.1.4"
