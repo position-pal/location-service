@@ -10,6 +10,10 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.akka.stream)
     implementation(libs.akka.http)
+    implementation(libs.akka.projection.eventsourced)
+    implementation(libs.akka.projection.cassandra)
+    testImplementation(libs.akka.projection.testkit)
+    testImplementation(libs.akka.stream.testkit)
     testImplementation(libs.akka.actor.testkit)
     testImplementation(libs.akka.persistence.testkit)
 }

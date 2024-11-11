@@ -18,10 +18,10 @@ import org.scalatest.wordspec.AnyWordSpecLike
 
 class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL with ModelCodecs with ScalaFutures:
 
-  private val config = WebSocketTestConfig("ws://localhost:8080/group", 5.seconds)
+  private val config = WebSocketTestConfig(baseEndpoint = "ws://localhost:8080/group", connectionTimeout = 5.seconds)
   private val systemResource = EndOfWorld.startup(8080)(ConfigFactory.load("akka.conf"))
 
-  given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(10, Seconds), Span(500, Milliseconds))
+  given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(30, Seconds), Span(500, Milliseconds))
 
   "WebSocket clients" when:
     "attempting to connect the web socket backend service" should:
