@@ -58,9 +58,11 @@ object WebSockets:
         case _ => Left("Invalid message")
       .collect { case Right(e) => e }.watchTermination(): (_, done) =>
         done.onComplete: _ =>
-          activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, ref) =>
-            service.removeObserverFor(uid)(Set(ref)).unsafeRunSync()
-          activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
+          var currentActiveSessions = Set.empty[(UserId, ActorRef[Protocol])]
+          synchronized:
+            currentActiveSessions = activeSessions.getOrElse(groupId, Set.empty)
+            activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
+          currentActiveSessions.foreach((uid, ref) => service.removeObserverFor(uid)(Set(ref)).unsafeRunSync())
       .to(Sink.foreach(e => service.handle(e).unsafeRunSync()))
       val routeToClient: Source[Message, ActorRef[Protocol]] =
         ActorSource.actorRef(
@@ -69,10 +71,12 @@ object WebSockets:
           bufferSize = 1_000,
           overflowStrategy = OverflowStrategy.fail,
         ).mapMaterializedValue: ref =>
-          activeSessions.getOrElse(groupId, Set.empty).foreach: (uid, _) =>
-            service.addObserverFor(uid)(Set(ref)).unsafeRunSync()
-          activeSessions.updateWith(groupId)(existing => Some(existing.getOrElse(Set.empty) + ((userId, ref))))
-          service.addObserverFor(userId)(activeSessions(groupId).map(_._2)).unsafeRunSync()
+          var currentActiveSessions = Set.empty[(UserId, ActorRef[Protocol])]
+          synchronized:
+            currentActiveSessions = activeSessions.getOrElse(groupId, Set.empty)
+            activeSessions.update(groupId, currentActiveSessions + ((userId, ref)))
+          currentActiveSessions.foreach((uid, _) => service.addObserverFor(uid)(Set(ref)).unsafeRunSync())
+          service.addObserverFor(userId)(currentActiveSessions.map(_._2) + ref).unsafeRunSync()
           ref
         .map:
           case Reply(event) => TextMessage(Json.encode(event).toUtf8String)
