@@ -41,8 +41,10 @@ trait RealTimeUserTrackerVerifierDSL:
         override infix def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using
             patience: PatienceConfig,
         ): Unit =
-          val testKit =
-            EventSourcedBehaviorTestKit[Command, Event, ObservableSession](system, RealTimeUserTracker("userTest"))
+          val testKit = EventSourcedBehaviorTestKit[Command, Event, ObservableSession](
+            system,
+            RealTimeUserTracker("userTest", "rtut-0"),
+          )
           println(s"Initializing with ${ctx.initialStates(ins)}")
           ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
             testKit.initialize(state)

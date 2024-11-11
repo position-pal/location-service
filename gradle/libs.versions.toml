@@ -1,5 +1,6 @@
 [versions]
 akka = "2.9.7"
+akkaprojection = "1.5.9"
 borer = "1.14.1"
 circe = "0.14.10"
 http4s = "1.0.0-M43"
@@ -19,7 +20,11 @@ akka-persistence-cassandra = "com.typesafe.akka:akka-persistence-cassandra_3:1.2
 akka-persistence-query = { module = "com.typesafe.akka:akka-persistence-query_3", version.ref = "akka" }
 akka-persistence-typed = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
 akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testkit_3", version.ref = "akka" }
+akka-projection-cassandra = { module = "com.lightbend.akka:akka-projection-cassandra_3", version.ref = "akkaprojection" }
+akka-projection-eventsourced = { module = "com.lightbend.akka:akka-projection-eventsourced_3", version.ref = "akkaprojection" }
+akka-projection-testkit = { module = "com.lightbend.akka:akka-projection-testkit_3", version.ref = "akkaprojection" }
 akka-stream = { module = "com.typesafe.akka:akka-stream_3", version.ref = "akka" }
+akka-stream-testkit = { module = "com.typesafe.akka:akka-stream-testkit_3", version.ref = "akka" }
 borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
 borer-derivation = { module = "io.bullet:borer-derivation_3", version.ref = "borer" }
 cats-core = "org.typelevel:cats-core_3:2.12.0"

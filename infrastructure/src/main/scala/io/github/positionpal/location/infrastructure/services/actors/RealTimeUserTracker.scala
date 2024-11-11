@@ -28,7 +28,9 @@ import io.github.positionpal.location.infrastructure.ws.WebSockets
 object RealTimeUserTracker:
 
   /** Uniquely identifies the types of this entity instances (actors) that will be managed by cluster sharding. */
-  val key: EntityTypeKey[Command] = EntityTypeKey(getClass.getName)
+  val key: EntityTypeKey[Command] = EntityTypeKey(getClass.getSimpleName)
+
+  val tags: Seq[String] = Vector.tabulate(5)(i => s"rtut-$i")
 
   sealed trait ProtocolCommand extends AkkaSerializable
   case class Wire(observer: ActorRef[WebSockets.Protocol]) extends ProtocolCommand
@@ -52,15 +54,17 @@ object RealTimeUserTracker:
   object ObservableSession:
     def of(userId: String): ObservableSession = ObservableSession(Session.of(UserId(userId)), Set.empty)
 
-  def apply(): Entity[Command, ShardingEnvelope[Command]] = Entity(key)(ctx => this(ctx.entityId))
+  def apply(): Entity[Command, ShardingEnvelope[Command]] = Entity(key): ctx =>
+    this(ctx.entityId, tags(math.abs(ctx.entityId.hashCode % tags.size)))
 
-  def apply(userId: String): Behavior[Command] = Behaviors.setup: ctx =>
+  def apply(userId: String, projectionTag: String): Behavior[Command] = Behaviors.setup: ctx =>
     given ActorContext[Command] = ctx
     Behaviors.withTimers: timer =>
       ctx.log.debug("Starting RealTimeUserTracker::{}@{}", userId, Cluster(ctx.system).selfMember.address)
       timer.startTimerAtFixedRate(AliveCheck, 10.seconds)
       val persistenceId = PersistenceId(key.name, userId)
       EventSourcedBehavior(persistenceId, ObservableSession.of(userId), commandHandler(timer), eventHandler)
+        .withTagger(_ => Set(projectionTag))
         .snapshotWhen((_, event, _) => event == RoutingStopped, deleteEventsOnSnapshot = true)
         .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
         .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
