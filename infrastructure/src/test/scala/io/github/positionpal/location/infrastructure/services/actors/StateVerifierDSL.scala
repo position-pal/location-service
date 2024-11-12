@@ -48,7 +48,8 @@ trait RealTimeUserTrackerVerifierDSL:
           println(s"Initializing with ${ctx.initialStates(ins)}")
           ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
             testKit.initialize(state)
-            events.foreach(ev => testKit.runCommand(ev).events should contain only ev)
+            events.foreach: e =>
+              testKit.runCommand(e).events should contain only StatefulDrivingEvent(state.session.userState.next(e), e)
             eventually:
               val currentState = testKit.getState()
               currentState.session.userState shouldBe outs(if outs.size == 1 then 0 else idx)

@@ -22,6 +22,8 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
     )
   given observableSession: Codec[RealTimeUserTracker.ObservableSession] =
     deriveCodec[RealTimeUserTracker.ObservableSession]
+  given enrichedDrivingEventCodec: Codec[RealTimeUserTracker.StatefulDrivingEvent] =
+    deriveCodec[RealTimeUserTracker.StatefulDrivingEvent]
   given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
   given aliveCheckCodec: Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]
   given wireCodec: Codec[RealTimeUserTracker.Wire] = deriveCodec[RealTimeUserTracker.Wire]
@@ -32,6 +34,7 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
   register[RealTimeUserTracker.Ignore.type]()
   register[DrivingEvent]()
   register[DrivenEvent]()
+  register[RealTimeUserTracker.StatefulDrivingEvent]()
   register[RealTimeUserTracker.ObservableSession]()
   register[RealTimeUserTracker.Wire]()
   register[RealTimeUserTracker.UnWire]()

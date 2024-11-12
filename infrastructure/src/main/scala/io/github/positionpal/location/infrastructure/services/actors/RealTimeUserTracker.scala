@@ -30,7 +30,10 @@ object RealTimeUserTracker:
   /** Uniquely identifies the types of this entity instances (actors) that will be managed by cluster sharding. */
   val key: EntityTypeKey[Command] = EntityTypeKey(getClass.getSimpleName)
 
-  val tags: Seq[String] = Vector.tabulate(5)(i => s"rtut-$i")
+  /** Labels used to tag the events emitted by this kind entity actors to distribute them over several projections.
+    * Each entity instance selects it (based on an appropriate strategy) and uses it to tag the events it emits.
+    */
+  val tags: Seq[String] = Vector.tabulate(5)(i => s"${getClass.getSimpleName}-$i")
 
   sealed trait ProtocolCommand extends AkkaSerializable
   case class Wire(observer: ActorRef[WebSockets.Protocol]) extends ProtocolCommand
@@ -39,9 +42,14 @@ object RealTimeUserTracker:
   case object Ignore
   case object AliveCheck
 
-  type Command = DrivingEvent | Ignore.type | AliveCheck.type | ProtocolCommand
-  type Event = DrivingEvent | ProtocolCommand
   type Observer = ActorRef[WebSockets.Protocol]
+  type Command = DrivingEvent | Ignore.type | AliveCheck.type | ProtocolCommand
+  type Event = StatefulDrivingEvent | ProtocolCommand
+
+  case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
+  object StatefulDrivingEvent:
+    def from(session: Session, event: DrivingEvent): StatefulDrivingEvent =
+      StatefulDrivingEvent(session.userState.next(event), event)
 
   case class ObservableSession(session: Session, observers: Set[Observer]) extends AkkaSerializable:
     def addObserver(observer: Observer): ObservableSession = copy(observers = observers + observer)
@@ -50,7 +58,6 @@ object RealTimeUserTracker:
       val updatedSession = session.updateWith(e)
       observers.foreach(_ ! WebSockets.Reply(userUpdateFrom(e, updatedSession)))
       copy(session = updatedSession)
-
   object ObservableSession:
     def of(userId: String): ObservableSession = ObservableSession(Session.of(UserId(userId)), Set.empty)
 
@@ -73,7 +80,7 @@ object RealTimeUserTracker:
     event match
       case Wire(o) => state.addObserver(o)
       case UnWire(o) => state.removeObserver(o)
-      case ev: DrivingEvent => state.update(ev)
+      case StatefulDrivingEvent(_, e) => state.update(e)
 
   private def commandHandler(
       timer: TimerScheduler[Command],
@@ -81,8 +88,9 @@ object RealTimeUserTracker:
     command match
       case e: SampledLocation => trackingHandler(state.session, e)
       case e: AliveCheck.type => aliveCheckHandler(timer)(state.session, e)
-      case e: (RoutingStarted | RoutingStopped | SOSAlertTriggered | SOSAlertStopped | ProtocolCommand) =>
-        Effect.persist(e)
+      case e: (RoutingStarted | RoutingStopped | SOSAlertTriggered | SOSAlertStopped) =>
+        Effect.persist(StatefulDrivingEvent.from(state.session, e))
+      case e: ProtocolCommand => Effect.persist(e)
       case _ => Effect.none
 
   private def trackingHandler(using
@@ -97,8 +105,8 @@ object RealTimeUserTracker:
             case Failure(exception) =>
               ctx.log.error(exception.getMessage)
               Ignore
-          Effect.persist(event)
-        case _ => Effect.persist(event)
+          Effect.persist(StatefulDrivingEvent.from(session, event))
+        case _ => Effect.persist(StatefulDrivingEvent.from(session, event))
 
   private def reaction(tracking: MonitorableTracking, event: SampledLocation) =
     for
@@ -131,5 +139,6 @@ object RealTimeUserTracker:
         timer.cancelAll()
         if session.userState == SOS || session.userState == Routing then
           ctx.log.info("User {} went offline", session.lastSampledLocation.get.user)
-        Effect.persist(WentOffline(session.lastSampledLocation.get.timestamp, session.lastSampledLocation.get.user))
+        val event = WentOffline(session.lastSampledLocation.get.timestamp, session.lastSampledLocation.get.user)
+        Effect.persist(StatefulDrivingEvent.from(session, event))
       else Effect.none
