@@ -47,11 +47,10 @@ object Session:
   ) extends Session:
     override def updateWith(event: DrivingEvent): Session = event match
       case e: SampledLocation =>
-        userState match
-          case Routing | SOS => copy(tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
-          case _ => copy(userState = Active, tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
+        copy(userState = userState.next(e), tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
       case e: RoutingStarted =>
-        copy(userState = Routing, tracking = Some(e.toMonitorableTracking), lastSampledLocation = Some(e))
-      case e: SOSAlertTriggered => copy(userState = SOS, tracking = Some(Tracking()), lastSampledLocation = Some(e))
-      case _: (SOSAlertStopped | RoutingStopped) => copy(userState = Active, tracking = None)
-      case _: WentOffline => copy(userState = Inactive)
+        copy(userState = userState.next(e), tracking = Some(e.toMonitorableTracking), lastSampledLocation = Some(e))
+      case e: SOSAlertTriggered =>
+        copy(userState = userState.next(e), tracking = Some(Tracking()), lastSampledLocation = Some(e))
+      case e: (SOSAlertStopped | RoutingStopped) => copy(userState = userState.next(e), tracking = None)
+      case e: WentOffline => copy(userState = userState.next(e))

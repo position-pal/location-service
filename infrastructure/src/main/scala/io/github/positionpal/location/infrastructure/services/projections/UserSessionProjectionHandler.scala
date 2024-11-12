@@ -11,51 +11,62 @@ import akka.persistence.query.Offset
 import akka.projection.cassandra.scaladsl.CassandraProjection
 import akka.projection.eventsourced.EventEnvelope
 import akka.projection.eventsourced.scaladsl.EventSourcedProvider
-import akka.projection.scaladsl.{AtLeastOnceProjection, Handler, SourceProvider}
+import akka.projection.scaladsl.{AtLeastOnceProjection, Handler}
 import akka.projection.{ProjectionBehavior, ProjectionId}
-import io.github.positionpal.location.application.storage.UserSessionReader
-import io.github.positionpal.location.domain.UserId
+import cats.effect.IO
+import io.github.positionpal.location.application.storage.UserSessionWriter
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.domain.Session.Snapshot
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.Event
 
-class UserSessionProjection[F[_]] {
+class UserSessionProjection:
 
-  def init(system: ActorSystem[?], repository: UserSessionReader[F]): Unit =
+  def init[T](system: ActorSystem[?], storage: UserSessionWriter[IO, T]): Unit =
     ShardedDaemonProcess(system).init(
       name = getClass.getSimpleName,
       RealTimeUserTracker.tags.size,
-      index => ProjectionBehavior(createProjectionFor(system, repository, index)),
+      index => ProjectionBehavior(createProjectionFor(system, storage, index)),
       ShardedDaemonProcessSettings(system),
       Some(ProjectionBehavior.Stop),
     )
 
-  private def createProjectionFor(
+  private def createProjectionFor[T](
       system: ActorSystem[?],
-      repository: UserSessionReader[F],
+      storage: UserSessionWriter[IO, T],
       index: Int,
-  ): AtLeastOnceProjection[Offset, EventEnvelope[RealTimeUserTracker.Event]] = {
+  ): AtLeastOnceProjection[Offset, EventEnvelope[RealTimeUserTracker.Event]] =
     val tag = RealTimeUserTracker.tags(index)
-    val sourceProvider: SourceProvider[Offset, EventEnvelope[RealTimeUserTracker.Event]] =
-      EventSourcedProvider.eventsByTag[RealTimeUserTracker.Event](
-        system = system,
-        readJournalPluginId = CassandraReadJournal.Identifier,
-        tag = tag,
-      )
+    val sourceProvider = EventSourcedProvider.eventsByTag[RealTimeUserTracker.Event](
+      system = system,
+      readJournalPluginId = CassandraReadJournal.Identifier,
+      tag = tag,
+    )
     CassandraProjection.atLeastOnce(
       projectionId = ProjectionId(getClass.getSimpleName, tag),
       sourceProvider,
-      handler = () => UserSessionProjectionHandler(tag, system, repository),
+      handler = () => UserSessionProjectionHandler(tag, system, storage),
     )
-  }
-}
 
-class UserSessionProjectionHandler[F[_]](
+class UserSessionProjectionHandler[T](
     tag: String,
     system: ActorSystem[?],
-    storage: UserSessionReader[F],
+    storage: UserSessionWriter[IO, T],
 ) extends Handler[EventEnvelope[RealTimeUserTracker.Event]]:
 
+  import io.github.positionpal.location.domain.EventConversions.given
+  import cats.effect.unsafe.implicits.global
+
   override def process(envelope: EventEnvelope[Event]): Future[Done] =
-    storage.sessionOf(UserId("user1"))
     system.log.debug("Process envelope {} with tag {}", envelope.event, tag)
-    Future.successful(Done)
+    envelope.event match
+      case RealTimeUserTracker.StatefulDrivingEvent(state, event) =>
+        val operation = event match
+          case e: SampledLocation => storage.update(Snapshot(e.user, state, Some(e)))
+          case e: RoutingStarted => storage.update(Snapshot(e.user, state, Some(e)))
+          case e: RoutingStopped => storage.update(Snapshot(e.user, state, None))
+          case e: SOSAlertTriggered => storage.update(Snapshot(e.user, state, Some(e)))
+          case e: SOSAlertStopped => storage.update(Snapshot(e.user, state, None))
+          case e: WentOffline => storage.update(Snapshot(e.user, state, None))
+        operation.map(_ => Done).unsafeToFuture()
+      case _ => Future.successful(Done)
