@@ -25,10 +25,10 @@ jobs:
       - name: Assemble main and test classes
         run: ./gradlew classes testClasses
       - name: Check infrastructure independent code
-        run: ./gradlew check -x infrastructure:check
+        run: ./gradlew check -x infrastructure:check -x storage:check
       - name: Check infrastructure dependent code
         if: contains(matrix.os, 'ubuntu')
-        run: ./gradlew infrastructure:check
+        run: ./gradlew infrastructure:check storage:check
 
   success:
     needs:

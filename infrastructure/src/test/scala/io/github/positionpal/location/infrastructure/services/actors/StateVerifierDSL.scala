@@ -45,7 +45,6 @@ trait RealTimeUserTrackerVerifierDSL:
             system,
             RealTimeUserTracker("userTest", "rtut-0"),
           )
-          println(s"Initializing with ${ctx.initialStates(ins)}")
           ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
             testKit.initialize(state)
             events.foreach: e =>

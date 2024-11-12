@@ -56,7 +56,7 @@ class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWord
 
 object UserSessionProjectionTest:
   class MockedUserSessionWriter extends UserSessionWriter[IO, Unit]:
-    var sessions = TrieMap.empty[UserId, List[Snapshot]]
+    var sessions: TrieMap[UserId, List[Snapshot]] = TrieMap.empty[UserId, List[Snapshot]]
 
     override def update(variation: Session.Snapshot): IO[Unit] =
       IO:

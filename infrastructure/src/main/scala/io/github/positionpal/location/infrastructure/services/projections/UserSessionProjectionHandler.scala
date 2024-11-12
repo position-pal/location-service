@@ -64,9 +64,8 @@ class UserSessionProjectionHandler[T](
         val operation = event match
           case e: SampledLocation => storage.update(Snapshot(e.user, state, Some(e)))
           case e: RoutingStarted => storage.update(Snapshot(e.user, state, Some(e)))
-          case e: RoutingStopped => storage.update(Snapshot(e.user, state, None))
           case e: SOSAlertTriggered => storage.update(Snapshot(e.user, state, Some(e)))
-          case e: SOSAlertStopped => storage.update(Snapshot(e.user, state, None))
-          case e: WentOffline => storage.update(Snapshot(e.user, state, None))
+          case e: (SOSAlertStopped | WentOffline | RoutingStopped) =>
+            storage.update(Snapshot(e.user, state, None))
         operation.map(_ => Done).unsafeToFuture()
       case _ => Future.successful(Done)

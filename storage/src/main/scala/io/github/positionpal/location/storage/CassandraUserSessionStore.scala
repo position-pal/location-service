@@ -16,10 +16,17 @@ import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.Session.Snapshot
 import io.github.positionpal.location.domain.UserState.*
 
+/** A Cassandra-based implementation of the [[UserSessionStore]]. */
 object CassandraUserSessionStore:
 
+  /** Creates a new instance of the Cassandra-based implementation of [[UserSessionStore]].
+    * @param keyspace the keyspace where the tables are stored. Default is "locationservice".
+    * @param actorSystem the actor system to use for the Cassandra session
+    * @tparam F the effect type
+    * @return a new instance of the Cassandra-based implementation of [[UserSessionStore]]
+    */
   def apply[F[_]: Async: CanRaise[StoreError]](
-      keyspace: String,
+      keyspace: String = "locationservice",
   )(using actorSystem: ActorSystem[?]): F[UserSessionStore[F, Unit]] =
     Async[F].delay(CassandraSessionRegistry(actorSystem).sessionFor("akka.persistence.cassandra"))
       .map(session => Impl(session, keyspace))

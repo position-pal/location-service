@@ -1,16 +1,16 @@
 package io.github.positionpal.location.storage
 
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.javadsl.Behaviors
-import cats.effect.Resource
-import com.typesafe.config.ConfigFactory
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class UserSessionStoreTest extends AnyWordSpecLike with Matchers:
+class UserSessionStoreTest
+    extends ScalaTestWithActorTestKit(UserSessionStoreTest.config)
+    with AnyWordSpecLike
+    with Matchers:
 
-  import cats.effect.IO
+  import cats.effect.{IO, Resource}
   import cats.effect.unsafe.implicits.global
   import cats.mtl.Handle.handleForApplicativeError
   import io.github.positionpal.location.domain.*
@@ -18,12 +18,7 @@ class UserSessionStoreTest extends AnyWordSpecLike with Matchers:
   import io.github.positionpal.location.domain.UserState.*
   import io.github.positionpal.location.storage.TimeUtils.now
 
-  private val storeResource =
-    for
-      actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("akka.conf"))(Behaviors.empty)
-      given ActorSystem[?] = actorSystem
-      store <- Resource.eval(CassandraUserSessionStore[IO]("locationservice"))
-    yield store
+  private val storeResource = Resource.eval(CassandraUserSessionStore[IO]("locationservice"))
 
   "User Session Database" when:
     "attempting to get the latest updated session of an unknown user" should:
@@ -71,3 +66,36 @@ class UserSessionStoreTest extends AnyWordSpecLike with Matchers:
         _ <- store.update(variation)
         res <- store.sessionOf(user)
       yield res
+
+object UserSessionStoreTest:
+  import com.typesafe.config.Config
+  import com.typesafe.config.ConfigFactory
+
+  val config: Config = ConfigFactory.parseString("""
+    |akka {
+    |  persistence {
+    |    journal.plugin = "akka.persistence.cassandra.journal"
+    |    snapshot-store.plugin = "akka.persistence.cassandra.snapshot"
+    |    journal.auto-start-journals = ["akka.persistence.cassandra.journal"]
+    |    cassandra {
+    |      events-by-tag {
+    |        bucket-size = "Day"
+    |        eventual-consistency-delay = 200 ms
+    |        flush-interval = 50ms
+    |      }
+    |      query {
+    |        refresh-interval = 1s
+    |      }
+    |      journal.keyspace = "locationservice"
+    |      snapshot.keyspace = "locationservice"
+    |    }
+    |  }
+    |  projection {
+    |    cassandra.offset-store.keyspace = "locationservice"
+    |    cassandra.session-config-path = "akka.persistence.cassandra"
+    |  }
+    |}
+    |datastax-java-driver {
+    |  advanced.reconnect-on-init = on
+    |}
+    |""".stripMargin)

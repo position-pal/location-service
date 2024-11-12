@@ -1,6 +1,7 @@
 package io.github.positionpal.location.infrastructure.services.actors
 
 import java.time.Instant
+import java.time.Instant.now
 
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
@@ -133,8 +134,7 @@ object RealTimeUserTracker:
       timer: TimerScheduler[Command],
   )(using ctx: ActorContext[Command]): (Session, AliveCheck.type) => Effect[Event, ObservableSession] =
     (session, _) =>
-      if session.userState != Inactive && session.lastSampledLocation.get.timestamp
-          .isBefore(Instant.now().minusSeconds(30))
+      if session.userState != Inactive && session.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(30))
       then
         timer.cancelAll()
         if session.userState == SOS || session.userState == Routing then
