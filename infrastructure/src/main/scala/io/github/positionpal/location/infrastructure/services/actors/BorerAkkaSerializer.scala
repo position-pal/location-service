@@ -9,11 +9,14 @@ import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent}
 import io.github.positionpal.location.infrastructure.ws.WebSockets
 import io.github.positionpal.location.presentation.*
 
-/** Custom Akka serializer for the actor entities. */
+/** Custom Akka serializer for the actor entities, where actor events and commands are registered into
+  * [[BorerCborAkkaSerializer]] for serialization and deserialization.
+  * This class should to be registered in the `akka.actor.serializers` entry in the akka serialization configuration.
+  */
 class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSerializer with ModelCodecs:
-  private val actorRefResolver = ActorRefResolver(system.toTyped)
-
   override def identifier: Int = 19923
+
+  private val actorRefResolver = ActorRefResolver(system.toTyped)
 
   given actorRefCodec[T]: Codec[ActorRef[T]] =
     Codec.bimap[String, ActorRef[T]](
@@ -22,7 +25,7 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
     )
   given observableSession: Codec[RealTimeUserTracker.ObservableSession] =
     deriveCodec[RealTimeUserTracker.ObservableSession]
-  given enrichedDrivingEventCodec: Codec[RealTimeUserTracker.StatefulDrivingEvent] =
+  given statefulDrivingEventCodec: Codec[RealTimeUserTracker.StatefulDrivingEvent] =
     deriveCodec[RealTimeUserTracker.StatefulDrivingEvent]
   given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
   given aliveCheckCodec: Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]

@@ -30,6 +30,3 @@ object EndOfWorld:
         Async[F].delay:
           Http(actorSystem.classicSystem).newServerAt("localhost", port).bind(WebSockets.Routes.groupRoute(service)),
     )(binding => Async[F].fromFuture(Async[F].delay(binding.unbind())).void)
-
-//  def configureProjection[F[_]: Async](using actorSystem: ActorSystem[?]): Resource[F, Unit] =
-//    Resource.eval(Async[F].delay(UserSessionProjection().init(actorSystem, repo)))

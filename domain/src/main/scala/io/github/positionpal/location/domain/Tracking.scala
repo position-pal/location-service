@@ -44,6 +44,9 @@ enum RoutingMode:
 object Tracking:
 
   extension (t: Tracking | MonitorableTracking)
+    /** @return `true` if the tracking is monitorable (i.e. is an instance
+      *         of [[MonitorableTracking]]), `false` otherwise.
+      */
     def isMonitorable: Boolean = t match
       case _: MonitorableTracking => true
       case _ => false

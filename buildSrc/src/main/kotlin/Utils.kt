@@ -1,5 +1,5 @@
 object Utils {
 
-    val inCI: Boolean
+    val isInCI: Boolean
         get() = System.getenv()["CI"].equals("true", ignoreCase = true)
 }
