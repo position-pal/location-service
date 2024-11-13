@@ -1,3 +1,58 @@
+## [0.6.0](https://github.com/position-pal/location-service/compare/0.5.0...0.6.0) (2024-11-13)
+
+### Features
+
+* **infrastructure:** add projection ([bf17079](https://github.com/position-pal/location-service/commit/bf1707921b27345dbe1694a43468a5288e9c8d7e))
+
+### Dependency updates
+
+* **deps:** update dependency com.lightbend.akka:akka-persistence-r2dbc_3 to v1.2.6 ([#68](https://github.com/position-pal/location-service/issues/68)) ([9f45a7b](https://github.com/position-pal/location-service/commit/9f45a7b4d4c2a12e942edcef8bb65cf336e07e5f))
+* **deps:** update dependency com.typesafe.akka:akka-http_3 to v10.6.3 ([608a548](https://github.com/position-pal/location-service/commit/608a548045810d360641902858fe53c1b95b827a))
+* **deps:** update dependency gradle to v8.11 ([#81](https://github.com/position-pal/location-service/issues/81)) ([378a2ea](https://github.com/position-pal/location-service/commit/378a2ea7588fe026f6b4612ecf5b1577744fc946))
+* **deps:** update dependency org.scalatestplus:junit-5-10_3 to v3.2.19.1 ([#53](https://github.com/position-pal/location-service/issues/53)) ([6ef788c](https://github.com/position-pal/location-service/commit/6ef788c6c445b0aaf3344ab286d811d8a9a5fcc9))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.113 ([9ccbb91](https://github.com/position-pal/location-service/commit/9ccbb9179b9f3f01d4b6e903441978c2d094dcae))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.114 ([9562c4d](https://github.com/position-pal/location-service/commit/9562c4deacb3746c5d062fd70042a7a0ade00225))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.115 ([#82](https://github.com/position-pal/location-service/issues/82)) ([cd155e0](https://github.com/position-pal/location-service/commit/cd155e01dab90800164a80276631e35f3cd9786d))
+* **deps:** update http4s to v1.0.0-m43 ([f0a4580](https://github.com/position-pal/location-service/commit/f0a45807361d7aaa583d8cf9acd6195449f5a23f))
+* **deps:** update node.js to v22 ([73c2a87](https://github.com/position-pal/location-service/commit/73c2a87194fe7f7f0ae03a71cb4b19f5ed71ea46))
+* **deps:** update postgres:17.0 docker digest to 2838b35 ([#78](https://github.com/position-pal/location-service/issues/78)) ([0b736aa](https://github.com/position-pal/location-service/commit/0b736aaa0ceaec82d25caeef6e43cb7d5358ae2f))
+* **deps:** update postgres:17.0 docker digest to f176fef ([#80](https://github.com/position-pal/location-service/issues/80)) ([5955f97](https://github.com/position-pal/location-service/commit/5955f9749593619428d2c617376e00852fe803b4))
+* **deps:** update scalamock to v0.6.6 ([bfde7a6](https://github.com/position-pal/location-service/commit/bfde7a6c0388ca4daad2efc224bf8d659316efbb))
+
+### Bug Fixes
+
+* **ws:** make synchronized access to active ws session ([1af295e](https://github.com/position-pal/location-service/commit/1af295ef1a3e3076e9bd1d802594334503bbadc3))
+
+### Documentation
+
+* add scala doc to classes ([ebe805d](https://github.com/position-pal/location-service/commit/ebe805dc6cf30a35973953b0e4f93a32e358229d))
+
+### Tests
+
+* **infrastructure:** do not ignore test ([4fdf4f8](https://github.com/position-pal/location-service/commit/4fdf4f825b724a9e7475b456427d94ba5e38e186))
+* **infrastructure:** increase interval span and leverage on the usage of system resource ([545d07a](https://github.com/position-pal/location-service/commit/545d07a18896cc661585734e9884e13c116c7f07))
+
+### Build and continuous integration
+
+* add docker image build and publication ([dfd8c1c](https://github.com/position-pal/location-service/commit/dfd8c1cca1a60964e04f3e08719bccf1b56af434))
+* fix arguments order in contains function ([9f195a7](https://github.com/position-pal/location-service/commit/9f195a7efd7545cee5a2997d8722672c2a82405b))
+
+### General maintenance
+
+* add entrypoint ([3439243](https://github.com/position-pal/location-service/commit/34392436fd2de2b15a4d276b5de169ff410bf647))
+* add projection skeleton ([87330fc](https://github.com/position-pal/location-service/commit/87330fc0c79077ee75f04b8cfd8cad2c1862ec0c))
+
+### Refactoring
+
+* **application:** add `Session.Snapshot`, position in `RoutingStarted` and `userId` in Session ([4c339ae](https://github.com/position-pal/location-service/commit/4c339ae7ed14b0623fcc2bbadff57b96feff05f6))
+* **domain:** remove redundant userId in tracking since already present in session ([ce5bedf](https://github.com/position-pal/location-service/commit/ce5bedf56f97dfe24d3434af3cc58f66df50d214))
+* **infrastructure:** leverage session in actor state ([91aeafa](https://github.com/position-pal/location-service/commit/91aeafac1ae18ad2b27be369cc4ae1aa16c8fb54))
+* **infrastructure:** support snapshotting and failure strategy in persistent actor ([f232181](https://github.com/position-pal/location-service/commit/f2321810763ff7fca19eb28276df706ff89316f3))
+* introduce session aggregate ([5efbdf0](https://github.com/position-pal/location-service/commit/5efbdf0b82bc825da3ecb619414fed2ff1701b6f))
+* remove not used code and dependencies ([f40ed76](https://github.com/position-pal/location-service/commit/f40ed763738f5689cbd90b1fe24d838c0a35f3fb))
+* **storage:** switch to cassandra data store ([07b5056](https://github.com/position-pal/location-service/commit/07b50563b9518a53d843d6206edac206544705ee))
+* use Instance in place of Date ([69b82f9](https://github.com/position-pal/location-service/commit/69b82f97f5ce86b511a34336d6f90651c55fc0c8))
+
 ## [0.5.0](https://github.com/position-pal/location-service/compare/0.4.0...0.5.0) (2024-10-31)
 
 ### Features
