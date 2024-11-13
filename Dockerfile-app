@@ -1,0 +1,6 @@
+FROM eclipse-temurin:21
+COPY ./ /location-service
+WORKDIR /location-service
+RUN chmod +x ./gradlew
+RUN ./gradlew
+CMD ["./gradlew", "run"]
