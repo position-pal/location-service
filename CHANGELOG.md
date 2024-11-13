@@ -1,3 +1,9 @@
+## [0.6.1](https://github.com/position-pal/location-service/compare/0.6.0...0.6.1) (2024-11-13)
+
+### Bug Fixes
+
+* use correct repo name ([98217bc](https://github.com/position-pal/location-service/commit/98217bcbdcbd29030729d0e545cd03c67fd35d0a))
+
 ## [0.6.0](https://github.com/position-pal/location-service/compare/0.5.0...0.6.0) (2024-11-13)
 
 ### Features
