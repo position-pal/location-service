@@ -29,7 +29,7 @@ class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWord
   "The UserSessionProjection" should {
     "process events correctly" in {
       val storageSessionWriter = MockedUserSessionWriter()
-      val handler = UserSessionProjectionHandler(tag = "tracker-0", system, storageSessionWriter)
+      val handler = UserSessionProjectionHandler(system, storageSessionWriter)
       val testUser = UserId("user1")
       val events = StatefulDrivingEvent(Active, SampledLocation(now, testUser, bolognaCampus))
         :: StatefulDrivingEvent(Routing, RoutingStarted(now, testUser, imolaCampus, Driving, cesenaCampus, inTheFuture))

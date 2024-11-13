@@ -20,8 +20,14 @@ import io.github.positionpal.location.domain.Session.Snapshot
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.Event
 
+/** A projection that listens to the events emitted by the [[RealTimeUserTracker]]
+  * actors and updates the user's session state, implementing the CQRS pattern.
+  */
 class UserSessionProjection:
 
+  /** Initializes the projection for the sharded event sourced [[RealTimeUserTracker]] actor
+    * deployed on the given [[system]] using as storage the provided [[UserSessionWriter]].
+    */
   def init[T](system: ActorSystem[?], storage: UserSessionWriter[IO, T]): Unit =
     ShardedDaemonProcess(system).init(
       name = getClass.getSimpleName,
@@ -45,11 +51,13 @@ class UserSessionProjection:
     CassandraProjection.atLeastOnce(
       projectionId = ProjectionId(getClass.getSimpleName, tag),
       sourceProvider,
-      handler = () => UserSessionProjectionHandler(tag, system, storage),
+      handler = () => UserSessionProjectionHandler(system, storage),
     )
 
+/** The handler that processes the events emitted by the [[RealTimeUserTracker]] actor
+  * updating the user's session state with the provided [[storage]].
+  */
 class UserSessionProjectionHandler[T](
-    tag: String,
     system: ActorSystem[?],
     storage: UserSessionWriter[IO, T],
 ) extends Handler[EventEnvelope[RealTimeUserTracker.Event]]:
@@ -58,7 +66,7 @@ class UserSessionProjectionHandler[T](
   import cats.effect.unsafe.implicits.global
 
   override def process(envelope: EventEnvelope[Event]): Future[Done] =
-    system.log.debug("Process envelope {} with tag {}", envelope.event, tag)
+    system.log.debug("Process envelope {}", envelope.event)
     envelope.event match
       case RealTimeUserTracker.StatefulDrivingEvent(state, event) =>
         val operation = event match

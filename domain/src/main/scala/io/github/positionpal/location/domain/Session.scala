@@ -27,15 +27,22 @@ object Session:
   /** A snapshot of the user's state and tracking information. */
   final case class Snapshot(userId: UserId, userState: UserState, lastSampledLocation: Option[SampledLocation])
 
-  extension (s: Session) def toSnapshot: Snapshot = Snapshot(s.userId, s.userState, s.lastSampledLocation)
+  extension (s: Session)
+    /** @return a [[Snapshot]] from the current [[Session]]. */
+    def toSnapshot: Snapshot = Snapshot(s.userId, s.userState, s.lastSampledLocation)
 
   def unapply(
       s: Session,
   ): Option[(UserId, UserState, Option[SampledLocation], Option[Tracking | MonitorableTracking])] =
     Some((s.userId, s.userState, s.lastSampledLocation, s.tracking))
 
-  def of(userId: UserId): Session = SessionImpl(userId, Inactive, None, None)
+  /** Creates a new [[Session]] for the given [[userId]],
+    * initially in the [[Inactive]] state with no tracking information.
+    */
+  def of(userId: UserId): Session =
+    SessionImpl(userId, userState = Inactive, lastSampledLocation = None, tracking = None)
 
+  /** Creates a new [[Session]] from the given [[userId]], [[state]], [[lastSample]] and [[tracking]] information. */
   def from(userId: UserId, state: UserState, lastSample: Option[SampledLocation], tracking: Option[Tracking]): Session =
     SessionImpl(userId, state, lastSample, tracking)
 
