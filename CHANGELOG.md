@@ -1,3 +1,40 @@
+## [0.6.0](https://github.com/position-pal/location-service/compare/0.5.0...0.6.0) (2024-11-13)
+
+### Features
+
+* add docker image build and publication ([ec4d16b](https://github.com/position-pal/location-service/commit/ec4d16b72f89036d07d62336a8004a4a512fc996))
+
+### Dependency updates
+
+* **deps:** update dependency com.lightbend.akka:akka-persistence-r2dbc_3 to v1.2.6 ([#68](https://github.com/position-pal/location-service/issues/68)) ([9f45a7b](https://github.com/position-pal/location-service/commit/9f45a7b4d4c2a12e942edcef8bb65cf336e07e5f))
+* **deps:** update dependency com.typesafe.akka:akka-http_3 to v10.6.3 ([608a548](https://github.com/position-pal/location-service/commit/608a548045810d360641902858fe53c1b95b827a))
+* **deps:** update dependency gradle to v8.11 ([#81](https://github.com/position-pal/location-service/issues/81)) ([378a2ea](https://github.com/position-pal/location-service/commit/378a2ea7588fe026f6b4612ecf5b1577744fc946))
+* **deps:** update dependency org.scalatestplus:junit-5-10_3 to v3.2.19.1 ([#53](https://github.com/position-pal/location-service/issues/53)) ([6ef788c](https://github.com/position-pal/location-service/commit/6ef788c6c445b0aaf3344ab286d811d8a9a5fcc9))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.113 ([9ccbb91](https://github.com/position-pal/location-service/commit/9ccbb9179b9f3f01d4b6e903441978c2d094dcae))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.114 ([9562c4d](https://github.com/position-pal/location-service/commit/9562c4deacb3746c5d062fd70042a7a0ade00225))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.115 ([#82](https://github.com/position-pal/location-service/issues/82)) ([cd155e0](https://github.com/position-pal/location-service/commit/cd155e01dab90800164a80276631e35f3cd9786d))
+* **deps:** update http4s to v1.0.0-m43 ([f0a4580](https://github.com/position-pal/location-service/commit/f0a45807361d7aaa583d8cf9acd6195449f5a23f))
+* **deps:** update node.js to v22 ([73c2a87](https://github.com/position-pal/location-service/commit/73c2a87194fe7f7f0ae03a71cb4b19f5ed71ea46))
+* **deps:** update postgres:17.0 docker digest to 2838b35 ([#78](https://github.com/position-pal/location-service/issues/78)) ([0b736aa](https://github.com/position-pal/location-service/commit/0b736aaa0ceaec82d25caeef6e43cb7d5358ae2f))
+* **deps:** update postgres:17.0 docker digest to f176fef ([#80](https://github.com/position-pal/location-service/issues/80)) ([5955f97](https://github.com/position-pal/location-service/commit/5955f9749593619428d2c617376e00852fe803b4))
+* **deps:** update scalamock to v0.6.6 ([bfde7a6](https://github.com/position-pal/location-service/commit/bfde7a6c0388ca4daad2efc224bf8d659316efbb))
+
+### Tests
+
+* **infrastructure:** increase interval span and leverage on the usage of system resource ([545d07a](https://github.com/position-pal/location-service/commit/545d07a18896cc661585734e9884e13c116c7f07))
+
+### Build and continuous integration
+
+* fix arguments order in contains function ([9f195a7](https://github.com/position-pal/location-service/commit/9f195a7efd7545cee5a2997d8722672c2a82405b))
+
+### General maintenance
+
+* add entrypoint ([3439243](https://github.com/position-pal/location-service/commit/34392436fd2de2b15a4d276b5de169ff410bf647))
+
+### Refactoring
+
+* use Instance in place of Date ([69b82f9](https://github.com/position-pal/location-service/commit/69b82f97f5ce86b511a34336d6f90651c55fc0c8))
+
 ## [0.5.0](https://github.com/position-pal/location-service/compare/0.4.0...0.5.0) (2024-10-31)
 
 ### Features
