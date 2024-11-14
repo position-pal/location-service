@@ -35,7 +35,6 @@ jobs:
           npx semantic-release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
   docker:
     needs:
