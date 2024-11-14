@@ -21,7 +21,7 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
   private val config = WebSocketTestConfig(baseEndpoint = "ws://localhost:8080/group", connectionTimeout = 5.seconds)
   private val systemResource = EndOfWorld.startup(8080)(ConfigFactory.load("akka.conf"))
 
-  given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(30, Seconds), Span(500, Milliseconds))
+  given patience: PatienceConfig = PatienceConfig(timeout = Span(5, Seconds), interval = Span(100, Milliseconds))
 
   "WebSocket clients" when:
     "attempting to connect the web socket backend service" should:
@@ -49,7 +49,7 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
             val result = test.runTest(scenario)
             whenReady(result): combinedConnectionsResult =>
               combinedConnectionsResult shouldBe true
-              eventually:
+              eventually(timeout(Span(30, Seconds)), interval(Span(500, Milliseconds))):
                 scenario.clients.foreach:
                   _.responses should contain allElementsOf expectedEvents
         .unsafeRunSync()
