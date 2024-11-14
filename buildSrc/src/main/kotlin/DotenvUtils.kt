@@ -6,8 +6,8 @@ import kotlin.reflect.KClass
 
 object DotenvUtils {
 
-    val Project.dotenv: DotEnv
-        get() = DotEnv.from(file(".env"))
+    val Project.dotenv: DotEnv?
+        get() = file(".env").takeIf { it.exists() }?.let { DotEnv.from(it) }
 
     fun <T> Project.injectInto(vararg taskTypes: KClass<out T>) where T : Task, T : ProcessForkOptions =
         ProcessForkOptionConfigurator(
