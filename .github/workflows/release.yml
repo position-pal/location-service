@@ -43,4 +43,3 @@ jobs:
     with:
       container_version: ${{ needs.release.outputs.container_version }}
     secrets: inherit
-
