@@ -1,6 +1,6 @@
 services:
   cassandra-db:
-    image: cassandra:latest
+    image: cassandra:latest@sha256:5d4795c41491654e2bda432179e020c7c2cd702bbb22b7d1314747658efd71b4
     container_name: cassandra-db
     ports:
       - "9042:9042"
@@ -11,7 +11,7 @@ services:
       retries: 60
 
   cassandra-init:
-    image: cassandra:latest
+    image: cassandra:latest@sha256:5d4795c41491654e2bda432179e020c7c2cd702bbb22b7d1314747658efd71b4
     depends_on:
       cassandra-db:
         condition: service_healthy
