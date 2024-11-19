@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21@sha256:5ad4efff3364b06c61578b267138359bcba92acc20dfd533f35b75c709a6f10b
+FROM eclipse-temurin:21@sha256:b5fc642f67dbbd1c4ce811388801cb8480aaca8aa9e56fd6dcda362cfea113f1
 COPY ./ /location-service
 WORKDIR /location-service
 RUN chmod +x ./gradlew
