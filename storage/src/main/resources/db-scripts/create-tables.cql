@@ -15,3 +15,15 @@ CREATE TABLE UserRoutes (
     Longitude DOUBLE,
     PRIMARY KEY (UserId, Timestamp)
 ) WITH CLUSTERING ORDER BY (Timestamp DESC);
+
+CREATE TABLE UserGroupsByUserId (
+    UserId TEXT,
+    GroupId TEXT,
+    PRIMARY KEY (UserId, GroupId)
+);
+
+CREATE TABLE UserGroupsByGroupId (
+    GroupId TEXT,
+    UserId TEXT,
+    PRIMARY KEY (GroupId, UserId)
+);
