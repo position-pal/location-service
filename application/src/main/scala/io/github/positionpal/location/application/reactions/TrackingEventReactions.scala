@@ -27,7 +27,7 @@ object ArrivalCheck:
 
   private val successMessage = "User has arrived at the expected destination on time!"
 
-  def apply[M[_]: Sync: Monad](mapsService: MapsService[M]): EventReaction[M] =
+  def apply[M[_]: Sync](mapsService: MapsService[M]): EventReaction[M] =
     on[M]: (monitoredTracking, event) =>
       for
         config <- ReactionsConfiguration.get
@@ -42,7 +42,7 @@ object ArrivalCheck:
 object StationaryCheck:
   private val alertMessage = "The user has been stuck in the same position for a while."
 
-  def apply[M[_]: Sync: Monad](): EventReaction[M] =
+  def apply[M[_]: Sync](): EventReaction[M] =
     on[M]: (monitoredTracking, event) =>
       for
         config <- ReactionsConfiguration.get
