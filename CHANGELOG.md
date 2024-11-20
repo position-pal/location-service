@@ -1,3 +1,25 @@
+## [0.6.1](https://github.com/position-pal/location-service/compare/0.6.0...0.6.1) (2024-11-20)
+
+### Dependency updates
+
+* **core-deps:** update dependency org.scala-lang:scala3-library_3 to v3.6.1 ([44a78de](https://github.com/position-pal/location-service/commit/44a78de726f7f0270dc9e171314d5a38b40731ee))
+* **deps:** update eclipse-temurin:21 docker digest to b5fc642 ([#91](https://github.com/position-pal/location-service/issues/91)) ([51b6691](https://github.com/position-pal/location-service/commit/51b6691fe0d1d0abe746b94000a0e6972f28689b))
+* **deps:** update plugin com.gradle.develocity to v3.18.2 ([#86](https://github.com/position-pal/location-service/issues/86)) ([020c3dd](https://github.com/position-pal/location-service/commit/020c3dda763b004a891bc6a5b862c7858f3f7919))
+
+### Bug Fixes
+
+* **application:** use Monad instance of Sync instead of overwrite explicitly ([b17afd5](https://github.com/position-pal/location-service/commit/b17afd55b59440ff7e9bb25901022179547a5a5a))
+
+### Tests
+
+* **infrastructure:** add configuration of futures completion patience and move in site call the eventually patience ([0e49f41](https://github.com/position-pal/location-service/commit/0e49f417ce538268edeac37576c5a22c8fe5c2f8))
+
+### Build and continuous integration
+
+* **deps:** pin dependencies ([#83](https://github.com/position-pal/location-service/issues/83)) ([1305149](https://github.com/position-pal/location-service/commit/1305149cc880da0cc6ab5c329cc6ac655de94ab5))
+* **deps:** pin dependencies ([#90](https://github.com/position-pal/location-service/issues/90)) ([4f5c47c](https://github.com/position-pal/location-service/commit/4f5c47c9da826365872e226a815b1ee625ec93d5))
+* do not try to publish docker images without a release of semantic release ([8147920](https://github.com/position-pal/location-service/commit/8147920fcc289eb29ebc3ab8539e1ccbe2f93321))
+
 ## [0.6.0](https://github.com/position-pal/location-service/compare/0.5.0...0.6.0) (2024-11-14)
 
 ### Features
