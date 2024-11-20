@@ -1,20 +1,21 @@
-package io.github.positionpal.location.storage
+package io.github.positionpal.location.storage.sessions
 
 import java.time.Instant
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import akka.actor.typed.ActorSystem
-import akka.stream.alpakka.cassandra.scaladsl.{CassandraSession, CassandraSessionRegistry}
+import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
 import cats.effect.kernel.Async
-import cats.implicits.{catsSyntaxApplicativeId, catsSyntaxMonadError, toFunctorOps, toTraverseOps}
-import com.datastax.oss.driver.api.core.cql.{Row, SimpleStatement}
+import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps, toTraverseOps}
+import com.datastax.oss.driver.api.core.cql.Row
 import io.github.positionpal.location.application.storage.UserSessionStore
 import io.github.positionpal.location.commons.CanRaise
 import io.github.positionpal.location.domain
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.Session.Snapshot
 import io.github.positionpal.location.domain.UserState.*
+import io.github.positionpal.location.storage.{StorageUtils, StoreError}
 
 /** A Cassandra-based implementation of the [[UserSessionStore]]. */
 object CassandraUserSessionStore:
@@ -26,21 +27,18 @@ object CassandraUserSessionStore:
     * @return a new instance of the Cassandra-based implementation of [[UserSessionStore]]
     */
   def apply[F[_]: Async: CanRaise[StoreError]](
+      session: F[CassandraSession],
       keyspace: String = "locationservice",
-  )(using actorSystem: ActorSystem[?]): F[UserSessionStore[F, Unit]] =
-    Async[F].delay(CassandraSessionRegistry(actorSystem).sessionFor("akka.persistence.cassandra"))
-      .map(session => Impl(session, keyspace))
+  )(using actorSystem: ActorSystem[?]): F[UserSessionStore[F, Unit]] = session.map(Impl(_, keyspace))
 
-  sealed trait StoreError extends RuntimeException
-  final case class InvalidSessionVariation(message: String) extends StoreError
-  final case class DatabaseError(message: String) extends StoreError
+  final case class InvalidSessionVariation(message: String) extends StoreError(message)
 
   private class Impl[F[_]: Async: CanRaise[StoreError]](using actorSystem: ActorSystem[?])(
       session: CassandraSession,
       keyspace: String,
-  ) extends UserSessionStore[F, Unit]:
+  ) extends UserSessionStore[F, Unit]
+      with StorageUtils:
     import Queries.*
-    import Tables.*
 
     given ExecutionContext = actorSystem.executionContext
 
@@ -65,12 +63,6 @@ object CassandraUserSessionStore:
         case Snapshot(uid, Inactive, None) => session.executeWrite(updateUserInfoQuery(uid, Inactive)).map(_ => ())
         case _ => Future.failed(InvalidSessionVariation(s"The given variation $variation is invalid"))
 
-    private def executeWithErrorHandling[T](operation: => Future[T]): F[T] =
-      Async[F].fromFuture(Async[F].delay(operation)).adaptError { case e: Exception => DatabaseError(e.getMessage) }
-
-    extension (l: GPSLocation)
-      private def unlessNullIsland: Option[GPSLocation] = Option(l).filter(l => l._1 != 0.0 || l._2 != 0.0)
-
     private object Tables:
       val userInfo = "UserInfo"
       val userRoutes = "UserRoutes"
@@ -85,21 +77,23 @@ object CassandraUserSessionStore:
             location <- r.location.unlessNullIsland
           yield SampledLocation(timestamp, userId, location)
 
+      extension (l: GPSLocation)
+        private def unlessNullIsland: Option[GPSLocation] = Option(l).filter(l => l._1 != 0.0 || l._2 != 0.0)
+
     private object Queries:
-      import Tables.*
+      export Tables.*
 
-      def getUserInfoQuery(userId: UserId) = SimpleStatement.newInstance(
-        s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE UserId = ?",
-        userId.id,
-      )
+      def getUserInfoQuery(userId: UserId) =
+        cql(s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE UserId = ?", userId.id)
 
-      def getTrackingQuery(userId: UserId) = SimpleStatement.newInstance(
-        s"SELECT Timestamp, Latitude, Longitude FROM $keyspace.$userRoutes WHERE UserId = ? ORDER BY Timestamp",
-        userId.id,
-      )
+      def getTrackingQuery(userId: UserId) =
+        cql(
+          s"SELECT Timestamp, Latitude, Longitude FROM $keyspace.$userRoutes WHERE UserId = ? ORDER BY Timestamp",
+          userId.id,
+        )
 
       def insertUserInfoQuery(userId: UserId, state: UserState, position: GPSLocation, timestamp: Instant) =
-        SimpleStatement.newInstance(
+        cql(
           s"INSERT INTO $keyspace.$userInfo(UserId, Status, Latitude, Longitude, LastUpdated) VALUES (?, ?, ?, ?, ?)",
           userId.id,
           state.toString,
@@ -108,14 +102,14 @@ object CassandraUserSessionStore:
           timestamp,
         )
 
-      def updateUserInfoQuery(userId: UserId, state: UserState) = SimpleStatement
-        .newInstance(s"UPDATE $keyspace.$userInfo SET Status = ? WHERE UserId = ?", state.toString, userId.id)
+      def updateUserInfoQuery(userId: UserId, state: UserState) =
+        cql(s"UPDATE $keyspace.$userInfo SET Status = ? WHERE UserId = ?", state.toString, userId.id)
 
       def deleteUserRoutesQuery(userId: UserId) =
-        SimpleStatement.newInstance(s"DELETE FROM $keyspace.$userRoutes WHERE UserId = ?", userId.id)
+        cql(s"DELETE FROM $keyspace.$userRoutes WHERE UserId = ?", userId.id)
 
       def updateUserRoutesQuery(userId: UserId, position: GPSLocation, timestamp: Instant) =
-        SimpleStatement.newInstance(
+        cql(
           s"INSERT INTO $keyspace.$userRoutes(UserId, Latitude, Longitude, Timestamp) VALUES (?, ?, ?, ?)",
           userId.id,
           position.latitude,
