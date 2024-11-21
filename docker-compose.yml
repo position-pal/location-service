@@ -20,3 +20,13 @@ services:
       - ./storage/src/main/resources/db-scripts/create-tables.cql:/create-storage-tables.cql
     command:
       /bin/sh -c "cqlsh cassandra-db -f /create-actor-tables.cql && cqlsh cassandra-db -f /create-storage-tables.cql"
+
+  rabbitmq-broker:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"   # the port RabbitMQ will listen on
+      - "8080:15672"  # the port the dashboard web service will be available from
