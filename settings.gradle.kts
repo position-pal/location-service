@@ -13,6 +13,7 @@ include(
     "infrastructure",
     "storage",
     "ws",
+    "messages",
     "entrypoint",
 )
 

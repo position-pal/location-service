@@ -5,6 +5,8 @@ borer = "1.14.1"
 circe = "0.14.10"
 http4s = "1.0.0-M43"
 junit = "1.11.3"
+kernel = "0.9.1"
+lepus = "0.5.3"
 pureconfig = "0.17.8"
 scala = "3.6.1"
 scalamock = "0.6.6"
@@ -40,14 +42,20 @@ http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref
 http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
 junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
+lepus-client = { module = "dev.hnaderi:lepus-client_3", version.ref = "lepus" }
+lepus-std = { module = "dev.hnaderi:lepus-std_3", version.ref = "lepus" }
+lepus-circe = { module = "dev.hnaderi:lepus-circe_3", version.ref = "lepus" }
 logback-classic = "ch.qos.logback:logback-classic:1.5.12"
 log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
+positionpal-kernel-domain = { module = "io.github.positionpal:kernel-domain", version.ref = "kernel" }
+positionpal-kernel-presentation = { module = "io.github.positionpal:kernel-presentation", version.ref = "kernel" }
 pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
 pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.ref = "pureconfig" }
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
 scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.1"
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
+scalamock-cats = { module = "eu.monniot:scala3mock-cats_3", version.ref = "scalamock" }
 scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
 
 [bundles]
