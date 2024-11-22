@@ -64,34 +64,35 @@ object RabbitMQ:
       vhost = Path.from(configuration.virtualHost).getOrElse(Path("/")),
     )
 
-  /** A ADT representing the possible errors that can occur when interacting with RabbitMQ client. */
+  /** An ADT representing the possible errors that can occur when interacting with RabbitMQ client. */
   enum Error(msg: String) extends RuntimeException(msg):
-    case ExchangeNameGetFailed(reason: String) extends Error(s"Exchange name get failed: $reason")
-    case QueueNameCreationFailed(reason: String) extends Error(s"Queue name creation failed: $reason")
     case QueueDeclarationFailed extends Error("Queue declaration failed")
 
   trait Protocol:
+    import lepus.protocol.domains.{ExchangeName, QueueName, ShortString}
+
     /** The name of the exchange where group events are published by the user-group microservice. */
-    val groupsEventsExchangeName = "group_updates_exchange"
+    val groupsEventsExchange: ExchangeName = ExchangeName("group_updates_exchange")
+
+    /** The name of the exchange where notifications commands are published by the location service. */
+    val notificationsCommandExchange: ExchangeName = ExchangeName("push-notifications")
 
     /** The name of the queue where group events are collected. */
-    val groupsEventsCollectorQueueName = "group_updates_location_service"
+    val groupsEventsQueue: QueueName = QueueName("group_updates_location_service")
 
     /** The key used in the header to identify the type of message. */
-    val messageTypeHeaderKey = "message_type"
+    val messageTypeKey: ShortString = ShortString("message_type")
 
   trait Utils extends Protocol:
     import lepus.protocol.domains.{FieldTable, ShortString}
     export Error.*
 
+    extension (s: String) def asShortOrEmpty: ShortString = ShortString.from(s).getOrElse(ShortString.empty)
+
     type Headers = FieldTable
 
-    extension (s: String)
-      infix def in(
-          headers: Headers,
-          key: Option[ShortString] = ShortString.from(messageTypeHeaderKey).toOption,
-      ): Boolean =
-        val expected = ShortString.from(s).toOption
+    extension (expected: ShortString)
+      infix def in(headers: Headers, key: Option[ShortString] = Some(messageTypeKey)): Boolean =
         key match
-          case Some(k) => headers.get(k).isDefined && expected.isDefined && headers.get(k).contains(expected.get)
-          case None => expected.isDefined && headers.values.values.exists(_ == expected.get)
+          case Some(k) => headers.get(k).contains(expected)
+          case None => headers.values.values.exists(_ == expected)
