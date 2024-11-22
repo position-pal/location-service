@@ -1,6 +1,6 @@
 dependencies {
     api(project(":presentation"))
-    implementation("dev.hnaderi:named-codec-circe_3:0.2.1")
+    implementation(libs.circe.named.codec)
     implementation(libs.lepus.client)
     implementation(libs.lepus.std)
     implementation(libs.lepus.circe)
@@ -8,7 +8,8 @@ dependencies {
 }
 
 dockerCompose {
-    startedServices = listOf("rabbitmq-broker")
+    val rabbitMqService = "rabbitmq-broker"
+    startedServices = listOf(rabbitMqService)
 }
 
 dockerCompose.isRequiredBy(tasks.test)

@@ -6,7 +6,7 @@ import cats.effect.{IO, IOApp, Resource}
 import com.comcast.ip4s.{host, port}
 import lepus.client.apis.NormalMessagingChannel
 import lepus.client.{Connection, ConnectionConfig, ConsumeMode, LepusClient, Message}
-import lepus.protocol.domains.{ExchangeName, ExchangeType, Path, ShortString}
+import lepus.protocol.domains.{ExchangeName, ExchangeType, Path, QueueName, ShortString}
 
 val connection: Resource[IO, Connection[IO]] = LepusClient[IO](
   host = host"localhost",
@@ -25,9 +25,9 @@ object HelloWorld extends IOApp.Simple:
     for
       _ <- IO.println(con.capabilities.toFieldTable)
       _ <- ch.exchange.declare(ExchangeName("events"), ExchangeType.Topic)
-      q <- ch.queue.declare(autoDelete = true)
+      q <- ch.queue.declare(QueueName("hello-world"), autoDelete = false)
       q <- IO.fromOption(q)(new Exception())
-      print = ch.messaging.consume[String](q.queue, mode = ConsumeMode.NackOnError).printlns
+      print = ch.messaging.consume[String](q.queue, mode = ConsumeMode.RaiseOnError(true)).printlns
       publish = fs2.Stream.awakeEvery[IO](1.second).map(_.toMillis).evalTap(l => IO.println(s"publishing $l"))
         .map(l => Message(l.toString)).evalMap(ch.messaging.publish(exchange, q.queue, _))
       _ <- IO.println(q)
@@ -85,7 +85,6 @@ object PubSub extends IOApp.Simple:
 
 import cats.effect.{Async, ExitCode}
 import lepus.client.{MessageCodec, json}
-import lepus.protocol.domains.QueueName
 import lepus.std.{WorkPoolDefinition, WorkPoolChannel}
 
 object WorkPool:
