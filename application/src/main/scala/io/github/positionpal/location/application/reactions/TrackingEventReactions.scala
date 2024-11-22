@@ -3,7 +3,7 @@ package io.github.positionpal.location.application.reactions
 import io.github.positionpal.location.domain.{MonitorableTracking, SampledLocation}
 
 /** A reaction to [[SampledLocation]] events. */
-object TrackingEventReaction extends BinaryShortCircuitReaction:
+object TrackingEventReaction extends BinaryShortCircuitReaction with FilterableOps:
   case object Continue
   enum Notification(val reason: String):
     case Alert(override val reason: String) extends Notification(reason)
