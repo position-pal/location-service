@@ -46,6 +46,21 @@ trait EventReactionADT:
       */
     @targetName("andThen") def >>>(other: EventReaction[F]): EventReaction[F]
 
+/** A mixin enriching the [[EventReactionADT]] with operations for filtering the execution of reactions. */
+trait FilterableOps:
+  context: EventReactionADT =>
+
+  extension [F[_]: Monad](reaction: EventReaction[F])
+    /** Filters the execution of the [[reaction]] based on the provided [[predicate]] function,
+      * which determines whether the reaction should be executed or the provided [[default]] outcome
+      * should be returned instead.
+      * @param predicate a function that evaluates to `true` if the reaction should be executed
+      * @return a new [[EventReaction]] that only runs if the predicate condition is satisfied.
+      */
+    def when(predicate: (Environment, Event) => Boolean)(default: Outcome): EventReaction[F] = on:
+      case (env, event) if predicate(env, event) => reaction(env, event)
+      case (_, _) => Monad[F].pure(default)
+
 /** A trait representing an event reaction that produces two possible outcomes: a "left" (failure)
   * and a "right" (success) outcome, following a short-circuit evaluation strategy: once the left
   * outcome is produced, no further reactions are processed, stopping the chain of reactions at the
