@@ -2,6 +2,8 @@ package io.github.positionpal.location.domain
 
 import java.time.Instant
 
+import io.github.positionpal.entities.UserId
+
 /** A generic domain event, representing a valuable change in the system. */
 trait DomainEvent:
   /** The timestamp when the event occurred. */

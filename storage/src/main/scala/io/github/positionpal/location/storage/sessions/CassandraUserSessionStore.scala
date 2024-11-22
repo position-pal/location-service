@@ -9,6 +9,7 @@ import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
 import cats.effect.kernel.Async
 import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps, toTraverseOps}
 import com.datastax.oss.driver.api.core.cql.Row
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.application.storage.UserSessionStore
 import io.github.positionpal.location.commons.CanRaise
 import io.github.positionpal.location.domain
@@ -83,36 +84,35 @@ object CassandraUserSessionStore:
     private object Queries:
       export Tables.*
 
-      def getUserInfoQuery(userId: UserId) =
-        cql(s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE UserId = ?", userId.id)
+      def getUserInfoQuery(userId: UserId) = cql(
+        s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE UserId = ?",
+        userId.username(),
+      )
 
-      def getTrackingQuery(userId: UserId) =
-        cql(
-          s"SELECT Timestamp, Latitude, Longitude FROM $keyspace.$userRoutes WHERE UserId = ? ORDER BY Timestamp",
-          userId.id,
-        )
+      def getTrackingQuery(userId: UserId) = cql(
+        s"SELECT Timestamp, Latitude, Longitude FROM $keyspace.$userRoutes WHERE UserId = ? ORDER BY Timestamp",
+        userId.username(),
+      )
 
-      def insertUserInfoQuery(userId: UserId, state: UserState, position: GPSLocation, timestamp: Instant) =
-        cql(
-          s"INSERT INTO $keyspace.$userInfo(UserId, Status, Latitude, Longitude, LastUpdated) VALUES (?, ?, ?, ?, ?)",
-          userId.id,
-          state.toString,
-          position.latitude,
-          position.longitude,
-          timestamp,
-        )
+      def insertUserInfoQuery(userId: UserId, state: UserState, position: GPSLocation, timestamp: Instant) = cql(
+        s"INSERT INTO $keyspace.$userInfo(UserId, Status, Latitude, Longitude, LastUpdated) VALUES (?, ?, ?, ?, ?)",
+        userId.username(),
+        state.toString,
+        position.latitude,
+        position.longitude,
+        timestamp,
+      )
 
       def updateUserInfoQuery(userId: UserId, state: UserState) =
-        cql(s"UPDATE $keyspace.$userInfo SET Status = ? WHERE UserId = ?", state.toString, userId.id)
+        cql(s"UPDATE $keyspace.$userInfo SET Status = ? WHERE UserId = ?", state.toString, userId.username())
 
       def deleteUserRoutesQuery(userId: UserId) =
-        cql(s"DELETE FROM $keyspace.$userRoutes WHERE UserId = ?", userId.id)
+        cql(s"DELETE FROM $keyspace.$userRoutes WHERE UserId = ?", userId.username())
 
-      def updateUserRoutesQuery(userId: UserId, position: GPSLocation, timestamp: Instant) =
-        cql(
-          s"INSERT INTO $keyspace.$userRoutes(UserId, Latitude, Longitude, Timestamp) VALUES (?, ?, ?, ?)",
-          userId.id,
-          position.latitude,
-          position.longitude,
-          timestamp,
-        )
+      def updateUserRoutesQuery(userId: UserId, position: GPSLocation, timestamp: Instant) = cql(
+        s"INSERT INTO $keyspace.$userRoutes(UserId, Latitude, Longitude, Timestamp) VALUES (?, ?, ?, ?)",
+        userId.username(),
+        position.latitude,
+        position.longitude,
+        timestamp,
+      )

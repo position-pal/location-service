@@ -7,6 +7,7 @@ import scala.Option.empty
 import cats.implicits.catsSyntaxTuple4Semigroupal
 import io.bullet.borer.derivation.MapBasedCodecs.{deriveAllCodecs, deriveCodec}
 import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.domain.*
 
 /** Provides codecs for the domain model and application services. */
@@ -14,7 +15,7 @@ trait ModelCodecs:
 
   given instantsCodec: Codec[Instant] = Codec.bimap[String, Instant](_.toString, Instant.parse)
 
-  given userIdCodec: Codec[UserId] = deriveCodec[UserId]
+  given userIdCodec: Codec[UserId] = Codec.bimap[String, UserId](_.username(), UserId.create)
 
   given userStateCodec: Codec[UserState] = deriveCodec[UserState]
 
@@ -39,7 +40,7 @@ trait ModelCodecs:
       val unbounded = reader.readMapOpen(1)
       val tracking = reader.readString() match
         case "route" => Tracking(reader.read[Route]())
-        case _ => reader.unexpectedDataItem(expected = "`user`")
+        case _ => reader.unexpectedDataItem(expected = "`route`")
       reader.readMapClose(unbounded, tracking),
   )
 
@@ -58,8 +59,7 @@ trait ModelCodecs:
             case "expectedArrival" => d.copy(_3 = Some(reader.read[Instant]()))
             case "route" => d.copy(_4 = Some(reader.read[Route]()))
             case _ => reader.unexpectedDataItem(expected = "`route`, `mode`, `destination` or `expectedArrival`")
-      val res = fields.mapN(Tracking.withMonitoring.apply)
-        .getOrElse(reader.validationFailure("Missing required fields"))
+      val res = fields.mapN(Tracking.withMonitoring).getOrElse(reader.validationFailure("Missing required fields"))
       reader.readMapClose(unbounded, res),
   )
 

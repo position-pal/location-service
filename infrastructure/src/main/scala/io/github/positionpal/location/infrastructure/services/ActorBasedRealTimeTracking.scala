@@ -1,5 +1,6 @@
 package io.github.positionpal.location.infrastructure.services
 
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.application.services.RealTimeTracking
 import io.github.positionpal.location.domain.*
 
@@ -33,4 +34,5 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
     override def removeObserverFor(resource: UserId)(observer: OutcomeObserver): F[Unit] = Async[F].delay:
       observer.foreach(refOf(resource) ! RealTimeUserTracker.UnWire(_))
 
-    private def refOf(userId: UserId) = ClusterSharding(actorSystem).entityRefFor(RealTimeUserTracker.key, userId.id)
+    private def refOf(userId: UserId) =
+      ClusterSharding(actorSystem).entityRefFor(RealTimeUserTracker.key, userId.username())

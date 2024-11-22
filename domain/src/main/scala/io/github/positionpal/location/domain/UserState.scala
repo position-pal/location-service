@@ -1,14 +1,5 @@
 package io.github.positionpal.location.domain
 
-/** An identifier uniquely identifying a [[User]]. */
-final case class UserId(id: String)
-
-/** An identifier uniquely identifying a group of [[User]]s. */
-final case class GroupId(id: String)
-
-/** A user of the system, identified by a [[UserId]] and belonging to a set of [[GroupId]]s. */
-case class User(userId: UserId, inGroups: Set[GroupId])
-
 /** The [[io.github.positionpal.location.domain.User]] state information. */
 enum UserState:
   /** The user is online and is continuously sending location updates. */

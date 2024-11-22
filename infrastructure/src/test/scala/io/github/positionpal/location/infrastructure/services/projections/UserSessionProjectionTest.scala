@@ -9,12 +9,13 @@ import akka.projection.eventsourced.EventEnvelope
 import akka.projection.testkit.scaladsl.{ProjectionTestKit, TestProjection, TestSourceProvider}
 import akka.stream.scaladsl.Source
 import cats.effect.IO
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.application.storage.UserSessionWriter
 import io.github.positionpal.location.domain.EventConversions.given
 import io.github.positionpal.location.domain.RoutingMode.Driving
 import io.github.positionpal.location.domain.Session.Snapshot
 import io.github.positionpal.location.domain.UserState.*
-import io.github.positionpal.location.domain.{RoutingStarted, SampledLocation, Session, UserId}
+import io.github.positionpal.location.domain.{RoutingStarted, SampledLocation, Session}
 import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
@@ -30,7 +31,7 @@ class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWord
     "process events correctly" in {
       val storageSessionWriter = MockedUserSessionWriter()
       val handler = UserSessionProjectionHandler(system, storageSessionWriter)
-      val testUser = UserId("user1")
+      val testUser = UserId.create("user1")
       val events = StatefulDrivingEvent(Active, SampledLocation(now, testUser, bolognaCampus))
         :: StatefulDrivingEvent(Routing, RoutingStarted(now, testUser, imolaCampus, Driving, cesenaCampus, inTheFuture))
         :: StatefulDrivingEvent(Routing, SampledLocation(now, testUser, forliCampus))

@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.groups
 
-import io.github.positionpal.location.domain.{GroupId, UserId}
+import io.github.positionpal.entities.{GroupId, UserId}
 
 /** The reading model projection for groups. It encapsulates the read-side
   * operations for querying and retrieving user groups related information from the underlying store.

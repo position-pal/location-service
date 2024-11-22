@@ -7,7 +7,7 @@ import cats.effect.kernel.Async
 import cats.effect.{IO, Resource}
 import cats.implicits.toFunctorOps
 import com.typesafe.config.Config
-import io.github.positionpal.location.domain.UserId
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
 import io.github.positionpal.location.infrastructure.ws.WebSockets

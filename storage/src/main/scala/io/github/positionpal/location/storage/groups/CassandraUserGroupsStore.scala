@@ -7,9 +7,9 @@ import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
 import cats.effect.kernel.Async
 import cats.implicits.toFunctorOps
 import com.datastax.oss.driver.api.core.cql.SimpleStatement
+import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.application.groups.UserGroupsStore
 import io.github.positionpal.location.commons.CanRaise
-import io.github.positionpal.location.domain.{GroupId, UserId}
 import io.github.positionpal.location.storage.{StorageUtils, StoreError}
 
 object CassandraUserGroupsStore:
@@ -33,11 +33,11 @@ object CassandraUserGroupsStore:
 
     override def groupsOf(userId: UserId): F[Set[GroupId]] = executeWithErrorHandling:
       session.select(getGroupsQuery(userId))
-        .runFold(Set.empty[GroupId])((acc, row) => acc + GroupId(row.getString("GroupId")))
+        .runFold(Set.empty[GroupId])((acc, row) => acc + GroupId.create(row.getString("GroupId")))
 
     override def membersOf(groupId: GroupId): F[Set[UserId]] = executeWithErrorHandling:
       session.select(getMembersQuery(groupId))
-        .runFold(Set.empty[UserId])((acc, row) => acc + UserId(row.getString("UserId")))
+        .runFold(Set.empty[UserId])((acc, row) => acc + UserId.create(row.getString("UserId")))
 
     override def removeMember(groupId: GroupId, userId: UserId): F[Unit] = executeWithErrorHandling:
       session.executeWrite(deleteMemberQuery(groupId, userId)).map(_ => ())
@@ -53,16 +53,16 @@ object CassandraUserGroupsStore:
         batch(insert(userGroupsByUserId)(groupId, userId) :: insert(userGroupsByGroupId)(groupId, userId) :: Nil)
 
       private def insert(table: String)(groupId: GroupId, userId: UserId): SimpleStatement =
-        cql(s"INSERT INTO $keyspace.$table (GroupId, UserId) VALUES (?, ?)", groupId.id, userId.id)
+        cql(s"INSERT INTO $keyspace.$table (GroupId, UserId) VALUES (?, ?)", groupId.value(), userId.username())
 
       def getGroupsQuery(userId: UserId) =
-        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByUserId WHERE UserId = ?", userId.id)
+        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByUserId WHERE UserId = ?", userId.username())
 
       def getMembersQuery(groupId: GroupId) =
-        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByGroupId WHERE GroupId = ?", groupId.id)
+        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByGroupId WHERE GroupId = ?", groupId.value())
 
       def deleteMemberQuery(groupId: GroupId, userId: UserId) =
         batch(delete(userGroupsByUserId)(groupId, userId) :: delete(userGroupsByGroupId)(groupId, userId) :: Nil)
 
       private def delete(table: String)(groupId: GroupId, userId: UserId) =
-        cql(s"DELETE FROM $keyspace.$table WHERE GroupId = ? AND UserId = ?", groupId.id, userId.id)
+        cql(s"DELETE FROM $keyspace.$table WHERE GroupId = ? AND UserId = ?", groupId.value(), userId.username())

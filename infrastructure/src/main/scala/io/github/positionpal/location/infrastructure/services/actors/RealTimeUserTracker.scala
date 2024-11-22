@@ -1,6 +1,5 @@
 package io.github.positionpal.location.infrastructure.services.actors
 
-import java.time.Instant
 import java.time.Instant.now
 
 import scala.concurrent.duration.DurationInt
@@ -15,6 +14,7 @@ import akka.cluster.sharding.typed.scaladsl.*
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.RetentionCriteria.snapshotEvery
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.application.reactions.*
 import io.github.positionpal.location.application.reactions.TrackingEventReaction.*
 import io.github.positionpal.location.domain.*
@@ -60,7 +60,7 @@ object RealTimeUserTracker:
       observers.foreach(_ ! WebSockets.Reply(userUpdateFrom(e, updatedSession)))
       copy(session = updatedSession)
   object ObservableSession:
-    def of(userId: String): ObservableSession = ObservableSession(Session.of(UserId(userId)), Set.empty)
+    def of(username: String): ObservableSession = ObservableSession(Session.of(UserId.create(username)), Set.empty)
 
   def apply(): Entity[Command, ShardingEnvelope[Command]] = Entity(key): ctx =>
     this(ctx.entityId, tags(math.abs(ctx.entityId.hashCode % tags.size)))

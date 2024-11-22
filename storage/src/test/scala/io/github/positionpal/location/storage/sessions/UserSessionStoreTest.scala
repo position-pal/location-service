@@ -14,6 +14,7 @@ class UserSessionStoreTest
   import cats.effect.unsafe.implicits.global
   import cats.effect.{IO, Resource}
   import cats.mtl.Handle.handleForApplicativeError
+  import io.github.positionpal.entities.UserId
   import io.github.positionpal.location.domain.*
   import io.github.positionpal.location.domain.Session.Snapshot
   import io.github.positionpal.location.domain.UserState.*
@@ -26,10 +27,10 @@ class UserSessionStoreTest
     "attempting to get the latest updated session of an unknown user" should:
       "return None" in:
         storeResource.use:
-          _.sessionOf(UserId("unknown-id"))
+          _.sessionOf(UserId.create("unknown-id"))
         .unsafeRunSync() shouldBe None
 
-    val user = UserId("u01")
+    val user = UserId.create("u01")
     val initialVariation = Snapshot(user, Active, Some(SampledLocation(now, user, GPSLocation(100.0, 0.0))))
     val lastVariation = Snapshot(user, Active, Some(SampledLocation(now, user, GPSLocation(200.0, 0.0))))
     val routingVariations = Snapshot(user, Routing, Some(SampledLocation(now, user, GPSLocation(300.0, 0.0)))) ::
@@ -51,7 +52,7 @@ class UserSessionStoreTest
           Some(Snapshot(user, Inactive, lastVariation.lastSampledLocation))
 
       "return a empty last location if the user have never been active" in:
-        val neverActiveUser = UserId("u02")
+        val neverActiveUser = UserId.create("u02")
         val variation = Snapshot(neverActiveUser, Inactive, None)
         updateAndGet(neverActiveUser, variation).unsafeRunSync().map(_.toSnapshot) shouldBe
           Some(Snapshot(neverActiveUser, Inactive, None))

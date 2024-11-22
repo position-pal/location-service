@@ -4,6 +4,7 @@ import scala.collection.concurrent.TrieMap
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.effect.IO
+import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
@@ -33,7 +34,7 @@ object WebSockets:
     def groupRoute(service: ActorBasedRealTimeTracking.Service[IO, UserId]): Route =
       path("group" / Segment / Segment): (guid, uid) =>
         handleWebSocketMessages:
-          Handlers.handleGroupRoute(GroupId(guid), UserId(uid), service)
+          Handlers.handleGroupRoute(GroupId.create(guid), UserId.create(uid), service)
 
   /** The handlers for the web socket communication. */
   object Handlers extends ModelCodecs:

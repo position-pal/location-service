@@ -7,7 +7,8 @@ import scala.concurrent.duration.FiniteDuration
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.scaladsl.Sink
 import io.bullet.borer.Json
-import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, GPSLocation, GroupId, SampledLocation, UserId}
+import io.github.positionpal.entities.{GroupId, UserId}
+import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, GPSLocation, SampledLocation}
 import io.github.positionpal.location.infrastructure.{TimeUtils, WebSocketClient}
 import io.github.positionpal.location.presentation.ModelCodecs
 
@@ -49,7 +50,7 @@ trait WebSocketTestDSL:
           clientMap(event.user).send(message)
 
     private def endpointOf(group: GroupId, userId: UserId): String =
-      s"${config.baseEndpoint}/${group.id}/${userId.id}"
+      s"${config.baseEndpoint}/${group.value()}/${userId.username()}"
 
     private def sink(set: mutable.Set[DrivenEvent]): Sink[Message, ?] = Sink.foreach: response =>
       val decoded = Json.decode(response.asTextMessage.getStrictText.getBytes).to[DrivenEvent].valueEither

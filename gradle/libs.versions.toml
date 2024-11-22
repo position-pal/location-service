@@ -5,7 +5,7 @@ borer = "1.14.1"
 circe = "0.14.10"
 http4s = "1.0.0-M43"
 junit = "1.11.3"
-kernel = "0.9.1"
+kernel = "0.10.0"
 lepus = "0.5.3"
 pureconfig = "0.17.8"
 scala = "3.6.1"
@@ -35,6 +35,7 @@ cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
 circe-core = { module = "io.circe:circe-core_3", version.ref = "circe" }
 circe-generic = { module = "io.circe:circe-generic_3", version.ref = "circe" }
 circe-parser = { module = "io.circe:circe-parser_3", version.ref = "circe" }
+circe-named-codec = "dev.hnaderi:named-codec-circe_3:0.2.1"
 cucumber = "io.cucumber:cucumber-scala_3:8.25.1"
 http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
 http4s-dsl = { module = "org.http4s:http4s-dsl_3", version.ref = "http4s" }

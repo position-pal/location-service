@@ -3,6 +3,7 @@ package io.github.positionpal.location.presentation
 import java.time.Instant
 
 import io.bullet.borer.Cbor
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.domain.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -27,7 +28,7 @@ class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
     deserialized shouldBe session
 
 private object ModelCodecsTest:
-  val user: UserId = UserId("test-user")
+  val user: UserId = UserId.create("test-user")
   val route: Route = SampledLocation(Instant.now(), user, GPSLocation(44.139, 12.243)) ::
     SampledLocation(Instant.now(), user, GPSLocation(44.140, 12.244)) :: Nil
   val tracking: Tracking = Tracking(route)
