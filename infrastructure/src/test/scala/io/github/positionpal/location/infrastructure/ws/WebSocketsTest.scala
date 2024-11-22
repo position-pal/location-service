@@ -5,6 +5,7 @@ import scala.concurrent.duration.DurationInt
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.typesafe.config.ConfigFactory
+import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.infrastructure.*
@@ -29,7 +30,7 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
         systemResource.use: _ =>
           IO:
             val test = WebSocketTest(config)
-            val scenario = test.Scenario(group = GroupId("test-group"), clients = test.Client(UserId("uid")) :: Nil)
+            val scenario = test.Scenario(GroupId.create("guid1"), clients = test.Client(UserId.create("uid1")) :: Nil)
             val result = test.runTest(scenario)
             whenReady(result): connectionResults =>
               connectionResults shouldBe true
@@ -39,11 +40,13 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
       "receive updates from all members of the same group" in:
         systemResource.use: _ =>
           IO:
+            val user1 = UserId.create("u1")
+            val user2 = UserId.create("u2")
             val test = WebSocketTest(config)
             val scenario = test.Scenario(
-              group = GroupId("test-group"),
-              clients = test.Client(UserId("u1")) :: test.Client(UserId("u2")) :: Nil,
-              events = sample(UserId("u1"), cesenaCampus) :: sample(UserId("u2"), bolognaCampus) :: Nil,
+              group = GroupId.create("test-group"),
+              clients = test.Client(user1) :: test.Client(user2) :: Nil,
+              events = sample(user1, cesenaCampus) :: sample(user2, bolognaCampus) :: Nil,
             )
             val expectedEvents = scenario.events.map(_.toUserUpdate)
             val result = test.runTest(scenario)

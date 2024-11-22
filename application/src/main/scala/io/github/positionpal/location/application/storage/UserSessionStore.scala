@@ -1,6 +1,7 @@
 package io.github.positionpal.location.application.storage
 
-import io.github.positionpal.location.domain.{Session, UserId}
+import io.github.positionpal.entities.UserId
+import io.github.positionpal.location.domain.Session
 
 /** The reading model projection for [[Session]]s. It encapsulates the read-side
   * operations for querying and retrieving [[Session]]s from the underlying store.

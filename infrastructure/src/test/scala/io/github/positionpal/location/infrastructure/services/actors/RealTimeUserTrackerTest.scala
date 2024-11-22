@@ -5,6 +5,7 @@ import scala.language.postfixOps
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import com.typesafe.config.{Config, ConfigFactory}
+import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.RoutingMode.*
@@ -21,7 +22,7 @@ class RealTimeUserTrackerTest
     with AnyWordSpecLike
     with RealTimeUserTrackerVerifierDSL:
 
-  private val testUser = UserId("user-test")
+  private val testUser = UserId.create("user-test")
   private val defaultContextSample = SampledLocation(now, testUser, bolognaCampus)
   private val destination = cesenaCampus
   private val longLastingPatience = Eventually.PatienceConfig(Span(30, Seconds), Span(5, Seconds))

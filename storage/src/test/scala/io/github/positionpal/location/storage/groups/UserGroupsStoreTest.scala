@@ -3,7 +3,7 @@ package io.github.positionpal.location.storage.groups
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import cats.effect.{IO, Resource}
 import cats.mtl.Handle.handleForApplicativeError
-import io.github.positionpal.location.domain.{GroupId, UserId}
+import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.storage.{AkkaPersistenceConfiguration, CassandraConnectionFactory}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -16,8 +16,8 @@ class UserGroupsStoreTest
   import cats.effect.unsafe.implicits.global
 
   private val groups = Map(
-    GroupId("astro") -> Set(UserId("Luca"), UserId("Greg")),
-    GroupId("divine") -> Set(UserId("Luca"), UserId("Josh"), UserId("Alice")),
+    GroupId.create("astro") -> Set(UserId.create("Luca"), UserId.create("Greg")),
+    GroupId.create("divine") -> Set(UserId.create("Luca"), UserId.create("Josh"), UserId.create("Alice")),
   )
   private val connection = CassandraConnectionFactory[IO](system).connect
   private val storeResource = Resource.eval(CassandraUserGroupsStore[IO](connection))

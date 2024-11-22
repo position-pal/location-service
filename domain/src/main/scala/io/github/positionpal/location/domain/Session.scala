@@ -1,5 +1,7 @@
 package io.github.positionpal.location.domain
 
+import io.github.positionpal.entities.UserId
+
 /** A facade over the user's state and tracking information. */
 trait Session:
 
