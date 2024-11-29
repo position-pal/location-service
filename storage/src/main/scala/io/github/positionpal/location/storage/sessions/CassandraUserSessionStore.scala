@@ -10,7 +10,7 @@ import cats.effect.kernel.Async
 import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps, toTraverseOps}
 import com.datastax.oss.driver.api.core.cql.Row
 import io.github.positionpal.entities.UserId
-import io.github.positionpal.location.application.storage.UserSessionStore
+import io.github.positionpal.location.application.sessions.UserSessionStore
 import io.github.positionpal.location.commons.CanRaise
 import io.github.positionpal.location.domain
 import io.github.positionpal.location.domain.*

@@ -14,6 +14,7 @@ include(
     "storage",
     "ws",
     "messages",
+    "grpc",
     "entrypoint",
 )
 
