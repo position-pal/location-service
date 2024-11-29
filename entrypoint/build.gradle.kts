@@ -4,8 +4,11 @@ plugins {
 
 dependencies {
     implementation(project(":infrastructure"))
+    implementation(project(":grpc"))
+    implementation(project(":storage"))
+    implementation(project(":messages"))
 }
 
 application {
-    mainClass.set("io.github.positionpal.location.entrypoint.main")
+    mainClass.set("$group.location.entrypoint.main")
 }
