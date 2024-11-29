@@ -3,14 +3,13 @@ package io.github.positionpal.location.messages.notifications
 import scala.concurrent.duration.DurationInt
 
 import cats.effect.IO
-import cats.effect.kernel.Resource
+import cats.effect.kernel.Outcome
 import eu.monniot.scala3mock.scalatest.MockFactory
-import io.github.positionpal.*
-import io.github.positionpal.commands.GroupWisePushNotification
-import io.github.positionpal.entities.{GroupId, NotificationMessage, UserId}
-import io.github.positionpal.location.messages.{MessageBrokerConnectionFactory, RabbitMQ}
-import lepus.client.{Connection, ConsumeMode}
-import lepus.protocol.domains.{QueueName, ShortString}
+import io.github.positionpal.commands.CommandType.*
+import io.github.positionpal.commands.{CoMembersPushNotification, GroupWisePushNotification}
+import io.github.positionpal.location.messages.RabbitMQ
+import io.github.positionpal.location.messages.RabbitMQTestUtils.*
+import lepus.client.DeliveredMessage
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -20,34 +19,45 @@ class RabbitMQNotificationsPublisherTest extends AnyWordSpec with Matchers with 
   import cats.effect.unsafe.implicits.global
 
   "RabbitMQ notifications publisher" should:
-    "work" in:
+    "successfully publish on RabbitMQ exchange" in:
       val app = for
         p <- RabbitMQNotificationsPublisher[IO]()
         _ <- p.send(GroupWisePushNotification.of(group, user, notification))
+        _ <- p.send(CoMembersPushNotification.of(user, user, notification))
       yield p
-      connection.use: conn =>
+      val result = connection.use: conn =>
         for
           a <- app
+          c <- Utils.consumer(conn).start
+          _ <- IO.sleep(5.seconds)
           _ <- a.start(conn).start
-          _ <- Utils.consumer(conn)
-        yield ()
+          c <- c.join
+        yield c
       .unsafeRunSync()
+      result.isSuccess shouldBe true
+      result match
+        case Outcome.Succeeded(fa) =>
+          val expected = List(GROUP_WISE_NOTIFICATION, CO_MEMBERS_NOTIFICATION).map(t => Some(t.name().asShortOrEmpty))
+          fa.map(_.map(_.message.properties.headers.get.get(msgTypeKey)).distinct should contain allElementsOf expected)
 
   object Utils:
+    import io.github.positionpal.entities.{UserId, GroupId, NotificationMessage}
+    import lepus.client.{Connection, ConsumeMode}
+    import lepus.protocol.domains.{QueueName, ShortString, ExchangeType}
 
-    private val configuration: RabbitMQ.Configuration =
-      RabbitMQ.Configuration(host = "localhost", port = 5672, username = "guest", password = "admin", virtualHost = "/")
-    val connection: Resource[IO, Connection[IO]] = MessageBrokerConnectionFactory.ofRabbitMQ[IO](configuration)
     val user: UserId = UserId.create("uid-test")
     val group: GroupId = GroupId.create("gid-test")
-    val notification: NotificationMessage = NotificationMessage
-      .create("A entitled test message", "Some useful information")
+    val notification: NotificationMessage = NotificationMessage.create("A entitled message", "Some useful information")
 
-    def consumer(conn: Connection[IO]): IO[Unit] = conn.channel.use: ch =>
-      for
-        q <- ch.queue.declare(QueueName("hello-world"), autoDelete = false)
-        q <- IO.fromOption(q)(new Exception())
-        _ <- ch.queue.bind(q.queue, notificationsCommandExchange, ShortString.empty)
-        print = ch.messaging.consume[String](q.queue, mode = ConsumeMode.RaiseOnError(true)).printlns
-        _ <- print.interruptAfter(15.seconds).compile.drain
-      yield ()
+    def consumer(conn: Connection[IO]): IO[List[DeliveredMessage[String]]] =
+      conn.channel.use: ch =>
+        for
+          _ <- ch.exchange.declare(notificationsCommandExchange, ExchangeType.Headers)
+          q <- ch.queue.declare(QueueName("test-notifications-queue"), autoDelete = false)
+          q <- IO.fromOption(q)(new Exception())
+          _ <- ch.queue.bind(q.queue, notificationsCommandExchange, ShortString.empty)
+          c = ch.messaging.consume[String](q.queue, mode = ConsumeMode.RaiseOnError(true))
+          l <- c.interruptAfter(15.seconds).compile.toList
+        yield l
+  end Utils
+end RabbitMQNotificationsPublisherTest
