@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+option java_package = "io.github.positionpal.location.presentation.proto";
+
+import "google/protobuf/timestamp.proto";
+
+message UserId {
+  string username = 1;
+}
+
+message GroupId {
+  string value = 1;
+}
+
+enum UserState {
+  ACTIVE = 0;
+  INACTIVE = 1;
+  SOS = 2;
+  ROUTING = 3;
+}
+
+message GPSLocation {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message SampledLocation {
+  UserId user = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  GPSLocation location = 3;
+}
+
+message Route {
+  repeated SampledLocation locations = 1;
+}
+
+message Tracking {
+  Route route = 1;
+  optional GPSLocation destination = 2;
+  optional google.protobuf.Timestamp eta = 3;
+}
+
+message Session {
+  UserId user = 1;
+  UserState state = 2;
+  SampledLocation lastSampledLocation = 3;
+  Tracking activeTracking = 4;
+}
+
+enum StatusCode {
+  OK = 0;
+  NOT_FOUND = 1;
+  GENERIC_ERROR = 2;
+}
+
+message Status {
+  StatusCode code = 1;
+  string message = 2;
+}
+
+message LocationResponse {
+  Status status = 1;
+  GPSLocation location = 2;
+}
+
+message UserStateResponse {
+  Status status = 1;
+  UserState state = 2;
+}
+
+message TrackingResponse {
+  Status status = 1;
+  Tracking route = 2;
+}
+
+message SessionResponse {
+  Status status = 1;
+  Session session = 2;
+}
+
+service UserSessionService {
+  rpc GetCurrentSession(GroupId) returns (stream SessionResponse) { }
+  rpc GetCurrentLocation(UserId) returns (LocationResponse) { }
+  rpc GetCurrentState(UserId) returns (UserStateResponse) { }
+  rpc GetCurrentTracking(UserId) returns (TrackingResponse) { }
+}
