@@ -1,0 +1,35 @@
+package io.github.positionpal.location.grpc
+
+import cats.data.{Validated, ValidatedNec}
+import cats.effect.IO
+import cats.implicits.toFoldableOps
+import io.github.positionpal.location.commons.ConfigurationError
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+
+class GrpcConfigurationTest extends AnyWordSpec with Matchers:
+
+  import cats.effect.unsafe.implicits.global
+
+  "Grpc server configuration" when:
+    "created with legit options" should:
+      "be valid" in:
+        val configuration = GrpcServer.Configuration[IO](50051)
+        configuration.unsafeRunSync().isValid shouldBe true
+
+    "created with illegal options" should:
+      "be invalid" in:
+        val configuration = GrpcServer.Configuration[IO](-1)
+        val result: ValidatedNec[ConfigurationError, GrpcServer.Configuration] = configuration.unsafeRunSync()
+        result.isInvalid shouldBe true
+        result match
+          case Validated.Invalid(e) => e.toList.collect { case e: ConfigurationError.Invalid => e }.size shouldBe 1
+
+    "created by non-existing environment variables" should:
+      "be invalid" in:
+        val configuration = GrpcServer.Configuration.byEnv[IO]
+        val result: ValidatedNec[ConfigurationError, GrpcServer.Configuration] = configuration.unsafeRunSync()
+        result.isInvalid shouldBe true
+        result match
+          case Validated.Invalid(e) =>
+            e.toList.collect { case e: ConfigurationError.NotSet => e }.size shouldBe 1
