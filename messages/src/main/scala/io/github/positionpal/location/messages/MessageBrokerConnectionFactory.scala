@@ -1,14 +1,5 @@
 package io.github.positionpal.location.messages
 
-/** A factory for creating connections to a message broker.
-  * @tparam F the effect type
-  * @tparam C the connection type
-  */
-trait ConnectionFactory[F[_], C]:
-
-  /** @return a new connection to the message broker, properly encapsulated in the effect type `F`. */
-  def get: F[C]
-
 /** A factory for creating connections to RabbitMQ message broker. */
 object MessageBrokerConnectionFactory:
   import cats.effect.kernel.{Temporal, Resource}

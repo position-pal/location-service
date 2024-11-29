@@ -20,7 +20,7 @@ class UserSessionStoreTest
   import io.github.positionpal.location.domain.UserState.*
   import io.github.positionpal.location.storage.TimeUtils.now
 
-  private val connection = CassandraConnectionFactory[IO](system).connect
+  private val connection = CassandraConnectionFactory[IO](system).get
   private val storeResource = Resource.eval(CassandraUserSessionStore[IO](connection))
 
   "User Session Database" when:

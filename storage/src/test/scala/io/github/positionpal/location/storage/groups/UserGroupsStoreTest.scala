@@ -19,7 +19,7 @@ class UserGroupsStoreTest
     GroupId.create("astro") -> Set(UserId.create("Luca"), UserId.create("Greg")),
     GroupId.create("divine") -> Set(UserId.create("Luca"), UserId.create("Josh"), UserId.create("Alice")),
   )
-  private val connection = CassandraConnectionFactory[IO](system).connect
+  private val connection = CassandraConnectionFactory[IO](system).get
   private val storeResource = Resource.eval(CassandraUserGroupsStore[IO](connection))
 
   "UserGroupsStore" when:

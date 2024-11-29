@@ -1,13 +1,6 @@
 package io.github.positionpal.location.storage
 
-/** A factory for creating connections to a storage system.
-  * @tparam F the effect type
-  * @tparam C the connection type
-  */
-trait ConnectionFactory[F[_], C]:
-
-  /** Creates a new connection to the storage system. */
-  def connect: F[C]
+import io.github.positionpal.location.commons.ConnectionFactory
 
 /** A factory for creating connections to a Cassandra database. */
 object CassandraConnectionFactory:
@@ -22,5 +15,5 @@ object CassandraConnectionFactory:
     */
   def apply[F[_]: Async](actorSystem: ActorSystem[?]): ConnectionFactory[F, CassandraSession] =
     new ConnectionFactory[F, CassandraSession]:
-      def connect: F[CassandraSession] =
+      def get: F[CassandraSession] =
         Async[F].delay(CassandraSessionRegistry(actorSystem).sessionFor("akka.persistence.cassandra"))
