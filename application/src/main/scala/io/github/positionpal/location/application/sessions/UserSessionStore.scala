@@ -1,4 +1,4 @@
-package io.github.positionpal.location.application.storage
+package io.github.positionpal.location.application.sessions
 
 import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.domain.Session

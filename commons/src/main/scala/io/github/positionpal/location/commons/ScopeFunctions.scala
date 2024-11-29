@@ -5,6 +5,9 @@ object ScopeFunctions:
 
   extension [A](a: A)
     /** @return `this` after having applied the given function [[f]] to it. */
-    def also(f: A => Unit): A =
+    inline def also(f: A => Unit): A =
       f(a)
       a
+
+    /** @return the result of applying the given function [[f]] to `this`. */
+    inline def let[T](f: A => T): T = f(a)

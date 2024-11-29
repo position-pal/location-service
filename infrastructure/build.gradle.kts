@@ -7,7 +7,6 @@ dependencies {
     implementation(libs.akka.persistence.typed)
     implementation(libs.akka.persistence.cassandra)
     implementation(libs.akka.persistence.query)
-    implementation(libs.logback.classic)
     implementation(libs.akka.stream)
     implementation(libs.akka.http)
     implementation(libs.akka.projection.eventsourced)

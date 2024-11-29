@@ -14,7 +14,7 @@ import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 import akka.projection.scaladsl.{AtLeastOnceProjection, Handler}
 import akka.projection.{ProjectionBehavior, ProjectionId}
 import cats.effect.IO
-import io.github.positionpal.location.application.storage.UserSessionWriter
+import io.github.positionpal.location.application.sessions.UserSessionWriter
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.Session.Snapshot
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
