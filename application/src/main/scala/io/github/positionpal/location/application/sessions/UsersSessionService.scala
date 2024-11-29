@@ -4,10 +4,9 @@ import fs2.Stream
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.Session
 
-/**
- * A service to query and retrieve the tracking session information of users.
- * @tparam F the effect type
- */
+/** A service to query and retrieve the tracking session information of users.
+  * @tparam F the effect type
+  */
 trait UsersSessionService[F[_]]:
 
   /** @return the current [[Session]] of the given [[userId]] if it exists. */
