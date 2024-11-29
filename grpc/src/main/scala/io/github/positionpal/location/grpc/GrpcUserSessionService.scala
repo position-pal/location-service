@@ -10,13 +10,12 @@ import io.github.positionpal.location.presentation.ProtoUtils.*
 import io.github.positionpal.location.presentation.{ProtoUtils, proto}
 import io.grpc.Metadata
 
-/**
- * A gRPC service adapter for the [[UsersSessionService]] to expose the session information of users.
- * @param usersSessionService the service to which delegate the session queries logic
- * @tparam F the effect type
- */
+/** A gRPC service adapter for the [[UsersSessionService]] to expose the session information of users.
+  * @param usersSessionService the service to which delegate the session queries logic
+  * @tparam F the effect type
+  */
 class GrpcUserSessionService[F[_]: Async](
-  usersSessionService: UsersSessionService[F],
+    usersSessionService: UsersSessionService[F],
 ) extends proto.UserSessionServiceFs2Grpc[F, Metadata]:
 
   override def getCurrentLocation(request: proto.UserId, ctx: Metadata): F[proto.LocationResponse] =
@@ -44,6 +43,5 @@ class GrpcUserSessionService[F[_]: Async](
     .handleError(e => (ErrorResponse(s"Error while fetching session related data: ${e.getMessage}"), None))
 
   override def getCurrentSession(request: proto.GroupId, ctx: Metadata): Stream[F, proto.SessionResponse] =
-    usersSessionService.ofGroup(request)
-      .map(s => proto.SessionResponse(OkResponse, Some(s)))
+    usersSessionService.ofGroup(request).map(s => proto.SessionResponse(OkResponse, Some(s)))
       .handleError(e => proto.SessionResponse(ErrorResponse(s"Error while fetching group sessions: ${e.getMessage}")))
