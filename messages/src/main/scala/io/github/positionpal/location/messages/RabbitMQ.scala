@@ -1,9 +1,5 @@
 package io.github.positionpal.location.messages
 
-import cats.data.Validated
-import cats.effect.kernel.Sync
-import io.github.positionpal.location.commons.ScopeFunctions.let
-
 object RabbitMQ:
 
   /** Configuration for connecting to a RabbitMQ broker. */
@@ -26,47 +22,48 @@ object RabbitMQ:
   object Configuration:
 
     import cats.data.ValidatedNec
-    import cats.implicits.catsSyntaxTuple5Semigroupal
+    import cats.effect.kernel.Sync
+    import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxTuple5Semigroupal, catsSyntaxValidatedIdBinCompat0}
     import io.github.positionpal.location.commons.ConfigurationError
     import io.github.positionpal.location.commons.ConfigurationError.*
+    import io.github.positionpal.location.commons.ScopeFunctions.let
 
-    /**
-     * Create a new [[Configuration]] instance with the given parameters.
-     * @param host the host RabbitMQ broker is running on
-     * @param port the port RabbitMQ broker is listening on
-     * @param username the username to authenticate with the RabbitMQ broker
-     * @param password the password to authenticate with the RabbitMQ broker
-     * @param virtualHost the virtual host to connect to on the RabbitMQ broker
-     * @tparam F the effect type
-     * @return a [[ValidatedNec]] instance containing either a valid [[Configuration]] or a
-     */
+    /** Create a new [[Configuration]] instance with the given parameters.
+      * @param host the host RabbitMQ broker is running on
+      * @param port the port RabbitMQ broker is listening on
+      * @param username the username to authenticate with the RabbitMQ broker
+      * @param password the password to authenticate with the RabbitMQ broker
+      * @param virtualHost the virtual host to connect to on the RabbitMQ broker
+      * @tparam F the effect type
+      * @return a [[ValidatedNec]] instance containing either a valid [[Configuration]] or a
+      */
     def apply[F[_]: Sync](
-      host: String,
-      port: Int,
-      username: String,
-      password: String,
-      virtualHost: String,
+        host: String,
+        port: Int,
+        username: String,
+        password: String,
+        virtualHost: String,
     ): F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
-      (host.validate, port.validate, username.validate, password.validate, virtualHost.validate)
-        .mapN(ConfigImpl.apply)
+      (host.nonEmpty, port.positive, username.nonEmpty, password.nonEmpty, virtualHost.nonEmpty).mapN(ConfigImpl.apply)
+    .handleError(e => Invalid(e.toString).invalidNec)
 
-    /**
-     * Create a new [[Configuration]] instance with the parameters read from environment variables,
-     * expected in `RABBITMQ_<PARAMETER>` format.
-     * @return a [[ValidatedNec]] instance containing either a valid [[Configuration]] or a
-     *         [[ConfigurationError]] in case of missing or invalid environment variables.
-     */
+    /** Create a new [[Configuration]] instance with the parameters read from environment variables,
+      * expected in `RABBITMQ_<PARAMETER>` format.
+      * @return a [[ValidatedNec]] instance containing either a valid [[Configuration]] or a
+      *         [[ConfigurationError]] in case of missing or invalid environment variables.
+      */
     def fromEnv[F[_]: Sync]: F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
       (
-        "RABBITMQ_HOST".let(s => sys.env.get(s).validate(s)),
-        "RABBITMQ_PORT".let(s => sys.env.get(s).validate(s).map(_.toInt)),
-        "RABBITMQ_USERNAME".let(s => sys.env.get(s).validate(s)),
-        "RABBITMQ_PASSWORD".let(s => sys.env.get(s).validate(s)),
-        "RABBITMQ_VIRTUAL_HOST".let(s => sys.env.get(s).validate(s)),
+        "RABBITMQ_HOST".let(s => sys.env.get(s).validStr(s)),
+        "RABBITMQ_PORT".let(s => sys.env.get(s).validStr(s).andThen(_.toInt.positive)),
+        "RABBITMQ_USERNAME".let(s => sys.env.get(s).validStr(s)),
+        "RABBITMQ_PASSWORD".let(s => sys.env.get(s).validStr(s)),
+        "RABBITMQ_VIRTUAL_HOST".let(s => sys.env.get(s).validStr(s)),
       ).mapN(ConfigImpl.apply)
+    .handleError(e => Invalid(e.toString).invalidNec)
 
     private case class ConfigImpl(host: String, port: Int, username: String, password: String, virtualHost: String)
-      extends Configuration
+        extends Configuration
 
   import cats.effect.kernel.{Resource, Temporal}
   import cats.effect.std.Console
@@ -74,6 +71,7 @@ object RabbitMQ:
   import fs2.io.net.Network
   import lepus.client.{Connection, LepusClient}
   import lepus.protocol.domains.Path
+  import io.github.positionpal.location.commons.ConnectionFactory
 
   private[messages] class ConnectionFactoryImpl[F[_]: Temporal: Network: Console](
       configuration: Configuration,
@@ -103,10 +101,12 @@ object RabbitMQ:
     val groupsEventsQueue: QueueName = QueueName("group_updates_location_service")
 
     /** The key used in the header to identify the type of message. */
-    val messageTypeKey: ShortString = ShortString("message_type")
+    val msgTypeKey: ShortString = ShortString("message_type")
 
   trait Utils extends Protocol:
-    import lepus.protocol.domains.{FieldTable, ShortString}
+    import lepus.client.Message
+    import lepus.protocol.domains.{FieldTable, FieldData, ShortString}
+    import lepus.protocol.classes.basic.Properties
     export Error.*
 
     extension (s: String) def asShortOrEmpty: ShortString = ShortString.from(s).getOrElse(ShortString.empty)
@@ -114,7 +114,11 @@ object RabbitMQ:
     type Headers = FieldTable
 
     extension (expected: ShortString)
-      infix def in(headers: Headers, key: Option[ShortString] = Some(messageTypeKey)): Boolean =
+      infix def in(headers: Headers, key: Option[ShortString] = Some(msgTypeKey)): Boolean =
         key match
           case Some(k) => headers.get(k).contains(expected)
           case None => headers.values.values.exists(_ == expected)
+
+    extension (b: Array[Byte])
+      def toMessage(headersData: Map[ShortString, FieldData]): Message[Array[Byte]] =
+        Message(b, Properties(headers = Some(FieldTable(headersData))))

@@ -5,8 +5,8 @@ import cats.implicits.{toFlatMapOps, toFunctorOps}
 import io.github.positionpal.location.application.groups.UserGroupsService
 import io.github.positionpal.location.messages.RabbitMQ
 import io.github.positionpal.{AvroSerializer, MessageType}
-import lepus.client.{Connection, Message}
-import lepus.protocol.domains.{FieldTable, ShortString}
+import lepus.client.{Connection, ConsumeMode, Message}
+import lepus.protocol.domains.{ExchangeType, FieldTable, ShortString}
 
 /** A consumer of groups-related events from RabbitMQ broker.
   * @param userGroupsService the service to handle the events
@@ -18,10 +18,12 @@ class RabbitMQGroupsEventConsumer[F[_]: Async](userGroupsService: UserGroupsServ
 
   def start(connection: Connection[F]): F[Unit] = connection.channel.use: ch =>
     for
+      _ <- ch.exchange.declare(groupsEventsExchange, ExchangeType.Headers)
       q <- ch.queue.declare(groupsEventsQueue, autoDelete = false, durable = true, exclusive = false)
       q <- Async[F].fromOption(q, QueueDeclarationFailed)
       _ <- ch.queue.bind(q.queue, groupsEventsExchange, ShortString.empty)
-      consumer = ch.messaging.consume[Array[Byte]](q.queue).evalMap(e => handleGroupEvent(e.message))
+      consumer = ch.messaging.consume[Array[Byte]](q.queue, mode = ConsumeMode.RaiseOnError(true))
+        .evalMap(e => handleGroupEvent(e.message))
       _ <- consumer.compile.drain
     yield ()
 
