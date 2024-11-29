@@ -1,6 +1,5 @@
 import DotenvUtils.dotenv
 import DotenvUtils.injectInto
-import Utils.isInCI
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -53,5 +52,7 @@ allprojects {
         }
     }
 
-    rootProject.dotenv?.let { dotenv -> injectInto(JavaExec::class, Test::class) environmentsFrom dotenv }
+    afterEvaluate {
+        rootProject.dotenv?.let { dotenv -> injectInto(JavaExec::class, Test::class) environmentsFrom dotenv }
+    }
 }
