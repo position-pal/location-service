@@ -1,9 +1,8 @@
 package io.github.positionpal.location.commons
 
-/**
- * A sealed trait representing the possible configuration errors.
- * @param message the error message.
- */
+/** A sealed trait representing the possible configuration errors.
+  * @param message the error message.
+  */
 enum ConfigurationError(val message: String):
   case NotSet(name: String) extends ConfigurationError(s"`$name` is not set!")
   case Invalid(reason: String) extends ConfigurationError(s"Invalid configuration: $reason")
