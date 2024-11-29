@@ -10,7 +10,7 @@ import akka.projection.testkit.scaladsl.{ProjectionTestKit, TestProjection, Test
 import akka.stream.scaladsl.Source
 import cats.effect.IO
 import io.github.positionpal.entities.UserId
-import io.github.positionpal.location.application.storage.UserSessionWriter
+import io.github.positionpal.location.application.sessions.UserSessionWriter
 import io.github.positionpal.location.domain.EventConversions.given
 import io.github.positionpal.location.domain.RoutingMode.Driving
 import io.github.positionpal.location.domain.Session.Snapshot
