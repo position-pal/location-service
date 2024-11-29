@@ -34,12 +34,13 @@ object ProtoConversions:
     case t: Tracking => proto.Tracking(Some(t.route))
   }
 
-  given sessionToProto: Conversion[Session, proto.Session] = s => proto.Session(
-    Some(s.userId),
-    s.userState,
-    s.lastSampledLocation.map(sampledLocationToProto(_)),
-    s.tracking.map(trackingToProto(_))
-  )
+  given sessionToProto: Conversion[Session, proto.Session] = s =>
+    proto.Session(
+      Some(s.userId),
+      s.userState,
+      s.lastSampledLocation.map(sampledLocationToProto(_)),
+      s.tracking.map(trackingToProto(_)),
+    )
 end ProtoConversions
 
 object ProtoUtils:
