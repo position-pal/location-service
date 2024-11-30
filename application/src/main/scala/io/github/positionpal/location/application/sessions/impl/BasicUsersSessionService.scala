@@ -6,6 +6,11 @@ import io.github.positionpal.location.application.groups.UserGroupsService
 import io.github.positionpal.location.application.sessions.{UserSessionReader, UsersSessionService}
 import io.github.positionpal.location.domain.Session
 
+/** A basic implementation of the [[UsersSessionService]] that retrieves user sessions
+  * based on their group membership.
+  * @param userGroupsService the service for managing user groups
+  * @param userSessionStore the store for user sessions
+  */
 class BasicUsersSessionService[F[_]](
     userGroupsService: UserGroupsService[F],
     userSessionStore: UserSessionReader[F],

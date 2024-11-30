@@ -1,5 +1,6 @@
 package io.github.positionpal.location.presentation
 
+/** A set of given instances for converting domain entities to and from their protocol buffer representations. */
 object ProtoConversions:
   import io.github.positionpal.entities.{UserId, GroupId}
   import io.github.positionpal.location.domain.*
@@ -43,12 +44,16 @@ object ProtoConversions:
     )
 end ProtoConversions
 
+/** A set of utility methods for working with protocol buffer messages. */
 object ProtoUtils:
   import io.github.positionpal.location.presentation.proto.Status
 
+  /** @return a successful response status. */
   def okResponse: Some[Status] = Some(proto.Status(proto.StatusCode.OK))
 
+  /** @return a not found response status with the provided message. */
   def notFoundResponse(message: String): Some[Status] = Some(proto.Status(proto.StatusCode.NOT_FOUND, message))
 
+  /** @return a generic error response with the provided message. */
   def errorResponse(message: String): Some[Status] = Some(proto.Status(proto.StatusCode.GENERIC_ERROR, message))
 end ProtoUtils
