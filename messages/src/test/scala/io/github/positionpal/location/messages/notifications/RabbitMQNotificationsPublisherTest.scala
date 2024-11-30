@@ -39,6 +39,7 @@ class RabbitMQNotificationsPublisherTest extends AnyWordSpec with Matchers with 
         case Outcome.Succeeded(fa) =>
           val expected = List(GROUP_WISE_NOTIFICATION, CO_MEMBERS_NOTIFICATION).map(t => Some(t.name().asShortOrEmpty))
           fa.map(_.map(_.message.properties.headers.get.get(msgTypeKey)).distinct should contain allElementsOf expected)
+        case _ => fail("Expected successful outcome")
 
   object Utils:
     import io.github.positionpal.entities.{UserId, GroupId, NotificationMessage}

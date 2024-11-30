@@ -24,6 +24,7 @@ class GrpcConfigurationTest extends AnyWordSpec with Matchers:
         result.isInvalid shouldBe true
         result match
           case Validated.Invalid(e) => e.toList.collect { case e: ConfigurationError.Invalid => e }.size shouldBe 1
+          case _ => fail("Expected invalid configuration")
 
     "created by non-existing environment variables" should:
       "be invalid" in:
@@ -33,3 +34,4 @@ class GrpcConfigurationTest extends AnyWordSpec with Matchers:
         result match
           case Validated.Invalid(e) =>
             e.toList.collect { case e: ConfigurationError.NotSet => e }.size shouldBe 1
+          case _ => fail("Expected invalid configuration")
