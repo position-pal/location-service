@@ -46,9 +46,9 @@ end ProtoConversions
 object ProtoUtils:
   import io.github.positionpal.location.presentation.proto.Status
 
-  def OkResponse: Some[Status] = Some(proto.Status(proto.StatusCode.OK))
+  def okResponse: Some[Status] = Some(proto.Status(proto.StatusCode.OK))
 
-  def NotFoundResponse(message: String): Some[Status] = Some(proto.Status(proto.StatusCode.NOT_FOUND, message))
+  def notFoundResponse(message: String): Some[Status] = Some(proto.Status(proto.StatusCode.NOT_FOUND, message))
 
-  def ErrorResponse(message: String): Some[Status] = Some(proto.Status(proto.StatusCode.GENERIC_ERROR, message))
+  def errorResponse(message: String): Some[Status] = Some(proto.Status(proto.StatusCode.GENERIC_ERROR, message))
 end ProtoUtils
