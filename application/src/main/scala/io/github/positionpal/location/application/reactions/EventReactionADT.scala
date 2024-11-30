@@ -59,7 +59,7 @@ trait FilterableOps:
       */
     def when(predicate: (Environment, Event) => Boolean)(default: Outcome): EventReaction[F] = on:
       case (env, event) if predicate(env, event) => reaction(env, event)
-      case (_, _) => Monad[F].pure(default)
+      case _ => Monad[F].pure(default)
 
 /** A trait representing an event reaction that produces two possible outcomes: a "left" (failure)
   * and a "right" (success) outcome, following a short-circuit evaluation strategy: once the left
