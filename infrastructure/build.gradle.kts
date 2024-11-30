@@ -1,20 +1,33 @@
+import Utils.inCI
+import Utils.normally
+import Utils.onMac
+import Utils.onWindows
+
 dependencies {
     api(project(":presentation"))
-    implementation(libs.bundles.http4s)
-    implementation(libs.log4cats.slf4j)
-    implementation(libs.akka.cluster.typed)
-    implementation(libs.akka.cluster.sharding.typed)
-    implementation(libs.akka.persistence.typed)
-    implementation(libs.akka.persistence.cassandra)
-    implementation(libs.akka.persistence.query)
-    implementation(libs.akka.stream)
-    implementation(libs.akka.http)
-    implementation(libs.akka.projection.eventsourced)
-    implementation(libs.akka.projection.cassandra)
-    testImplementation(libs.akka.projection.testkit)
-    testImplementation(libs.akka.stream.testkit)
-    testImplementation(libs.akka.actor.testkit)
-    testImplementation(libs.akka.persistence.testkit)
+    with(libs) {
+        implementation(bundles.http4s)
+        implementation(akka.cluster.typed)
+        implementation(akka.cluster.sharding.typed)
+        implementation(akka.persistence.typed)
+        implementation(akka.persistence.cassandra)
+        implementation(akka.persistence.query)
+        implementation(akka.stream)
+        implementation(akka.http)
+        implementation(akka.projection.eventsourced)
+        implementation(akka.projection.cassandra)
+        testImplementation(akka.projection.testkit)
+        testImplementation(akka.stream.testkit)
+        testImplementation(akka.actor.testkit)
+        testImplementation(akka.persistence.testkit)
+    }
 }
 
-dockerCompose.isRequiredBy(tasks.test)
+normally {
+    dockerCompose {
+        startedServices = listOf("cassandra-init", "cassandra-db")
+        isRequiredBy(tasks.test)
+    }
+} except { inCI and (onMac or onWindows) } where {
+    tasks.test { enabled = false }
+} cause "GitHub Actions runner does not support Docker Compose"
