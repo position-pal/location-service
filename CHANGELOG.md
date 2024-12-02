@@ -1,3 +1,56 @@
+## [0.7.0](https://github.com/position-pal/location-service/compare/0.6.1...0.7.0) (2024-12-02)
+
+### Features
+
+* **application:** add FilterableReaction mixin ([3ae41d0](https://github.com/position-pal/location-service/commit/3ae41d01e7393bc9325194011f5fb0e134b9fcfa))
+* **application:** add user sessions service ([4a714fd](https://github.com/position-pal/location-service/commit/4a714fd21adf7af248ed085e8dec5335b487cfaf))
+* **grpc:** add grpc service sessions implementation ([6f0b175](https://github.com/position-pal/location-service/commit/6f0b175b6854c4ea7a3aa85693de7bebe1fdc720))
+* **messages:** add RabbitMQ groups related events consumer ([a006098](https://github.com/position-pal/location-service/commit/a0060988315c9793fee2b89f94d600e0394f6aa9))
+* **messages:** add RabbitMQ notification publisher ([e219770](https://github.com/position-pal/location-service/commit/e21977092ae6b0aa268946cdebbd0b7aaf610f27))
+* **presentation:** add grpc services definitions ([cf976e3](https://github.com/position-pal/location-service/commit/cf976e34192331a31f559407aae9470e9fb4490b))
+* **storage:** add postgres groups repository adapter ([f138fca](https://github.com/position-pal/location-service/commit/f138fcad121c9af6daac00c9175fcd151801e188))
+
+### Dependency updates
+
+* **deps:** update dependency gradle to v8.11.1 ([#94](https://github.com/position-pal/location-service/issues/94)) ([0860827](https://github.com/position-pal/location-service/commit/0860827cc2c6cd889ef5abf6adf6cb2e762b9547))
+* **deps:** update plugin gradle-docker-compose to v0.17.11 ([#93](https://github.com/position-pal/location-service/issues/93)) ([1701990](https://github.com/position-pal/location-service/commit/170199025d8451eec31f44f3995af210bb7c2f71))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.14 ([#92](https://github.com/position-pal/location-service/issues/92)) ([7a205e2](https://github.com/position-pal/location-service/commit/7a205e243333743ac8d73569c671c6653d4b23bb))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.15 ([#96](https://github.com/position-pal/location-service/issues/96)) ([bcd9ea1](https://github.com/position-pal/location-service/commit/bcd9ea1c305ad6f2da96cc61a307a19b43549ac5))
+* **deps:** update pureconfig to v0.17.8 ([#95](https://github.com/position-pal/location-service/issues/95)) ([072da14](https://github.com/position-pal/location-service/commit/072da14ef692f22db72a9af417d82daf2372e2db))
+
+### Bug Fixes
+
+* **build:** inject env variables only after having evaluated subprojects ([58240fa](https://github.com/position-pal/location-service/commit/58240fa510adb500c332c7018fc35e49e2d7828c))
+
+### Documentation
+
+* add missing scala docs ([8cf8409](https://github.com/position-pal/location-service/commit/8cf84094a33fbc88a650ecadc3b04ace0b6a310c))
+
+### Tests
+
+* **grpc:** add test for session api and grpc configuration ([f61c590](https://github.com/position-pal/location-service/commit/f61c59049b99e29da4a20429ffac93c4d40c4653))
+* **storage:** drop unnecessary akka storage configuration ([6300bff](https://github.com/position-pal/location-service/commit/6300bffad3a98db25a50bf704c091e9fc503c35f))
+* use exhaustive matching ([afc1135](https://github.com/position-pal/location-service/commit/afc1135652cb81e6d973ade7bb5482cfa8de7dec))
+
+### Build and continuous integration
+
+* add env token for getting shared kernel ([3f28069](https://github.com/position-pal/location-service/commit/3f280692177b996e790b80ce372da186666829c0))
+* **deps:** update docker/build-push-action digest to 48aba3b ([#97](https://github.com/position-pal/location-service/issues/97)) ([eb8b639](https://github.com/position-pal/location-service/commit/eb8b63958b096e36831edea22a01e5595354d62f))
+* leverage build dsl to conditionally configure tests ([008dfc9](https://github.com/position-pal/location-service/commit/008dfc9fec79e81fbd88b73a385209beb6b3e09e))
+
+### Style improvements
+
+* apply qa rules ([75d6b89](https://github.com/position-pal/location-service/commit/75d6b893e72e7a8e3bfc1afbbdc677813670bbfa))
+* **presentation:** use lowercase letter for methods ([e098a11](https://github.com/position-pal/location-service/commit/e098a111d8896fc1757aba8908d40cfa18b8f2c2))
+
+### Refactoring
+
+* **commons:** align object name with file name ([3b3bbc3](https://github.com/position-pal/location-service/commit/3b3bbc33beb97f2dfbbd7a55c1de6bf37245bfbf))
+* **commons:** use common ConnectionFactory ([ccd0f05](https://github.com/position-pal/location-service/commit/ccd0f057ba5ca0a2a4e7a9f745745c2cfee16c6e))
+* **messages:** add configuration validation ([c9adb6d](https://github.com/position-pal/location-service/commit/c9adb6d8c897451a930b264eb0b0b1d7ac2477c6))
+* **messages:** dry extracting common behaviors ([ea9549e](https://github.com/position-pal/location-service/commit/ea9549e6e40d1861f3f1e9711f7e138b30a03be3))
+* use UserId and GroupId from shared kernel ([2ede795](https://github.com/position-pal/location-service/commit/2ede795052191d4124329b80762dce2d8aa655c7))
+
 ## [0.6.1](https://github.com/position-pal/location-service/compare/0.6.0...0.6.1) (2024-11-20)
 
 ### Dependency updates
