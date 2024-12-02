@@ -4,14 +4,11 @@ import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import cats.effect.{IO, Resource}
 import cats.mtl.Handle.handleForApplicativeError
 import io.github.positionpal.entities.{GroupId, UserId}
-import io.github.positionpal.location.storage.{AkkaPersistenceConfiguration, CassandraConnectionFactory}
+import io.github.positionpal.location.storage.CassandraConnectionFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class UserGroupsStoreTest
-    extends ScalaTestWithActorTestKit(AkkaPersistenceConfiguration.get)
-    with AnyWordSpecLike
-    with Matchers:
+class UserGroupsStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecLike with Matchers:
 
   import cats.effect.unsafe.implicits.global
 

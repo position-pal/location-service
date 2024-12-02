@@ -1,15 +1,12 @@
 package io.github.positionpal.location.storage.sessions
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import io.github.positionpal.location.storage.{AkkaPersistenceConfiguration, CassandraConnectionFactory}
+import io.github.positionpal.location.storage.CassandraConnectionFactory
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class UserSessionStoreTest
-    extends ScalaTestWithActorTestKit(AkkaPersistenceConfiguration.get)
-    with AnyWordSpecLike
-    with Matchers:
+class UserSessionStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecLike with Matchers:
 
   import cats.effect.unsafe.implicits.global
   import cats.effect.{IO, Resource}
