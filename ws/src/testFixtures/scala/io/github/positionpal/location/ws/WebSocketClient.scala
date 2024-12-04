@@ -1,17 +1,14 @@
-package io.github.positionpal.location.infrastructure
+package io.github.positionpal.location.ws
 
 class WebSocketClient:
 
-  import akka.http.scaladsl.Http
-  import akka.http.scaladsl.model.ws.{Message, WebSocketRequest}
-  import akka.http.scaladsl.model.Uri
-  import akka.stream.scaladsl.{Source, Sink, Flow}
-  import akka.stream.Materializer
   import akka.actor.ActorSystem
-  import akka.stream.scaladsl.Keep
-  import akka.http.scaladsl.model.ws.WebSocketUpgradeResponse
-  import akka.stream.OverflowStrategy
-  import akka.stream.scaladsl.SourceQueueWithComplete
+  import akka.http.scaladsl.Http
+  import akka.http.scaladsl.model.Uri
+  import akka.http.scaladsl.model.ws.{Message, WebSocketRequest, WebSocketUpgradeResponse}
+  import akka.stream.scaladsl.*
+  import akka.stream.{Materializer, OverflowStrategy}
+
   import scala.concurrent.{ExecutionContext, Future}
 
   given actorSystem: ActorSystem = ActorSystem("WebsocketClient")

@@ -1,29 +1,18 @@
-package io.github.positionpal.location.infrastructure.ws
+package io.github.positionpal.location.ws
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import akka.NotUsed
+import akka.http.scaladsl.server.RouteResult.Complete
 import cats.effect.IO
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
-import io.github.positionpal.location.infrastructure.services.actors.AkkaSerializable
 import io.github.positionpal.location.presentation.ModelCodecs
 
 /** Web socket port service implementation for real time tracking. */
 object WebSockets:
-
-  /** The protocol for the web socket communication. */
-  sealed trait Protocol extends AkkaSerializable
-
-  /** Replies to a client with the given [[event]]. */
-  case class Reply(event: DrivenEvent) extends Protocol
-
-  /** Completes the web socket connection. */
-  case object Complete extends Protocol
-
-  /** Fails the web socket connection with the given [[ex]]. */
-  case class Failure(ex: Throwable) extends Protocol
 
   /** The routes for the web socket communication. */
   object Routes:
@@ -47,32 +36,32 @@ object WebSockets:
     import cats.effect.unsafe.implicits.global
     import io.bullet.borer.Json
 
-    private val activeSessions = TrieMap[GroupId, Set[(UserId, ActorRef[Protocol])]]()
+    private val activeSessions = TrieMap[GroupId, Set[(UserId, ActorRef[DrivenEvent])]]()
 
     def handleGroupRoute(
         groupId: GroupId,
         userId: UserId,
         service: ActorBasedRealTimeTracking.Service[IO, UserId],
-    ): Flow[Message, Message, ?] =
+    ): Flow[Message, Message, NotUsed] =
       val routeToGroupActor: Sink[Message, Unit] = Flow[Message].map:
         case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
         case _ => Left("Invalid message")
       .collect { case Right(e) => e }.watchTermination(): (_, done) =>
         done.onComplete: _ =>
-          var currentActiveSessions = Set.empty[(UserId, ActorRef[Protocol])]
+          var currentActiveSessions = Set.empty[(UserId, ActorRef[DrivenEvent])]
           synchronized:
             currentActiveSessions = activeSessions.getOrElse(groupId, Set.empty)
             activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
           currentActiveSessions.foreach((uid, ref) => service.removeObserverFor(uid)(Set(ref)).unsafeRunSync())
-      .to(Sink.foreach(e => service.handle(e).unsafeRunSync()))
-      val routeToClient: Source[Message, ActorRef[Protocol]] =
+      .to(Sink.foreach(service.handle(_).unsafeRunSync()))
+      val routeToClient: Source[Message, ActorRef[DrivenEvent]] =
         ActorSource.actorRef(
           completionMatcher = { case Complete => },
-          failureMatcher = { case Failure(ex) => ex },
+          failureMatcher = { case ex: Throwable => ex },
           bufferSize = 1_000,
           overflowStrategy = OverflowStrategy.fail,
         ).mapMaterializedValue: ref =>
-          var currentActiveSessions = Set.empty[(UserId, ActorRef[Protocol])]
+          var currentActiveSessions = Set.empty[(UserId, ActorRef[DrivenEvent])]
           synchronized:
             currentActiveSessions = activeSessions.getOrElse(groupId, Set.empty)
             activeSessions.update(groupId, currentActiveSessions + ((userId, ref)))
@@ -80,5 +69,5 @@ object WebSockets:
           service.addObserverFor(userId)(currentActiveSessions.map(_._2) + ref).unsafeRunSync()
           ref
         .map:
-          case Reply(event) => TextMessage(Json.encode(event).toUtf8String)
+          case event: DrivenEvent => TextMessage(Json.encode(event).toUtf8String)
       Flow.fromSinkAndSource(routeToGroupActor, routeToClient)

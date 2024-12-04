@@ -21,7 +21,6 @@ import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
 import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.infrastructure.geo.*
-import io.github.positionpal.location.infrastructure.ws.WebSockets
 
 /** The actor in charge of tracking the real-time location of users, reacting to
   * their movements and status changes. This actor is managed by Akka Cluster Sharding.
@@ -37,13 +36,13 @@ object RealTimeUserTracker:
   val tags: Seq[String] = Vector.tabulate(5)(i => s"${getClass.getSimpleName}-$i")
 
   sealed trait ProtocolCommand extends AkkaSerializable
-  case class Wire(observer: ActorRef[WebSockets.Protocol]) extends ProtocolCommand
-  case class UnWire(observer: ActorRef[WebSockets.Protocol]) extends ProtocolCommand
+  case class Wire(observer: ActorRef[DrivenEvent]) extends ProtocolCommand
+  case class UnWire(observer: ActorRef[DrivenEvent]) extends ProtocolCommand
 
   case object Ignore
   case object AliveCheck
 
-  type Observer = ActorRef[WebSockets.Protocol]
+  type Observer = ActorRef[DrivenEvent]
   type Command = DrivingEvent | Ignore.type | AliveCheck.type | ProtocolCommand
   type Event = StatefulDrivingEvent | ProtocolCommand
 
@@ -57,7 +56,7 @@ object RealTimeUserTracker:
     def removeObserver(observer: Observer): ObservableSession = copy(observers = observers - observer)
     def update(e: DrivingEvent): ObservableSession =
       val updatedSession = session.updateWith(e)
-      observers.foreach(_ ! WebSockets.Reply(userUpdateFrom(e, updatedSession)))
+      observers.foreach(_ ! userUpdateFrom(e, updatedSession))
       copy(session = updatedSession)
   object ObservableSession:
     def of(username: String): ObservableSession = ObservableSession(Session.of(UserId.create(username)), Set.empty)

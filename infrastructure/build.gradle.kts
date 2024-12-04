@@ -1,8 +1,3 @@
-import Utils.inCI
-import Utils.normally
-import Utils.onMac
-import Utils.onWindows
-
 dependencies {
     api(project(":presentation"))
     with(libs) {
@@ -12,7 +7,7 @@ dependencies {
         implementation(akka.persistence.typed)
         implementation(akka.persistence.cassandra)
         implementation(akka.persistence.query)
-        implementation(akka.stream)
+        implementation(akka.stream.typed)
         implementation(akka.http)
         implementation(akka.projection.eventsourced)
         implementation(akka.projection.cassandra)
@@ -23,12 +18,3 @@ dependencies {
         testImplementation(testFixtures(project(":domain")))
     }
 }
-
-normally {
-    dockerCompose {
-        startedServices = listOf("cassandra-init", "cassandra-db")
-        isRequiredBy(tasks.test)
-    }
-} except { inCI and (onMac or onWindows) } where {
-    tasks.test { enabled = false }
-} cause "GitHub Actions runner does not support Docker Compose"

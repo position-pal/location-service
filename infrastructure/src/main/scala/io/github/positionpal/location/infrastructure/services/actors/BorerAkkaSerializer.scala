@@ -6,7 +6,6 @@ import akka.actor.typed.{ActorRef, ActorRefResolver}
 import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
 import io.bullet.borer.{Codec, Decoder, Encoder}
 import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent}
-import io.github.positionpal.location.infrastructure.ws.WebSockets
 import io.github.positionpal.location.presentation.*
 
 /** Custom Akka serializer for the actor entities, where actor events and commands are registered into
@@ -31,7 +30,6 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
   given aliveCheckCodec: Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]
   given wireCodec: Codec[RealTimeUserTracker.Wire] = deriveCodec[RealTimeUserTracker.Wire]
   given unWireCodec: Codec[RealTimeUserTracker.UnWire] = deriveCodec[RealTimeUserTracker.UnWire]
-  given replyCodec: Codec[WebSockets.Reply] = deriveCodec[WebSockets.Reply]
 
   register[RealTimeUserTracker.AliveCheck.type]()
   register[RealTimeUserTracker.Ignore.type]()
@@ -41,4 +39,3 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
   register[RealTimeUserTracker.ObservableSession]()
   register[RealTimeUserTracker.Wire]()
   register[RealTimeUserTracker.UnWire]()
-  register[WebSockets.Reply]()
