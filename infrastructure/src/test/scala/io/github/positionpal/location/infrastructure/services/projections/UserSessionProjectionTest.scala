@@ -12,12 +12,12 @@ import cats.effect.IO
 import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.application.sessions.UserSessionWriter
 import io.github.positionpal.location.domain.EventConversions.given
+import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.RoutingMode.Driving
 import io.github.positionpal.location.domain.Session.Snapshot
+import io.github.positionpal.location.domain.TimeUtils.*
 import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.domain.{RoutingStarted, SampledLocation, Session}
-import io.github.positionpal.location.infrastructure.GeoUtils.*
-import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.StatefulDrivingEvent
 import org.scalatest.wordspec.AnyWordSpecLike

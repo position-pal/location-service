@@ -7,8 +7,8 @@ import io.github.positionpal.location.application.reactions.*
 import io.github.positionpal.location.application.reactions.TrackingEventReaction.{Continue, Notification}
 import io.github.positionpal.location.commons.*
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.infrastructure.GeoUtils.*
-import io.github.positionpal.location.infrastructure.TimeUtils.*
+import io.github.positionpal.location.domain.GeoUtils.*
+import io.github.positionpal.location.domain.TimeUtils.*
 import io.github.positionpal.location.infrastructure.geo.MapboxService
 import io.github.positionpal.location.infrastructure.utils.*
 import org.scalatest.funspec.AnyFunSpec

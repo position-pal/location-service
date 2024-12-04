@@ -5,6 +5,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     `java-library`
+    `java-test-fixtures`
     id("scala")
     alias(libs.plugins.scala.extras)
     alias(libs.plugins.gradle.docker.compose)
@@ -15,6 +16,7 @@ allprojects {
 
     with(rootProject.libs.plugins) {
         apply(plugin = "java-library")
+        apply(plugin = "java-test-fixtures")
         apply(plugin = "scala")
         apply(plugin = scala.extras.get().pluginId)
         apply(plugin = gradle.docker.compose.get().pluginId)
@@ -35,6 +37,7 @@ allprojects {
     with(rootProject.libs) {
         dependencies {
             implementation(scala.library)
+            testFixturesImplementation(scala.library)
             implementation(bundles.cats)
             testImplementation(bundles.scala.testing)
         }
