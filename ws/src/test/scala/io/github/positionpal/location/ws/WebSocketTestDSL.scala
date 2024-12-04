@@ -1,4 +1,4 @@
-package io.github.positionpal.location.infrastructure.ws
+package io.github.positionpal.location.ws
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -10,7 +10,6 @@ import io.bullet.borer.Json
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.TimeUtils.*
 import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, GPSLocation, SampledLocation}
-import io.github.positionpal.location.infrastructure.WebSocketClient
 import io.github.positionpal.location.presentation.ModelCodecs
 
 trait WebSocketTestDSL:
