@@ -4,10 +4,10 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.commons.EnvVariablesProvider
 import io.github.positionpal.location.domain.Distance.DistanceUnit
+import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.RoutingMode.Driving
 import io.github.positionpal.location.domain.{Distance, RoutingMode}
-import io.github.positionpal.location.infrastructure.GeoUtils.*
-import io.github.positionpal.location.infrastructure.utils.*
+import io.github.positionpal.location.infrastructure.utils.HTTPUtils
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 

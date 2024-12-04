@@ -7,9 +7,9 @@ import cats.effect.unsafe.implicits.global
 import com.typesafe.config.ConfigFactory
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.infrastructure.*
-import io.github.positionpal.location.infrastructure.GeoUtils.*
 import io.github.positionpal.location.presentation.ModelCodecs
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
