@@ -11,9 +11,8 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
   import cats.effect.kernel.Async
   import cats.implicits.{toFunctorOps, toFlatMapOps}
   import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker
-  import io.github.positionpal.location.infrastructure.ws.WebSockets
 
-  override type Outcome = WebSockets.Protocol
+  override type Outcome = DrivenEvent
 
   override type OutcomeObserver = Set[ActorRef[Outcome]]
 

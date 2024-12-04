@@ -17,6 +17,7 @@ scalatest = "3.3.0-SNAP4"
 
 [libraries]
 akka-actor = { module = "com.typesafe.akka:akka-actor_3", version.ref = "akka" }
+akka-actor-typed = { module = "com.typesafe.akka:akka-actor-typed_3", version.ref = "akka" }
 akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", version.ref = "akka" }
 akka-cluster-typed = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
 akka-cluster-sharding-typed = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
@@ -28,7 +29,7 @@ akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testki
 akka-projection-cassandra = { module = "com.lightbend.akka:akka-projection-cassandra_3", version.ref = "akkaprojection" }
 akka-projection-eventsourced = { module = "com.lightbend.akka:akka-projection-eventsourced_3", version.ref = "akkaprojection" }
 akka-projection-testkit = { module = "com.lightbend.akka:akka-projection-testkit_3", version.ref = "akkaprojection" }
-akka-stream = { module = "com.typesafe.akka:akka-stream_3", version.ref = "akka" }
+akka-stream-typed = { module = "com.typesafe.akka:akka-stream-typed_3", version.ref = "akka" }
 akka-stream-testkit = { module = "com.typesafe.akka:akka-stream-testkit_3", version.ref = "akka" }
 borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
 borer-derivation = { module = "io.bullet:borer-derivation_3", version.ref = "borer" }
