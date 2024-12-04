@@ -8,10 +8,10 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.EventConversions.{*, given}
+import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.RoutingMode.*
+import io.github.positionpal.location.domain.TimeUtils.*
 import io.github.positionpal.location.domain.UserState.*
-import io.github.positionpal.location.infrastructure.GeoUtils.*
-import io.github.positionpal.location.infrastructure.TimeUtils.*
 import io.github.positionpal.location.infrastructure.services.actors.RealTimeUserTracker.*
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Seconds, Span}

@@ -1,22 +1,5 @@
 package io.github.positionpal.location.infrastructure
 
-object GeoUtils:
-  import io.github.positionpal.location.domain.GPSLocation
-
-  val bolognaCampus: GPSLocation = GPSLocation(44.487912, 11.32885)
-  val imolaCampus: GPSLocation = GPSLocation(44.352962, 11.711285)
-  val forliCampus: GPSLocation = GPSLocation(44.219119, 12.042589)
-  val cesenaCampus: GPSLocation = GPSLocation(44.1476299926484, 12.2357184467018)
-end GeoUtils
-
-object TimeUtils:
-  import java.time.Instant
-
-  def now: Instant = Instant.now()
-  def inTheFuture: Instant = Instant.parse("2100-12-31T23:59:59Z")
-  def inThePast: Instant = Instant.parse("2000-01-01T00:00:00Z")
-end TimeUtils
-
 class WebSocketClient:
 
   import akka.http.scaladsl.Http
@@ -55,5 +38,4 @@ class WebSocketClient:
   def shutdown(): Unit =
     Http().shutdownAllConnectionPools()
     actorSystem.terminate()
-
 end WebSocketClient

@@ -20,6 +20,7 @@ dependencies {
         testImplementation(akka.stream.testkit)
         testImplementation(akka.actor.testkit)
         testImplementation(akka.persistence.testkit)
+        testImplementation(testFixtures(project(":domain")))
     }
 }
 
