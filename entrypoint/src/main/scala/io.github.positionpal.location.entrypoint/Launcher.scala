@@ -15,11 +15,11 @@ import io.github.positionpal.location.infrastructure.services.projections.UserSe
 import io.github.positionpal.location.infrastructure.utils.AkkaUtils
 import io.github.positionpal.location.messages.groups.RabbitMQGroupsEventConsumer
 import io.github.positionpal.location.messages.{MessageBrokerConnectionFactory, RabbitMQ}
+import io.github.positionpal.location.presentation.proto.UserSessionServiceFs2Grpc
 import io.github.positionpal.location.storage.CassandraConnectionFactory
 import io.github.positionpal.location.storage.groups.CassandraUserGroupsStore
-import io.github.positionpal.location.ws.HttpService
-import io.github.positionpal.location.presentation.proto.UserSessionServiceFs2Grpc
 import io.github.positionpal.location.storage.sessions.CassandraUserSessionStore
+import io.github.positionpal.location.ws.HttpService
 
 object Launcher extends IOApp.Simple:
 
@@ -32,7 +32,8 @@ object Launcher extends IOApp.Simple:
     rabbitMQConfig <- Resource.eval:
       validatedRabbitMQConfig match
         case Validated.Valid(config) => IO.pure(config)
-        case Validated.Invalid(errors) => IO.raiseError(new Exception(errors.map(_.message).toNonEmptyList.toList.mkString(", ")))
+        case Validated.Invalid(errors) =>
+          IO.raiseError(new Exception(errors.map(_.message).toNonEmptyList.toList.mkString(", ")))
     rabbitMQConnection <- MessageBrokerConnectionFactory.ofRabbitMQ[IO](rabbitMQConfig)
     cassandraConnection <- Resource.pure(CassandraConnectionFactory[IO](actorSystem).get)
     userGroupsStore <- Resource.eval(CassandraUserGroupsStore[IO](cassandraConnection))
@@ -40,16 +41,16 @@ object Launcher extends IOApp.Simple:
     userSessionsStore <- Resource.eval(CassandraUserSessionStore[IO](cassandraConnection))
     _ <- Resource.eval(IO(UserSessionProjection.init(actorSystem, userSessionsStore)))
     validatedGrpcConfiguration <- Resource.eval(GrpcServer.Configuration[IO](50052))
-    sessionService <- Resource.eval(IO(GrpcUserSessionService[IO](BasicUsersSessionService[IO](userGroupsService, userSessionsStore))))
+    sessionService <- Resource
+      .eval(IO(GrpcUserSessionService[IO](BasicUsersSessionService[IO](userGroupsService, userSessionsStore))))
     _ <- Resource.eval:
       (validatedGrpcConfiguration match
         case Validated.Valid(config) =>
           UserSessionServiceFs2Grpc.bindServiceResource[IO](sessionService)
-            .flatMap(s => GrpcServer.start[IO](config, Set(s)))
-            .evalMap(s => IO(s.start())).useForever
+            .flatMap(s => GrpcServer.start[IO](config, Set(s))).evalMap(s => IO(s.start())).useForever
         case Validated.Invalid(errors) =>
           IO.raiseError(new Exception(errors.map(_.message).toNonEmptyList.toList.mkString(", ")))
-        ).start
+      ).start
     _ <- Resource.eval(RabbitMQGroupsEventConsumer[IO](userGroupsService).start(rabbitMQConnection))
   yield ()
 

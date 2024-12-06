@@ -58,10 +58,10 @@ class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFact
     def grpcServerFrom(service: GrpcUserSessionService[IO]): IO[Nothing] =
       grpcLocalConfiguration.flatMap:
         case Valid(c) =>
-          proto.UserSessionServiceFs2Grpc.bindServiceResource[IO](service).flatMap(s => GrpcServer.start[IO](c, Set(s)))
+          UserSessionServiceFs2Grpc.bindServiceResource[IO](service).flatMap(s => GrpcServer.start[IO](c, Set(s)))
             .evalMap(s => IO(s.start())).useForever
         case Invalid(e) => IO.raiseError(new RuntimeException(e.toString))
     val managedChannelRes: Resource[IO, UserSessionServiceFs2Grpc[IO, Metadata]] =
       NettyChannelBuilder.forAddress("127.0.0.1", port).usePlaintext().resource[IO]
-        .flatMap(ch => proto.UserSessionServiceFs2Grpc.stubResource[IO](ch))
+        .flatMap(ch => UserSessionServiceFs2Grpc.stubResource[IO](ch))
   end Utils
