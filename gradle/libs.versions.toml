@@ -3,6 +3,7 @@ akka = "2.9.7"
 akkaprojection = "1.5.9"
 borer = "1.15.0"
 circe = "0.14.10"
+fs2 = "3.11.0"
 fs2-grpc = "2.7.21"
 grpc = "1.69.0"
 http4s = "1.0.0-M44"
@@ -41,7 +42,8 @@ circe-generic = { module = "io.circe:circe-generic_3", version.ref = "circe" }
 circe-parser = { module = "io.circe:circe-parser_3", version.ref = "circe" }
 circe-named-codec = "dev.hnaderi:named-codec-circe_3:0.3.0"
 cucumber = "io.cucumber:cucumber-scala_3:8.25.1"
-fs2-core = "co.fs2:fs2-core_3:3.11.0"
+fs2-core = { module = "co.fs2:fs2-core_3", version.ref = "fs2" }
+fs2-io = { module = "co.fs2:fs2-io_3", version.ref = "fs2" }
 fs2-grpc-runtime = { module = "org.typelevel:fs2-grpc-runtime_3", version.ref = "fs2-grpc" }
 grpc-core = { module = "io.grpc:grpc-core", version.ref = "grpc" }
 grpc-netty-shaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "grpc" }
@@ -77,6 +79,7 @@ scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "
 [bundles]
 borer = [ "borer-core", "borer-derivation" ]
 cats = [ "cats-core", "cats-effect", "cats-mtl" ]
+fs2 = [ "fs2-core", "fs2-io" ]
 circe = [ "circe-core", "circe-generic", "circe-parser" ]
 http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-circe" ]
 pureconfig = [ "pureconfig-core", "pureconfig-cats-effect" ]
@@ -94,6 +97,8 @@ scala-testing = [
 cucumber-jvm = "se.thinkcode.cucumber-runner:0.0.11"
 git-sensitive-semantic-versioning = "org.danilopianini.git-sensitive-semantic-versioning:3.1.7"
 gradle-docker-compose = "com.avast.gradle.docker-compose:0.17.12"
+allure = "io.qameta.allure:2.12.0"
+cucumber-runner = "se.thinkcode.cucumber-runner:0.0.11"
 protobuf = "com.google.protobuf:0.9.4"
 scala-extras = "io.github.tassiluca.gradle-scala-extras:3.1.1"
 shadowJar = "com.github.johnrengelman.shadow:8.1.1"

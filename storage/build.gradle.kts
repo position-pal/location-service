@@ -7,7 +7,7 @@ dependencies {
     api(project(":application"))
     with(libs) {
         implementation(akka.cluster.typed)
-        implementation(akka.persistence.cassandra)
+        api(akka.persistence.cassandra)
         implementation(akka.persistence.typed)
         implementation(akka.persistence.query)
         implementation(logback.classic)
