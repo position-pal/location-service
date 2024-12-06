@@ -8,7 +8,7 @@ dependencies {
     with(libs) {
         implementation(akka.actor.typed)
         setOf(akka.http, akka.stream.typed).forEach {
-            implementation(it)
+            api(it)
             testFixturesImplementation(it)
         }
     }

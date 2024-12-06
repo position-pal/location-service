@@ -2,8 +2,8 @@ dependencies {
     api(project(":presentation"))
     with(libs) {
         implementation(bundles.http4s)
-        implementation(akka.cluster.typed)
-        implementation(akka.cluster.sharding.typed)
+        api(akka.cluster.typed)
+        api(akka.cluster.sharding.typed)
         implementation(akka.persistence.typed)
         implementation(akka.persistence.cassandra)
         implementation(akka.persistence.query)

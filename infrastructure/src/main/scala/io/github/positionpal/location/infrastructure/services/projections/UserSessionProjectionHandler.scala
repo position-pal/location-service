@@ -23,7 +23,7 @@ import io.github.positionpal.location.infrastructure.services.actors.RealTimeUse
 /** A projection that listens to the events emitted by the [[RealTimeUserTracker]]
   * actors and updates the user's session state, implementing the CQRS pattern.
   */
-class UserSessionProjection:
+object UserSessionProjection:
 
   /** Initializes the projection for the sharded event sourced [[RealTimeUserTracker]] actor
     * deployed on the given [[system]] using as storage the provided [[UserSessionWriter]].
@@ -73,7 +73,6 @@ class UserSessionProjectionHandler[T](
           case e: SampledLocation => storage.update(Snapshot(e.user, state, Some(e)))
           case e: RoutingStarted => storage.update(Snapshot(e.user, state, Some(e)))
           case e: SOSAlertTriggered => storage.update(Snapshot(e.user, state, Some(e)))
-          case e: (SOSAlertStopped | WentOffline | RoutingStopped) =>
-            storage.update(Snapshot(e.user, state, None))
+          case e: (SOSAlertStopped | WentOffline | RoutingStopped) => storage.update(Snapshot(e.user, state, None))
         operation.map(_ => Done).unsafeToFuture()
       case _ => Future.successful(Done)

@@ -11,3 +11,5 @@ object ScopeFunctions:
 
     /** @return the result of applying the given function [[f]] to `this`. */
     inline def let[T](f: A => T): T = f(a)
+
+  inline def withContext[A, T](ctx: A)(f: A => T): T = f(ctx)

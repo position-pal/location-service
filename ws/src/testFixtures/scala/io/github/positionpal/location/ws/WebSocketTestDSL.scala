@@ -1,5 +1,7 @@
 package io.github.positionpal.location.ws
 
+import java.time.Instant
+
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
@@ -8,7 +10,6 @@ import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.scaladsl.Sink
 import io.bullet.borer.Json
 import io.github.positionpal.entities.{GroupId, UserId}
-import io.github.positionpal.location.domain.TimeUtils.*
 import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, GPSLocation, SampledLocation}
 import io.github.positionpal.location.presentation.ModelCodecs
 
@@ -17,8 +18,7 @@ trait WebSocketTestDSL:
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def sample(userId: UserId, location: GPSLocation): SampledLocation =
-    SampledLocation(now, userId, location)
+  def sample(userId: UserId, location: GPSLocation): SampledLocation = SampledLocation(Instant.now, userId, location)
 
   case class WebSocketTestConfig(baseEndpoint: String, connectionTimeout: FiniteDuration)
 

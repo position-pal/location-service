@@ -6,7 +6,7 @@ import Utils.onWindows
 dependencies {
     api(project(":presentation"))
     implementation(libs.circe.named.codec)
-    implementation(libs.lepus.client)
+    api(libs.lepus.client)
     implementation(libs.lepus.std)
     implementation(libs.lepus.circe)
     testImplementation(libs.scalamock.cats)
