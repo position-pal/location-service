@@ -37,7 +37,7 @@ object ProtoConversions:
 
   given sessionToProto: Conversion[Session, proto.Session] = s =>
     proto.Session(
-      Some(s.userId),
+      Some(s.scope.user),
       s.userState,
       s.lastSampledLocation.map(sampledLocationToProto(_)),
       s.tracking.map(trackingToProto(_)),

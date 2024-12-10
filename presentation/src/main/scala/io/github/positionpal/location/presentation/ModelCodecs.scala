@@ -7,7 +7,7 @@ import scala.Option.empty
 import cats.implicits.catsSyntaxTuple4Semigroupal
 import io.bullet.borer.derivation.MapBasedCodecs.{deriveAllCodecs, deriveCodec}
 import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
-import io.github.positionpal.entities.UserId
+import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
 
 /** Provides codecs for the domain model and application services. */
@@ -16,6 +16,10 @@ trait ModelCodecs:
   given instantsCodec: Codec[Instant] = Codec.bimap[String, Instant](_.toString, Instant.parse)
 
   given userIdCodec: Codec[UserId] = Codec.bimap[String, UserId](_.username(), UserId.create)
+
+  given groupIdCodec: Codec[GroupId] = Codec.bimap[String, GroupId](_.value(), GroupId.create)
+
+  given scopeCodec: Codec[Scope] = deriveCodec[Scope]
 
   given userStateCodec: Codec[UserState] = deriveCodec[UserState]
 
@@ -65,7 +69,7 @@ trait ModelCodecs:
 
   given sessionCodec: Codec[Session] = Codec[Session](
     Encoder[Session]: (writer, session) =>
-      writer.writeMapOpen(4).writeString("userId").write(session.userId).writeString("state").write(session.userState)
+      writer.writeMapOpen(4).writeString("scope").write(session.scope).writeString("state").write(session.userState)
         .writeString("lastSampledLocation").write(session.lastSampledLocation)
       if session.tracking.exists(_.isMonitorable) then
         writer.writeString("monitorableTracking").write(session.tracking.map(_.asMonitorable))
@@ -76,14 +80,14 @@ trait ModelCodecs:
       val unbounded = reader.readMapOpen(4)
       val fields = (0 until 4).foldLeft(
         (
-          empty[UserId],
+          empty[Scope],
           empty[UserState],
           empty[Option[SampledLocation]],
           empty[Option[Tracking | MonitorableTracking]],
         ),
       ): (d, _) =>
         reader.readString() match
-          case "userId" => d.copy(_1 = Some(reader.read[UserId]()))
+          case "scope" => d.copy(_1 = Some(reader.read[Scope]()))
           case "state" => d.copy(_2 = Some(reader.read[UserState]()))
           case "lastSampledLocation" => d.copy(_3 = Some(reader.read[Option[SampledLocation]]()))
           case "monitorableTracking" => d.copy(_4 = Some(reader.read[Option[MonitorableTracking]]()))
