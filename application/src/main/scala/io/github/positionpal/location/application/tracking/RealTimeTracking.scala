@@ -1,7 +1,5 @@
-package io.github.positionpal.location.application.services
+package io.github.positionpal.location.application.tracking
 
-import io.github.positionpal.location
-import io.github.positionpal.location.application.services
 import io.github.positionpal.location.domain.DrivingEvent
 
 trait RealTimeTracking:
@@ -16,7 +14,7 @@ trait RealTimeTracking:
   trait Service[F[_], G]:
 
     /** Handle the [[event]]. */
-    def handle(event: DrivingEvent): F[Unit]
+    def handle(resource: G)(event: DrivingEvent): F[Unit]
 
     /** Add an observer for the given [[resource]]. */
     def addObserverFor(resource: G)(observer: OutcomeObserver): F[Unit]
