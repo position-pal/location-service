@@ -3,8 +3,9 @@ package io.github.positionpal.location.presentation
 import java.time.Instant
 
 import io.bullet.borer.Cbor
-import io.github.positionpal.entities.UserId
+import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.domain.GeoUtils.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -28,10 +29,11 @@ class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
     deserialized shouldBe session
 
 private object ModelCodecsTest:
-  val user: UserId = UserId.create("test-user")
-  val route: Route = SampledLocation(Instant.now(), user, GPSLocation(44.139, 12.243)) ::
-    SampledLocation(Instant.now(), user, GPSLocation(44.140, 12.244)) :: Nil
+  val user: UserId = UserId.create("luke")
+  val group: GroupId = GroupId.create("astro")
+  val route: Route = SampledLocation(Instant.now(), user, bolognaCampus) ::
+    SampledLocation(Instant.now(), user, forliCampus) :: Nil
   val tracking: Tracking = Tracking(route)
   val monitorableTracking: MonitorableTracking =
-    Tracking.withMonitoring(RoutingMode.Driving, GPSLocation(44.141, 12.245), Instant.now(), route)
-  val session: Session = Session.from(user, UserState.Active, None, Some(monitorableTracking))
+    Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, Instant.now(), route)
+  val session: Session = Session.from(group, user, UserState.Active, None, Some(monitorableTracking))
