@@ -22,6 +22,7 @@ dependencies {
         api(scalapb.runtime)
         api(scalapb.runtime.grpc)
     }
+    testImplementation(testFixtures(project(":domain")))
 }
 
 protobuf {
