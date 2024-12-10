@@ -2,6 +2,7 @@ package io.github.positionpal.location.application.reactions
 
 import scala.util.Right
 
+import io.github.positionpal.entities.NotificationMessage
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -22,24 +23,27 @@ class EventReactionsTest extends AnyFunSpec with Matchers:
 
   describe("`TrackingEventReaction`s"):
     it("should be able to be composed"):
+      val notificationMessage = NotificationMessage.create("Test", "A simple test")
       val reaction1 = on((_, _) => IO(Right(Continue)))
-      val reaction2 = on((_, _) => IO(Left(Alert("Test"))))
+      val reaction2 = on((_, _) => IO(Left(Alert(notificationMessage))))
       val composed = reaction1 >>> reaction2
-      composed(tracking, event).unsafeRunSync() shouldBe Left(Alert("Test"))
+      composed(tracking, event).unsafeRunSync() shouldBe Left(Alert(notificationMessage))
 
     it("should use short circuit evaluation"):
       var sentinels = List[String]()
       def updateSentinels(s: String): Unit = sentinels = sentinels :+ s
-      val reaction1 = on((_, _) => IO { updateSentinels("reaction1"); Left(Alert("Test")) })
+      val notificationMessage = NotificationMessage.create("Test", "A simple test")
+      val reaction1 = on((_, _) => IO { updateSentinels("reaction1"); Left(Alert(notificationMessage)) })
       val reaction2 = on((_, _) => IO { updateSentinels("reaction2"); Right(Continue) })
       val composed = reaction1 >>> reaction2
-      composed(tracking, event).unsafeRunSync() shouldBe Left(Alert("Test"))
+      composed(tracking, event).unsafeRunSync() shouldBe Left(Alert(notificationMessage))
       sentinels shouldBe List("reaction1")
 
     it("should be able to be filtered"):
+      val notificationMessage = NotificationMessage.create("Test", "A simple test")
       val reaction1 = on((_, _) => IO(Right(Continue)))
-      val reaction2 = on((_, _) => IO(Left(Alert("Test"))))
+      val reaction2 = on((_, _) => IO(Left(Alert(notificationMessage))))
       val composed1 = reaction1 >>> reaction2.when((_, _) => false)(Right(Continue))
       composed1(tracking, event).unsafeRunSync() shouldBe Right(Continue)
       val composed2 = reaction1 >>> reaction2.when((_, _) => true)(Right(Continue))
-      composed2(tracking, event).unsafeRunSync() shouldBe Left(Alert("Test"))
+      composed2(tracking, event).unsafeRunSync() shouldBe Left(Alert(notificationMessage))
