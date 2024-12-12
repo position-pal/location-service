@@ -1,3 +1,21 @@
+## [0.7.1](https://github.com/position-pal/location-service/compare/0.7.0...0.7.1) (2024-12-12)
+
+### Dependency updates
+
+* **core-deps:** update dependency org.scala-lang:scala3-library_3 to v3.6.2 ([#112](https://github.com/position-pal/location-service/issues/112)) ([4756fe4](https://github.com/position-pal/location-service/commit/4756fe4890cad1688f41020d9c56502fd75add96))
+* **deps:** pin rabbitmq docker tag to 5c3ead8 ([#100](https://github.com/position-pal/location-service/issues/100)) ([938fcd3](https://github.com/position-pal/location-service/commit/938fcd3cc19d5740ba754b15956f7a5f49ab4da9))
+* **deps:** update borer to v1.15.0 ([#108](https://github.com/position-pal/location-service/issues/108)) ([7a8074e](https://github.com/position-pal/location-service/commit/7a8074e26bb8c0ce8d4b15ac6fc014fa78319a42))
+* **deps:** update dependency com.google.protobuf:protoc to v4.29.0 ([#102](https://github.com/position-pal/location-service/issues/102)) ([7684c10](https://github.com/position-pal/location-service/commit/7684c10207b452450b9740e06b9f398496ddf616))
+* **deps:** update dependency com.google.protobuf:protoc to v4.29.1 ([#106](https://github.com/position-pal/location-service/issues/106)) ([c0e18ea](https://github.com/position-pal/location-service/commit/c0e18eaa9c2c30bfb966c2fd8d454ae535755e78))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.116 ([#110](https://github.com/position-pal/location-service/issues/110)) ([8bb109a](https://github.com/position-pal/location-service/commit/8bb109a5a47b0a96cb7ba106bfca9c788d8318e6))
+* **deps:** update eclipse-temurin:21 docker digest to 30cda46 ([#104](https://github.com/position-pal/location-service/issues/104)) ([6c336ff](https://github.com/position-pal/location-service/commit/6c336ff1197e611796f9fc5113433aaee068f633))
+* **deps:** update grpc-java monorepo to v1.68.2 ([#101](https://github.com/position-pal/location-service/issues/101)) ([de87900](https://github.com/position-pal/location-service/commit/de879009f649e26b666e6e0c8d233c054c5ba20d))
+* **deps:** update grpc-java monorepo to v1.69.0 ([#113](https://github.com/position-pal/location-service/issues/113)) ([f222234](https://github.com/position-pal/location-service/commit/f222234f4f0613ac6fc4b0270a89481bf054c818))
+* **deps:** update http4s to v1.0.0-m44 ([#109](https://github.com/position-pal/location-service/issues/109)) ([c3250ef](https://github.com/position-pal/location-service/commit/c3250ef4fb795294becd121b0961792145ad7878))
+* **deps:** update node.js to 22.12 ([#105](https://github.com/position-pal/location-service/issues/105)) ([6d1743c](https://github.com/position-pal/location-service/commit/6d1743c9f14f4c893bff56efd8d71644647cd066))
+* **deps:** update rabbitmq docker tag to v4 ([#103](https://github.com/position-pal/location-service/issues/103)) ([c9e86f7](https://github.com/position-pal/location-service/commit/c9e86f7e3ac0f050dae5469f20640142fdaba80a))
+* **deps:** update rabbitmq:4-management docker digest to 8340b65 ([#107](https://github.com/position-pal/location-service/issues/107)) ([2e182de](https://github.com/position-pal/location-service/commit/2e182de5798dee3452e9ef79bb374cf3ad5c5db6))
+
 ## [0.7.0](https://github.com/position-pal/location-service/compare/0.6.1...0.7.0) (2024-12-02)
 
 ### Features
