@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.RouteResult.Complete
 import cats.effect.IO
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
+import io.github.positionpal.location.tracking.services.ActorBasedRealTimeTracking
 import io.github.positionpal.location.presentation.ModelCodecs
 
 /** Web socket port service implementation for real time tracking. */

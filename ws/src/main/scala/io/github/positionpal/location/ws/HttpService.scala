@@ -7,7 +7,7 @@ object HttpService:
   import cats.effect.{Async, IO, Resource}
   import cats.implicits.toFunctorOps
   import io.github.positionpal.entities.UserId
-  import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
+  import io.github.positionpal.location.tracking.services.ActorBasedRealTimeTracking
 
   def start[F[_]: Async](port: Int)(service: ActorBasedRealTimeTracking.Service[IO, UserId])(using
       actorSystem: ActorSystem[?],

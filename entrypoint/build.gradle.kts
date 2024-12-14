@@ -10,7 +10,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":infrastructure"))
+    implementation(project(":tracking-actors"))
     implementation(project(":ws"))
     implementation(project(":grpc"))
     implementation(project(":storage"))
