@@ -10,7 +10,7 @@ include(
     "domain",
     "application",
     "presentation",
-    "infrastructure",
+    "tracking-actors",
     "storage",
     "ws",
     "messages",
