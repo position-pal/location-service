@@ -3,19 +3,10 @@ plugins {
     id("com.gradle.develocity") version "3.18.2"
 }
 
-rootProject.name = "location-service"
+rootProject.name = "scala-template"
 
 include(
-    "commons",
-    "domain",
-    "application",
-    "presentation",
-    "infrastructure",
-    "storage",
-    "ws",
-    "messages",
-    "grpc",
-    "entrypoint",
+    "core",
 )
 
 develocity {
