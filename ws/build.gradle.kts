@@ -4,7 +4,7 @@ import Utils.onMac
 import Utils.onWindows
 
 dependencies {
-    api(project(":infrastructure"))
+    api(project(":tracking-actors"))
     with(libs) {
         implementation(akka.actor.typed)
         setOf(akka.http, akka.stream.typed).forEach {

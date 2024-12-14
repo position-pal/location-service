@@ -12,8 +12,8 @@ import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.UserState.*
-import io.github.positionpal.location.infrastructure.services.ActorBasedRealTimeTracking
-import io.github.positionpal.location.infrastructure.utils.AkkaUtils
+import io.github.positionpal.location.tracking.services.ActorBasedRealTimeTracking
+import io.github.positionpal.location.tracking.utils.AkkaUtils
 import io.github.positionpal.location.presentation.ModelCodecs
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}

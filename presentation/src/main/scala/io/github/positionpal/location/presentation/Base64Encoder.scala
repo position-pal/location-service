@@ -1,21 +1,18 @@
 package io.github.positionpal.location.presentation
 
-import io.github.positionpal.entities.{GroupId, UserId}
-
 import java.util.Base64
 
-object Base64Encoder:
-  extension (s: String)
-    def encode: String = Base64.getEncoder.encodeToString(s.getBytes)
+import io.github.positionpal.entities.{GroupId, UserId}
 
-  extension (s: String)
-    def decode: String = new String(Base64.getDecoder.decode(s))
+object Base64Encoder:
+  extension (s: String) def encode: String = Base64.getEncoder.encodeToString(s.getBytes)
+
+  extension (s: String) def decode: String = new String(Base64.getDecoder.decode(s))
 
 object ScopeUtils:
   import io.github.positionpal.location.domain.Scope
 
-  extension (scope: Scope)
-    def concatenated: String = s"${scope.group.value()}-${scope.user.username()}"
+  extension (scope: Scope) def concatenated: String = s"${scope.group.value()}-${scope.user.username()}"
 
   extension (s: String)
     def splitted: Scope =
