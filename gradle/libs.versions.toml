@@ -1,96 +1,19 @@
 [versions]
-akka = "2.9.7"
-akkaprojection = "1.5.9"
-borer = "1.15.0"
-circe = "0.14.10"
-fs2-grpc = "2.7.21"
-grpc = "1.69.0"
-http4s = "1.0.0-M44"
-junit = "1.11.4"
-kernel = "0.10.0"
-lepus = "0.5.4"
-pureconfig = "0.17.8"
 scala = "3.6.2"
-scalamock = "0.6.6"
-scalapb = "1.0.0-alpha.1"
 scalatest = "3.3.0-SNAP4"
+junit = "1.11.4"
 
 [libraries]
-akka-actor = { module = "com.typesafe.akka:akka-actor_3", version.ref = "akka" }
-akka-actor-testkit = { module = "com.typesafe.akka:akka-actor-testkit-typed_3", version.ref = "akka" }
-akka-cluster-typed = { module = "com.typesafe.akka:akka-cluster-typed_3", version.ref = "akka" }
-akka-cluster-sharding-typed = { module = "com.typesafe.akka:akka-cluster-sharding-typed_3", version.ref = "akka" }
-akka-http = "com.typesafe.akka:akka-http_3:10.6.3"
-akka-persistence-cassandra = "com.typesafe.akka:akka-persistence-cassandra_3:1.2.1"
-akka-persistence-query = { module = "com.typesafe.akka:akka-persistence-query_3", version.ref = "akka" }
-akka-persistence-typed = { module = "com.typesafe.akka:akka-persistence-typed_3", version.ref = "akka" }
-akka-persistence-testkit = { module = "com.typesafe.akka:akka-persistence-testkit_3", version.ref = "akka" }
-akka-projection-cassandra = { module = "com.lightbend.akka:akka-projection-cassandra_3", version.ref = "akkaprojection" }
-akka-projection-eventsourced = { module = "com.lightbend.akka:akka-projection-eventsourced_3", version.ref = "akkaprojection" }
-akka-projection-testkit = { module = "com.lightbend.akka:akka-projection-testkit_3", version.ref = "akkaprojection" }
-akka-stream = { module = "com.typesafe.akka:akka-stream_3", version.ref = "akka" }
-akka-stream-testkit = { module = "com.typesafe.akka:akka-stream-testkit_3", version.ref = "akka" }
-borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
-borer-derivation = { module = "io.bullet:borer-derivation_3", version.ref = "borer" }
-cats-core = "org.typelevel:cats-core_3:2.12.0"
-cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
-cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
-circe-core = { module = "io.circe:circe-core_3", version.ref = "circe" }
-circe-generic = { module = "io.circe:circe-generic_3", version.ref = "circe" }
-circe-parser = { module = "io.circe:circe-parser_3", version.ref = "circe" }
-circe-named-codec = "dev.hnaderi:named-codec-circe_3:0.2.1"
-cucumber = "io.cucumber:cucumber-scala_3:8.25.1"
-fs2-core = "co.fs2:fs2-core_3:3.11.0"
-fs2-grpc-runtime = { module = "org.typelevel:fs2-grpc-runtime_3", version.ref = "fs2-grpc" }
-grpc-core = { module = "io.grpc:grpc-core", version.ref = "grpc" }
-grpc-netty-shaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "grpc" }
-grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
-grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
-http4s-circe = { module = "org.http4s:http4s-circe_3", version.ref = "http4s" }
-http4s-dsl = { module = "org.http4s:http4s-dsl_3", version.ref = "http4s" }
-http4s-ember-client = { module = "org.http4s:http4s-ember-client_3", version.ref = "http4s" }
-http4s-ember-server = { module = "org.http4s:http4s-ember-server_3", version.ref = "http4s" }
-junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
-lepus-client = { module = "dev.hnaderi:lepus-client_3", version.ref = "lepus" }
-lepus-std = { module = "dev.hnaderi:lepus-std_3", version.ref = "lepus" }
-lepus-circe = { module = "dev.hnaderi:lepus-circe_3", version.ref = "lepus" }
-logback-classic = "ch.qos.logback:logback-classic:1.5.12"
-log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
-positionpal-kernel-domain = { module = "io.github.positionpal:kernel-domain", version.ref = "kernel" }
-positionpal-kernel-presentation = { module = "io.github.positionpal:kernel-presentation", version.ref = "kernel" }
-protobuf-protoc = "com.google.protobuf:protoc:4.29.1"
-protoc-gen-fs2 = { module = "org.typelevel:protoc-gen-fs2-grpc", version.ref = "fs2-grpc" }
-pureconfig-cats-effect = { module = "com.github.pureconfig:pureconfig-cats-effect_3", version.ref = "pureconfig" }
-pureconfig-core = { module = "com.github.pureconfig:pureconfig-core_3", version.ref = "pureconfig" }
 scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
-scalapb-protoc-gen = { module = "com.thesamet.scalapb:protoc-gen-scala", version.ref = "scalapb" }
-scalapb-runtime = { module = "com.thesamet.scalapb:scalapb-runtime_3", version.ref = "scalapb" }
-scalapb-runtime-grpc = { module = "com.thesamet.scalapb:scalapb-runtime-grpc_3", version.ref = "scalapb" }
 scalatest = { module = "org.scalatest:scalatest_3", version.ref = "scalatest" }
 scalatestplus-junit5 = "org.scalatestplus:junit-5-10_3:3.2.19.1"
-scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
-scalamock-cats = { module = "eu.monniot:scala3mock-cats_3", version.ref = "scalamock" }
-scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
+junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 
 [bundles]
-borer = [ "borer-core", "borer-derivation" ]
-cats = [ "cats-core", "cats-effect", "cats-mtl" ]
-circe = [ "circe-core", "circe-generic", "circe-parser" ]
-http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-circe" ]
-pureconfig = [ "pureconfig-core", "pureconfig-cats-effect" ]
-scala-testing = [
-    "scalatest",
-    "scalatestplus-junit5",
-    "cucumber",
-    "junit-platform-engine",
-    "junit-platform-launcher",
-    "scalamock",
-    "scalamock-test"
-]
+scala-testing = [ "scalatest", "junit-platform-engine", "junit-platform-launcher", "scalatestplus-junit5" ]
 
 [plugins]
-cucumber-jvm = "se.thinkcode.cucumber-runner:0.0.11"
-gradle-docker-compose = "com.avast.gradle.docker-compose:0.17.12"
-protobuf = "com.google.protobuf:0.9.4"
 scala-extras = "io.github.tassiluca.gradle-scala-extras:3.1.1"
+git-sensitive-semantic-versioning = "org.danilopianini.git-sensitive-semantic-versioning:3.1.7"
+shadowJar = "com.github.johnrengelman.shadow:8.1.1"
