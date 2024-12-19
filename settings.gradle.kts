@@ -1,21 +1,12 @@
 plugins {
-    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.0.17"
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.0.15"
     id("com.gradle.develocity") version "3.19"
 }
 
-rootProject.name = "location-service"
+rootProject.name = "scala-template"
 
 include(
-    "commons",
-    "domain",
-    "application",
-    "presentation",
-    "infrastructure",
-    "storage",
-    "ws",
-    "messages",
-    "grpc",
-    "entrypoint",
+    "core",
 )
 
 develocity {
