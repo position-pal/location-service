@@ -50,9 +50,12 @@ trait ModelCodecs:
 
   given monitorableTrackingCodec: Codec[MonitorableTracking] = Codec[MonitorableTracking](
     Encoder[MonitorableTracking]: (writer, tracking) =>
-      writer.writeMapOpen(4).writeString("route").write(tracking.route).writeString("mode").write(tracking.mode)
-        .writeString("destination").write(tracking.destination).writeString("expectedArrival")
-        .write(tracking.expectedArrival).writeMapClose(),
+      writer.writeMapOpen(4)
+        .writeString("route").write(tracking.route)
+        .writeString("mode").write(tracking.mode)
+        .writeString("destination").write(tracking.destination)
+        .writeString("expectedArrival").write(tracking.expectedArrival)
+        .writeMapClose(),
     Decoder[MonitorableTracking]: reader =>
       val unbounded = reader.readMapOpen(4)
       val fields = (0 until 4).foldLeft((empty[RoutingMode], empty[GPSLocation], empty[Instant], empty[Route])):
@@ -69,7 +72,9 @@ trait ModelCodecs:
 
   given sessionCodec: Codec[Session] = Codec[Session](
     Encoder[Session]: (writer, session) =>
-      writer.writeMapOpen(4).writeString("scope").write(session.scope).writeString("state").write(session.userState)
+      writer.writeMapOpen(4)
+        .writeString("scope").write(session.scope)
+        .writeString("state").write(session.userState)
         .writeString("lastSampledLocation").write(session.lastSampledLocation)
       if session.tracking.exists(_.isMonitorable) then
         writer.writeString("monitorableTracking").write(session.tracking.map(_.asMonitorable))

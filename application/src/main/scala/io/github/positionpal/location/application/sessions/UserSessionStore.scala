@@ -1,7 +1,6 @@
 package io.github.positionpal.location.application.sessions
 
-import io.github.positionpal.entities.UserId
-import io.github.positionpal.location.domain.Session
+import io.github.positionpal.location.domain.{Scope, Session}
 
 /** The reading model projection for [[Session]]s. It encapsulates the read-side
   * operations for querying and retrieving [[Session]]s from the underlying store.
@@ -10,7 +9,7 @@ import io.github.positionpal.location.domain.Session
 trait UserSessionReader[F[_]]:
 
   /** @return the current [[Session]] of the given [[userId]] if it exists. */
-  def sessionOf(userId: UserId): F[Option[Session]]
+  def sessionOf(scope: Scope): F[Option[Session]]
 
 /** The writing model projection for [[Session]]s. It encapsulates the write-side
   * operations for saving [[Session]]s to the underlying store.
