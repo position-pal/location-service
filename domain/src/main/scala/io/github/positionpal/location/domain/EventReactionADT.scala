@@ -1,9 +1,8 @@
-package io.github.positionpal.location.application.reactions
+package io.github.positionpal.location.domain
 
 import scala.annotation.targetName
 
 import cats.Monad
-import io.github.positionpal.location.domain.DrivingEvent
 
 /** An abstract data type for effectful event reactions. */
 trait EventReactionADT:
