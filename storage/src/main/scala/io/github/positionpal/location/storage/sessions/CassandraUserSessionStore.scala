@@ -43,14 +43,14 @@ object CassandraUserSessionStore:
 
     given ExecutionContext = actorSystem.executionContext
 
-    override def sessionOf(userId: UserId): F[Option[Session]] = executeWithErrorHandling:
+    override def sessionOf(scope: Scope): F[Option[Session]] = executeWithErrorHandling:
       for
-        userInfoRow <- session.selectOne(getUserInfoQuery(userId))
-        userInfo <- userInfoRow.traverse(row => (row.userState, row.sampledLocationOf(userId)).pure[Future])
-        routes <- session.select(getTrackingQuery(userId))
+        userInfoRow <- session.selectOne(getUserInfoQuery(scope))
+        userInfo <- userInfoRow.traverse(row => (row.userState, row.sampledLocationOf(scope.user)).pure[Future])
+        routes <- session.select(getTrackingQuery(scope))
           .runFold(List.empty[(Instant, GPSLocation)])((acc, row) => (row.timestamp, row.location) :: acc)
-        tracking = Option.when(routes.nonEmpty)(Tracking(routes.reverse.map(SampledLocation(_, userId, _))))
-      yield userInfo.map((state, location) => Session.from(userId, state, location, tracking))
+        tracking = Option.when(routes.nonEmpty)(Tracking(routes.reverse.map(SampledLocation(_, scope.user, _))))
+      yield userInfo.map((state, location) => Session.from(scope, state, location, tracking))
 
     override def update(variation: Session.Snapshot): F[Unit] = executeWithErrorHandling:
       variation match
@@ -65,8 +65,8 @@ object CassandraUserSessionStore:
         case _ => Future.failed(InvalidSessionVariation(s"The given variation $variation is invalid"))
 
     private object Tables:
-      val userInfo = "UserInfo"
-      val userRoutes = "UserRoutes"
+      val userInfo = "ScopedUserInfo"
+      val userRoutes = "ScopedUserRoutes"
 
       extension (r: Row)
         def timestamp = r.getInstant("Timestamp")
@@ -84,34 +84,45 @@ object CassandraUserSessionStore:
     private object Queries:
       export Tables.*
 
-      def getUserInfoQuery(userId: UserId) = cql(
-        s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE UserId = ?",
-        userId.username(),
+      def getUserInfoQuery(scope: Scope) = cql(
+        s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE GroupId = ? AND UserId = ?",
+        scope.group.value(),
+        scope.user.username(),
       )
 
-      def getTrackingQuery(userId: UserId) = cql(
-        s"SELECT Timestamp, Latitude, Longitude FROM $keyspace.$userRoutes WHERE UserId = ? ORDER BY Timestamp",
-        userId.username(),
+      def getTrackingQuery(scope: Scope) = cql(
+        s"SELECT Timestamp, Latitude, Longitude FROM $keyspace.$userRoutes WHERE GroupId = ? AND UserId = ? ORDER BY Timestamp",
+        scope.group.value(),
+        scope.user.username(),
       )
 
-      def insertUserInfoQuery(userId: UserId, state: UserState, position: GPSLocation, timestamp: Instant) = cql(
-        s"INSERT INTO $keyspace.$userInfo(UserId, Status, Latitude, Longitude, LastUpdated) VALUES (?, ?, ?, ?, ?)",
-        userId.username(),
+      def insertUserInfoQuery(scope: Scope, state: UserState, position: GPSLocation, timestamp: Instant) = cql(
+        s"INSERT INTO $keyspace.$userInfo(GroupId, UserId, Status, Latitude, Longitude, LastUpdated) VALUES (?, ?, ?, ?, ?, ?)",
+        scope.group.value(),
+        scope.user.username(),
         state.toString,
         position.latitude,
         position.longitude,
         timestamp,
       )
 
-      def updateUserInfoQuery(userId: UserId, state: UserState) =
-        cql(s"UPDATE $keyspace.$userInfo SET Status = ? WHERE UserId = ?", state.toString, userId.username())
+      def updateUserInfoQuery(scope: Scope, state: UserState) = cql(
+        s"UPDATE $keyspace.$userInfo SET Status = ? WHERE GroupId = ? AND UserId = ?",
+        state.toString,
+        scope.group.value(),
+        scope.user.username(),
+      )
 
-      def deleteUserRoutesQuery(userId: UserId) =
-        cql(s"DELETE FROM $keyspace.$userRoutes WHERE UserId = ?", userId.username())
+      def deleteUserRoutesQuery(scope: Scope) = cql(
+        s"DELETE FROM $keyspace.$userRoutes WHERE GroupId = ? AND UserId = ?",
+        scope.group.value(),
+        scope.user.username(),
+      )
 
-      def updateUserRoutesQuery(userId: UserId, position: GPSLocation, timestamp: Instant) = cql(
-        s"INSERT INTO $keyspace.$userRoutes(UserId, Latitude, Longitude, Timestamp) VALUES (?, ?, ?, ?)",
-        userId.username(),
+      def updateUserRoutesQuery(scope: Scope, position: GPSLocation, timestamp: Instant) = cql(
+        s"INSERT INTO $keyspace.$userRoutes(GroupId, UserId, Latitude, Longitude, Timestamp) VALUES (?, ?, ?, ?, ?)",
+        scope.group.value(),
+        scope.user.username(),
         position.latitude,
         position.longitude,
         timestamp,

@@ -13,6 +13,7 @@ dependencies {
         implementation(logback.classic)
         testImplementation(akka.actor.testkit)
     }
+    testImplementation(testFixtures(project(":domain")))
 }
 
 normally {

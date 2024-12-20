@@ -1,20 +1,23 @@
 USE locationservice;
 
-CREATE TABLE UserInfo (
-    UserId TEXT PRIMARY KEY,
+CREATE TABLE ScopedUserInfo (
+    GroupId TEXT,
+    UserId TEXT,
     Status TEXT,
     Latitude DOUBLE,
     Longitude DOUBLE,
-    LastUpdated TIMESTAMP
+    LastUpdated TIMESTAMP,
+    PRIMARY KEY (GroupId, UserId)
 );
 
-CREATE TABLE UserRoutes (
+CREATE TABLE ScopedUserRoutes (
+    GroupId TEXT,
     UserId TEXT,
     Timestamp TIMESTAMP,
     Latitude DOUBLE,
     Longitude DOUBLE,
-    PRIMARY KEY (UserId, Timestamp)
-) WITH CLUSTERING ORDER BY (Timestamp DESC);
+    PRIMARY KEY (GroupId, UserId, Timestamp)
+) WITH CLUSTERING ORDER BY (UserId ASC, Timestamp DESC);
 
 CREATE TABLE UserGroupsByUserId (
     UserId TEXT,

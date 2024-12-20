@@ -16,7 +16,7 @@ services:
       cassandra-db:
         condition: service_healthy
     volumes:
-      - ./infrastructure/src/main/resources/db-scripts/create-tables.cql:/create-actor-tables.cql
+      - ./tracking-actors/src/main/resources/db-scripts/create-tables.cql:/create-actor-tables.cql
       - ./storage/src/main/resources/db-scripts/create-tables.cql:/create-storage-tables.cql
     command:
       /bin/sh -c "cqlsh cassandra-db -f /create-actor-tables.cql && cqlsh cassandra-db -f /create-storage-tables.cql"

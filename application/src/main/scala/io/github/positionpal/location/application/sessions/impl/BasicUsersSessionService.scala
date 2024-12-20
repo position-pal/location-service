@@ -1,10 +1,10 @@
 package io.github.positionpal.location.application.sessions.impl
 
 import fs2.Stream
-import io.github.positionpal.entities.{GroupId, UserId}
+import io.github.positionpal.entities.GroupId
 import io.github.positionpal.location.application.groups.UserGroupsService
 import io.github.positionpal.location.application.sessions.{UserSessionReader, UsersSessionService}
-import io.github.positionpal.location.domain.Session
+import io.github.positionpal.location.domain.{Scope, Session}
 
 /** A basic implementation of the [[UsersSessionService]] that retrieves user sessions
   * based on their group membership.
@@ -20,8 +20,8 @@ class BasicUsersSessionService[F[_]](
     Stream
       .eval(userGroupsService.membersOf(groupId))
       .flatMap(members => Stream.emits(members.toSeq))
-      .evalMap(userSessionStore.sessionOf)
+      .evalMap(userId => userSessionStore.sessionOf(Scope(userId, groupId)))
       .collect { case Some(s) => s }
 
-  override def ofUser(userId: UserId): F[Option[Session]] =
-    userSessionStore.sessionOf(userId)
+  override def ofScope(scope: Scope): F[Option[Session]] =
+    userSessionStore.sessionOf(scope)
