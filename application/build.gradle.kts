@@ -5,4 +5,5 @@ dependencies {
         api(logback.classic)
         api(log4cats.slf4j)
     }
+    testImplementation(testFixtures(project(":domain")))
 }
