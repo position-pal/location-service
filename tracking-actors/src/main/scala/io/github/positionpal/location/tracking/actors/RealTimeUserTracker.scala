@@ -101,7 +101,9 @@ object RealTimeUserTracker:
     command match
       case e: ProtocolCommand => Effect.persist(e)
       case e: AliveCheck.type => aliveCheckHandler(timer)(state.session, e)
-      case e: DrivingEvent => trackingHandler(state.session, e)
+      case e: DrivingEvent =>
+        if state.session.userState == Inactive then timer.startTimerAtFixedRate(msg = AliveCheck, interval = 20.seconds)
+        trackingHandler(state.session, e)
       case _ => Effect.none
 
   import cats.effect.unsafe.implicits.global
@@ -118,7 +120,7 @@ object RealTimeUserTracker:
   private def aliveCheckHandler(timer: TimerScheduler[Command])(
     using notifier: NotificationService[IO],
   ): (Session, AliveCheck.type) => Effect[Event, ObservableSession] = (s, _) =>
-    if s.userState != Inactive && s.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(30))
+    if s.userState != Inactive && s.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(60))
     then
       timer.cancelAll()
       val event = WentOffline(s.lastSampledLocation.get.timestamp, s.lastSampledLocation.get.user)
