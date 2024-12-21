@@ -4,4 +4,5 @@ dependencies {
         api(grpc.netty.shaded)
         testImplementation(scalamock.cats)
     }
+    testImplementation(testFixtures(project(":domain")))
 }

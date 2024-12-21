@@ -14,6 +14,10 @@ object ProtoConversions:
 
   given gidToProto: Conversion[proto.GroupId, GroupId] = gid => GroupId.create(gid.value)
 
+  given scopeToProto: Conversion[Scope, proto.Scope] = s => proto.Scope(Some(s.user), Some(s.group))
+
+  given protoToScope: Conversion[proto.Scope, Scope] = s => Scope(s.getUser, s.getGroup)
+
   given stateToProto: Conversion[UserState, proto.UserState] = {
     case UserState.Active => proto.UserState.ACTIVE
     case UserState.Inactive => proto.UserState.INACTIVE
@@ -37,7 +41,7 @@ object ProtoConversions:
 
   given sessionToProto: Conversion[Session, proto.Session] = s =>
     proto.Session(
-      Some(s.scope.user),
+      Some(s.scope),
       s.userState,
       s.lastSampledLocation.map(sampledLocationToProto(_)),
       s.tracking.map(trackingToProto(_)),

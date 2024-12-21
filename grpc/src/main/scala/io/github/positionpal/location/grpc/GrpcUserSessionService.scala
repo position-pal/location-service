@@ -18,28 +18,28 @@ class GrpcUserSessionService[F[_]: Async](
     usersSessionService: UsersSessionService[F],
 ) extends proto.UserSessionServiceFs2Grpc[F, Metadata]:
 
-  override def getCurrentLocation(request: proto.UserId, ctx: Metadata): F[proto.LocationResponse] =
+  override def getCurrentLocation(request: proto.Scope, ctx: Metadata): F[proto.LocationResponse] =
     ofUser(request):
       _.lastSampledLocation match
         case Some(location) => (okResponse, Some(location.position))
         case None => (notFoundResponse("User haven't shared their location, yet."), None)
     .map((s, r) => proto.LocationResponse(s, r.map(locationToProto(_))))
 
-  override def getCurrentState(request: proto.UserId, ctx: Metadata): F[proto.UserStateResponse] =
+  override def getCurrentState(request: proto.Scope, ctx: Metadata): F[proto.UserStateResponse] =
     ofUser(request)(s => (okResponse, Some(s.state)))
       .map((s, r) => proto.UserStateResponse(s, r.getOrElse(proto.UserState.INACTIVE)))
 
-  override def getCurrentTracking(request: proto.UserId, ctx: Metadata): F[proto.TrackingResponse] =
+  override def getCurrentTracking(request: proto.Scope, ctx: Metadata): F[proto.TrackingResponse] =
     ofUser(request):
       _.tracking match
         case Some(tracking) => (okResponse, Some(tracking))
         case None => (notFoundResponse("User has no active tracking."), None)
     .map((s, r) => proto.TrackingResponse(s, r.map(trackingToProto(_))))
 
-  private def ofUser[T](uid: proto.UserId)(onSuccess: Session => (Some[proto.Status], Option[T])) =
-    usersSessionService.ofUser(uid).map:
+  private def ofUser[T](scope: proto.Scope)(onSuccess: Session => (Some[proto.Status], Option[T])) =
+    usersSessionService.ofScope(scope).map:
       case Some(s) => onSuccess(s)
-      case None => (notFoundResponse(s"No session found for user ${uid.username}"), None)
+      case None => (notFoundResponse(s"No session found for user ${scope.getUser.username}"), None)
     .handleError(e => (errorResponse(s"Error while fetching session related data: ${e.getMessage}"), None))
 
   override def getCurrentSession(request: proto.GroupId, ctx: Metadata): Stream[F, proto.SessionResponse] =
