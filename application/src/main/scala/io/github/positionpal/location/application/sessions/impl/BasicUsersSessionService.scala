@@ -17,11 +17,8 @@ class BasicUsersSessionService[F[_]](
 ) extends UsersSessionService[F]:
 
   override def ofGroup(groupId: GroupId): Stream[F, Session] =
-    Stream
-      .eval(userGroupsService.membersOf(groupId))
-      .flatMap(members => Stream.emits(members.toSeq))
-      .evalMap(userId => userSessionStore.sessionOf(Scope(userId, groupId)))
-      .collect { case Some(s) => s }
+    Stream.eval(userGroupsService.membersOf(groupId)).flatMap(members => Stream.emits(members.toSeq))
+      .evalMap(userId => userSessionStore.sessionOf(Scope(userId, groupId))).collect { case Some(s) => s }
 
   override def ofScope(scope: Scope): F[Option[Session]] =
     userSessionStore.sessionOf(scope)

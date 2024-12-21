@@ -26,7 +26,7 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
     ): F[Service[F, Scope]] =
       for
         sharding <- Async[F].delay(ClusterSharding(actorSystem))
-        _ <- Async[F].delay(sharding.init(RealTimeUserTracker(notificationService, mapsService)))
+        _ <- Async[F].delay(sharding.init(RealTimeUserTracker(using notificationService, mapsService)))
       yield ServiceImpl(actorSystem)
 
   private class ServiceImpl[F[_]: Async](actorSystem: ActorSystem[?]) extends Service[F, Scope]:

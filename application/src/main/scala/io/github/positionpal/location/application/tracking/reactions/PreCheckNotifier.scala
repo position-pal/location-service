@@ -12,15 +12,12 @@ import io.github.positionpal.location.domain.UserState.*
 /** A [[TrackingEventReaction]] performing a preliminary check on the event, possibly emitting a
   * notification if it is a noteworthy event.
   */
-object EventPreCheckNotifier:
+object PreCheckNotifier:
 
   def apply[F[_]: Async](using notifier: NotificationService[F]): EventReaction[F] =
     on[F]: (session, event) =>
-      event
-        .notify(session)
-        .map(n => Async[F].start(notifier.sendToGroup(session.scope.group, event.user, n)))
-        .map(_ => Left(()).pure[F])
-        .getOrElse(Right(Continue).pure[F])
+      event.notify(session).map(n => Async[F].start(notifier.sendToGroup(session.scope.group, event.user, n)))
+        .map(_ => Left(()).pure[F]).getOrElse(Right(Continue).pure[F])
 
   extension (event: DrivingEvent)
     private def notify(s: Session) =

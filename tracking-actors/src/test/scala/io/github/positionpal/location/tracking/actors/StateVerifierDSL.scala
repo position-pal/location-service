@@ -53,9 +53,7 @@ trait RealTimeUserTrackerVerifierDSL:
             RealTimeUserTracker(
               Scope(UserId.create("luke"), GroupId.create("astro")),
               "rtut-0",
-              ctx.notificationService,
-              ctx.mapsService,
-            ),
+            )(using ctx.notificationService, ctx.mapsService),
           )
           ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
             testKit.initialize(state)
