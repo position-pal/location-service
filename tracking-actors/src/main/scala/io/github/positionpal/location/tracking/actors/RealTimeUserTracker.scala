@@ -17,9 +17,9 @@ import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionC
 import cats.effect.IO
 import io.github.positionpal.entities.NotificationMessage
 import io.github.positionpal.location.application.notifications.NotificationService
-import io.github.positionpal.location.application.reactions.*
-import io.github.positionpal.location.application.reactions.TrackingEventReaction.*
 import io.github.positionpal.location.application.tracking.MapsService
+import io.github.positionpal.location.application.tracking.reactions.*
+import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
 import io.github.positionpal.location.domain.UserState.*
@@ -60,6 +60,7 @@ object RealTimeUserTracker:
   object StatefulDrivingEvent:
     def from(session: Session, event: DrivingEvent): StatefulDrivingEvent =
       StatefulDrivingEvent(session.userState.next(event), event)
+  end StatefulDrivingEvent
 
   case class ObservableSession(session: Session, observers: Set[Observer]) extends AkkaSerializable:
     def addObserver(observer: Observer): ObservableSession = copy(observers = observers + observer)
@@ -68,37 +69,25 @@ object RealTimeUserTracker:
       val updatedSession = session.updateWith(e)
       observers.foreach(_ ! userUpdateFrom(e, updatedSession))
       copy(session = updatedSession)
+  end ObservableSession
   object ObservableSession:
     def of(scope: Scope): ObservableSession = ObservableSession(Session.of(scope), Set.empty)
+  end ObservableSession
 
-  def apply(
-      notificationService: NotificationService[IO],
-      mapsService: MapsService[IO],
-  ): Entity[Command, ShardingEnvelope[Command]] =
-    Entity(key)(ctx =>
-      this(ctx.entityId.splitted, tags(math.abs(ctx.entityId.hashCode % tags.size)), notificationService, mapsService),
-    )
+  def apply(using NotificationService[IO], MapsService[IO]): Entity[Command, ShardingEnvelope[Command]] =
+    Entity(key)(ctx => this(ctx.entityId.splitted, tags(math.abs(ctx.entityId.hashCode % tags.size))))
 
-  def apply(
-      scope: Scope,
-      projectionTag: String,
-      notificationService: NotificationService[IO],
-      mapsService: MapsService[IO],
-  ): Behavior[Command] = Behaviors.setup: ctx =>
-    given ActorContext[Command] = ctx
-    Behaviors.withTimers: timer =>
-      ctx.log.debug("Starting RealTimeUserTracker::{}@{}", scope, Cluster(ctx.system).selfMember.address)
-      timer.startTimerAtFixedRate(AliveCheck, 10.seconds) // TODO fix
-      val persistenceId = PersistenceId(key.name, scope.concatenated)
-      EventSourcedBehavior(
-        persistenceId,
-        ObservableSession.of(scope),
-        commandHandler(timer, notificationService, mapsService),
-        eventHandler,
-      ).withTagger(_ => Set(projectionTag))
-        .snapshotWhen((_, event, _) => event == RoutingStopped, deleteEventsOnSnapshot = true)
-        .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
-        .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
+  def apply(scope: Scope, tag: String)(using NotificationService[IO], MapsService[IO]): Behavior[Command] =
+    Behaviors.setup: ctx =>
+      given ActorContext[Command] = ctx
+      Behaviors.withTimers: timer =>
+        ctx.log.debug("Starting RealTimeUserTracker::{}@{}", scope, Cluster(ctx.system).selfMember.address)
+        val persistenceId = PersistenceId(key.name, scope.concatenated)
+        EventSourcedBehavior(persistenceId, ObservableSession.of(scope), commandHandler(timer), eventHandler)
+          .withTagger(_ => Set(tag))
+          .snapshotWhen((_, event, _) => event == RoutingStopped, deleteEventsOnSnapshot = true)
+          .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
+          .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
 
   private def eventHandler: (ObservableSession, Event) => ObservableSession = (state, event) =>
     event match
@@ -106,64 +95,38 @@ object RealTimeUserTracker:
       case UnWire(o) => state.removeObserver(o)
       case StatefulDrivingEvent(_, e) => state.update(e)
 
-  private def commandHandler(
-      timer: TimerScheduler[Command],
-      notificationService: NotificationService[IO],
-      mapsService: MapsService[IO],
-  )(using ctx: ActorContext[Command]): (ObservableSession, Command) => Effect[Event, ObservableSession] =
-    (state, command) =>
-      command match
-        case e: SampledLocation => trackingHandler(notificationService, mapsService)(state.session, e)
-        case e: AliveCheck.type => aliveCheckHandler(timer)(notificationService)(state.session, e)
-        case e: (RoutingStarted | RoutingStopped | SOSAlertTriggered | SOSAlertStopped) =>
-          Effect.persist(StatefulDrivingEvent.from(state.session, e))
-        case e: ProtocolCommand => Effect.persist(e)
-        case _ => Effect.none
+  private def commandHandler(timer: TimerScheduler[Command])(
+    using ActorContext[Command], NotificationService[IO], MapsService[IO],
+  ): (ObservableSession, Command) => Effect[Event, ObservableSession] = (state, command) =>
+    command match
+      case e: ProtocolCommand => Effect.persist(e)
+      case e: AliveCheck.type => aliveCheckHandler(timer)(state.session, e)
+      case e: DrivingEvent => trackingHandler(state.session, e)
+      case _ => Effect.none
 
   import cats.effect.unsafe.implicits.global
 
   private def trackingHandler(
-      notificationService: NotificationService[IO],
-      mapsService: MapsService[IO],
-  )(using ctx: ActorContext[Command]): (Session, SampledLocation) => Effect[Event, ObservableSession] =
-    (session, event) =>
-      session match
-        case Session(_, Routing, _, Some(tracking: MonitorableTracking)) =>
-          val reaction = (ArrivalCheck(mapsService) >>> StationaryCheck() >>> ArrivalTimeoutCheck())(tracking, event)
-          ctx.pipeToSelf(reaction.unsafeToFuture()):
-            case Success(result) => reactionHandler(session, event, result)(notificationService)
-            case Failure(exception) =>
-              ctx.log.error("Error while executing reaction: {}", exception.getMessage)
-              Ignore
-          Effect.persist(StatefulDrivingEvent.from(session, event))
-        case _ => Effect.persist(StatefulDrivingEvent.from(session, event))
-
-  private def reactionHandler(session: Session, event: DrivingEvent, result: Either[Serializable, Continue.type])(
-      notificationService: NotificationService[IO],
-  )(using ctx: ActorContext[Command]): Command = result match
-    case Right(_) => Ignore
-    case Left(Notification.Alert(msg)) =>
-      notificationService.sendToGroup(session.scope.group, session.scope.user, msg).unsafeRunAndForget()
-      Ignore
-    case Left(Notification.Success(msg)) =>
-      notificationService.sendToGroup(session.scope.group, session.scope.user, msg).unsafeRunAndForget()
-      RoutingStopped(event.timestamp, event.user)
-    case Left(e) =>
-      ctx.log.error(e.toString)
-      Ignore
+    using ctx: ActorContext[Command], notifier: NotificationService[IO], maps: MapsService[IO],
+  ): (Session, DrivingEvent) => Effect[Event, ObservableSession] = (s, e) =>
+    val reaction = (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(s, e)
+    ctx.pipeToSelf(reaction.unsafeToFuture()):
+      case Success(result) => result match { case Left(value: DrivingEvent) => value; case _ => Ignore }
+      case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
+    Effect.persist(StatefulDrivingEvent.from(s, e))
 
   private def aliveCheckHandler(timer: TimerScheduler[Command])(
-      notificationService: NotificationService[IO],
-  ): (Session, AliveCheck.type) => Effect[Event, ObservableSession] = (session, _) =>
-    if session.userState != Inactive && session.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(30))
+    using notifier: NotificationService[IO],
+  ): (Session, AliveCheck.type) => Effect[Event, ObservableSession] = (s, _) =>
+    if s.userState != Inactive && s.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(30))
     then
       timer.cancelAll()
-      val event = WentOffline(session.lastSampledLocation.get.timestamp, session.lastSampledLocation.get.user)
-      if session.userState == SOS || session.userState == Routing then
+      val event = WentOffline(s.lastSampledLocation.get.timestamp, s.lastSampledLocation.get.user)
+      if s.userState == SOS || s.userState == Routing then
         val notification = NotificationMessage.create(
-          s"${event.user.username()} connection lost alert!",
-          s"User ${event.user.username()} went offline while in ${session.userState} mode!",
+          s"${event.user.username()} connection lost!",
+          s"User ${event.user.username()} went offline while in ${s.userState} mode!",
         )
-        notificationService.sendToGroup(session.scope.group, session.scope.user, notification).unsafeRunAndForget()
-      Effect.persist(StatefulDrivingEvent.from(session, event))
+        notifier.sendToGroup(s.scope.group, s.scope.user, notification).unsafeRunAndForget()
+      Effect.persist(StatefulDrivingEvent.from(s, event))
     else Effect.none

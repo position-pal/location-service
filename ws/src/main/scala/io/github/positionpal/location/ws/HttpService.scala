@@ -6,10 +6,10 @@ object HttpService:
   import akka.http.scaladsl.Http
   import cats.effect.{Async, IO, Resource}
   import cats.implicits.toFunctorOps
-  import io.github.positionpal.entities.UserId
-  import io.github.positionpal.location.tracking.services.ActorBasedRealTimeTracking
+  import io.github.positionpal.location.domain.Scope
+  import io.github.positionpal.location.tracking.ActorBasedRealTimeTracking
 
-  def start[F[_]: Async](port: Int)(service: ActorBasedRealTimeTracking.Service[IO, UserId])(using
+  def start[F[_]: Async](port: Int)(service: ActorBasedRealTimeTracking.Service[IO, Scope])(using
       actorSystem: ActorSystem[?],
   ): Resource[F, Http.ServerBinding] =
     Resource.make(
