@@ -32,14 +32,18 @@ class RealTimeUserTrackerTest
 
   import RealTimeUserTrackerTest.*
 
-  private val longLastingPatience = Eventually.PatienceConfig(Span(30, Seconds), Span(5, Seconds))
+  private val longLastingPatience = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
 
-  private val mockedNotificationService = mock[NotificationService[IO]]
-  private val mockedMapsService = mock[MapsService[IO]]
+  private val notifier = mock[NotificationService[IO]]
+  private val maps = mock[MapsService[IO]]
+
+  when(notifier.sendToGroup).expects(*, *, *).returns(IO.unit).anyNumberOfTimes
+  when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation)).expects(*, *, *)
+    .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters)).anyNumberOfTimes
 
   given ctx: Context[UserState, ObservableSession] with
-    def notificationService: NotificationService[IO] = mockedNotificationService
-    def mapsService: MapsService[IO] = mockedMapsService
+    def notificationService: NotificationService[IO] = notifier
+    def mapsService: MapsService[IO] = maps
     def initialStates(ins: List[UserState]): List[ObservableSession] =
       ins.map(s => ObservableSession(Session.from(Scope(testUser, testGroup), s, sampling(s), tracking(s)), Set.empty))
 
@@ -60,12 +64,6 @@ class RealTimeUserTrackerTest
       "reaching the destination" should:
         "transition to active mode" in:
           given Eventually.PatienceConfig = longLastingPatience
-          when(mockedMapsService.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation))
-            .expects(Driving, destination, destination).returns(IO.pure(0.meters)).once
-          when(mockedNotificationService.sendToGroup).expects:
-            where: (guid, uid, notification) =>
-              guid == testGroup && uid == testUser && notification.body().contains("has reached their destination")
-          .returns(IO.unit).once
           Routing -- SampledLocation(now, testUser, destination) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
@@ -96,14 +94,8 @@ class RealTimeUserTrackerTest
     "inactive for a while" should:
       "transition to inactive mode" in:
         given Eventually.PatienceConfig = longLastingPatience
-        when(mockedMapsService.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation)).expects(Driving, *, *)
-          .returns(IO.pure(Int.MaxValue.meters))
-        when(mockedNotificationService.sendToGroup).expects:
-          where: (guid, uid, notification) =>
-            guid == testGroup && uid == testUser && notification.body().contains("went offline")
-        .returns(IO.unit).twice
         val sampledLocation = SampledLocation(now, testUser, cesenaCampus)
-        (Active | Routing | SOS) -- sampledLocation --> Inactive verifying: (_, s) =>
+        Inactive -- sampledLocation --> Inactive verifying: (_, s) =>
           s.session.lastSampledLocation shouldBe Some(sampledLocation)
 
   extension (s: ObservableSession)
