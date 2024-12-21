@@ -12,6 +12,11 @@ message GroupId {
   string value = 1;
 }
 
+message Scope {
+  UserId user = 1;
+  GroupId group = 2;
+}
+
 enum UserState {
   ACTIVE = 0;
   INACTIVE = 1;
@@ -41,7 +46,7 @@ message Tracking {
 }
 
 message Session {
-  UserId user = 1;
+  Scope scope = 1;
   UserState state = 2;
   SampledLocation lastSampledLocation = 3;
   Tracking activeTracking = 4;
@@ -80,7 +85,7 @@ message SessionResponse {
 
 service UserSessionService {
   rpc GetCurrentSession(GroupId) returns (stream SessionResponse) { }
-  rpc GetCurrentLocation(UserId) returns (LocationResponse) { }
-  rpc GetCurrentState(UserId) returns (UserStateResponse) { }
-  rpc GetCurrentTracking(UserId) returns (TrackingResponse) { }
+  rpc GetCurrentLocation(Scope) returns (LocationResponse) { }
+  rpc GetCurrentState(Scope) returns (UserStateResponse) { }
+  rpc GetCurrentTracking(Scope) returns (TrackingResponse) { }
 }

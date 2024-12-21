@@ -40,16 +40,20 @@ class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFact
     import fs2.grpc.syntax.all.*
     import io.github.positionpal.location.commons.ScopeFunctions.*
     import io.github.positionpal.entities.{GroupId, UserId}
-    import io.github.positionpal.location.domain.{UserState, SampledLocation, GPSLocation}
+    import io.github.positionpal.location.domain.{UserState, SampledLocation, Scope}
     import io.github.positionpal.location.domain.UserState.*
     import io.github.positionpal.location.presentation.proto
+    import io.github.positionpal.location.domain.GeoUtils.*
     import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
     import java.time.Instant.now
 
+    val testGroup = GroupId.create("astro")
+    val eveScope = Scope(UserId.create("eve"), testGroup)
+    val lukeScope = Scope(UserId.create("luke"), testGroup)
     val sessions: (GroupId, List[Session]) = (
-      GroupId.create("astro"),
-      UserId.create("eve").let(u => Session.from(u, Active, Some(SampledLocation(now(), u, GPSLocation(15, 90))), None))
-        :: UserId.create("luke").let(u => Session.from(u, Inactive, None, None))
+      testGroup,
+      eveScope.let(s => Session.from(s, Active, Some(SampledLocation(now(), s.user, bolognaCampus)), None))
+        :: lukeScope.let(s => Session.from(s, Inactive, None, None))
         :: Nil,
     )
 
