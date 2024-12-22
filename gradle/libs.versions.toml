@@ -55,7 +55,7 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 lepus-client = { module = "dev.hnaderi:lepus-client_3", version.ref = "lepus" }
 lepus-std = { module = "dev.hnaderi:lepus-std_3", version.ref = "lepus" }
 lepus-circe = { module = "dev.hnaderi:lepus-circe_3", version.ref = "lepus" }
-logback-classic = "ch.qos.logback:logback-classic:1.5.14"
+logback-classic = "ch.qos.logback:logback-classic:1.5.15"
 log4cats-slf4j = "org.typelevel:log4cats-slf4j_3:2.7.0"
 positionpal-kernel-domain = { module = "io.github.positionpal:kernel-domain", version.ref = "kernel" }
 positionpal-kernel-presentation = { module = "io.github.positionpal:kernel-presentation", version.ref = "kernel" }
