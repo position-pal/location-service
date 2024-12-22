@@ -8,26 +8,32 @@ import cats.mtl.Handle.handleForApplicativeError
 import com.typesafe.config.ConfigFactory
 import io.github.positionpal.location.application.groups.impl.BasicUserGroupsService
 import io.github.positionpal.location.application.sessions.impl.BasicUsersSessionService
-import io.github.positionpal.location.commons.ConfigurationError
+import io.github.positionpal.location.commons.{ConfigurationError, EnvVariablesProvider}
 import io.github.positionpal.location.grpc.{GrpcServer, GrpcUserSessionService}
-import io.github.positionpal.location.tracking.ActorBasedRealTimeTracking
-import io.github.positionpal.location.tracking.projections.UserSessionProjection
-import io.github.positionpal.location.tracking.utils.AkkaUtils
 import io.github.positionpal.location.messages.groups.RabbitMQGroupsEventConsumer
+import io.github.positionpal.location.messages.notifications.RabbitMQNotificationsPublisher
 import io.github.positionpal.location.messages.{MessageBrokerConnectionFactory, RabbitMQ}
 import io.github.positionpal.location.presentation.proto.UserSessionServiceFs2Grpc
 import io.github.positionpal.location.storage.CassandraConnectionFactory
 import io.github.positionpal.location.storage.groups.CassandraUserGroupsStore
 import io.github.positionpal.location.storage.sessions.CassandraUserSessionStore
+import io.github.positionpal.location.tracking.projections.UserSessionProjection
+import io.github.positionpal.location.tracking.utils.{AkkaUtils, HTTPUtils}
+import io.github.positionpal.location.tracking.{ActorBasedRealTimeTracking, MapboxService}
 import io.github.positionpal.location.ws.HttpService
 
 object Launcher extends IOApp.Simple:
 
   private val app: Resource[IO, Unit] = for
+    httpClient <- HTTPUtils.clientRes
+    envs <- Resource.eval(EnvVariablesProvider[IO].configuration)
+    mapsConfig <- Resource.eval(IO.pure(MapboxService.Configuration(httpClient, envs("MAPBOX_API_KEY"))))
+    maps <- Resource.eval(MapboxService[IO](mapsConfig))
+    notifier <- Resource.eval(RabbitMQNotificationsPublisher[IO]())
     actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("akka.conf"))(Behaviors.empty)
     given ActorSystem[?] = actorSystem
-    realTimeTrackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem))
-    _ <- HttpService.start[IO](8080)(realTimeTrackingService)
+    trackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps))
+    _ <- HttpService.start[IO](5001)(trackingService)
     validatedRabbitMQConfig <- Resource.eval(RabbitMQ.Configuration.fromEnv[IO])
     rabbitMQConfig <- Resource.eval:
       validatedRabbitMQConfig match
@@ -52,6 +58,7 @@ object Launcher extends IOApp.Simple:
           IO.raiseError(new Exception(errors.map(_.message).toNonEmptyList.toList.mkString(", ")))
       ).start
     _ <- Resource.eval(RabbitMQGroupsEventConsumer[IO](userGroupsService).start(rabbitMQConnection))
+    _ <- Resource.eval(notifier.start(rabbitMQConnection))
   yield ()
 
   override def run: IO[Unit] = app.use(_ => IO.never)

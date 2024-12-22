@@ -2,7 +2,7 @@ package io.github.positionpal.location.presentation
 
 import java.time.Instant
 
-import io.bullet.borer.Cbor
+import io.bullet.borer.{Cbor, Json}
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.GeoUtils.*
@@ -12,6 +12,10 @@ import org.scalatest.matchers.should.Matchers
 class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
 
   import ModelCodecsTest.*
+
+  val event: DrivingEvent = SampledLocation(Instant.now(), user, group, bolognaCampus)
+  val ser = Json.encode(event)
+  println(String(ser.toByteArray))
 
   "`Tracking`" should "be correctly serialized and deserialized" in:
     val serialized = Cbor.encode(tracking).toByteArray
