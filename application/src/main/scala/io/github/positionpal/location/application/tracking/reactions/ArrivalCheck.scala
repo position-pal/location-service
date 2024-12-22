@@ -23,7 +23,7 @@ object ArrivalCheck:
             distance <- maps.distance(tracking.mode)(e.position, tracking.destination)
             isWithinProximity = distance.toMeters.value <= config.proximityToleranceMeters.meters.value
             _ <- if isWithinProximity then sendNotification(session.scope.group, e.user) else Async[F].unit
-          yield if isWithinProximity then Left(RoutingStopped(e.timestamp, e.user)) else Right(Continue)
+          yield if isWithinProximity then Left(RoutingStopped(e.timestamp, e.user, e.group)) else Right(Continue)
         case _ => Monad[F].pure(Right(Continue))
 
   private def sendNotification[F[_]: Async](group: GroupId, user: UserId)(using notifier: NotificationService[F]) =

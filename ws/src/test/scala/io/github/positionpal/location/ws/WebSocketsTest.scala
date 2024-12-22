@@ -1,6 +1,7 @@
 package io.github.positionpal.location.ws
 
 import scala.concurrent.duration.DurationInt
+
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import cats.effect.IO
@@ -14,9 +15,9 @@ import io.github.positionpal.location.application.tracking.MapsService
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.UserState.*
+import io.github.positionpal.location.presentation.ModelCodecs
 import io.github.positionpal.location.tracking.ActorBasedRealTimeTracking
 import io.github.positionpal.location.tracking.utils.AkkaUtils
-import io.github.positionpal.location.presentation.ModelCodecs
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
@@ -24,7 +25,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Milliseconds, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL with ModelCodecs with ScalaFutures with MockFactory:
+class WebSocketsTest
+    extends AnyWordSpecLike
+    with Matchers
+    with WebSocketTestDSL
+    with ModelCodecs
+    with ScalaFutures
+    with MockFactory:
 
   private val maps: MapsService[IO] = mock[MapsService[IO]]
   private val notifier: NotificationService[IO] = mock[NotificationService[IO]]
@@ -54,13 +61,14 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
       "receive updates from all members of the same group" in:
         systemResource.use: _ =>
           IO:
-            val user1 = UserId.create("u1")
-            val user2 = UserId.create("u2")
+            val luke = UserId.create("luke")
+            val eve = UserId.create("eve")
+            val group = GroupId.create("astro")
             val test = WebSocketTest(config)
             val scenario = test.Scenario(
               group = GroupId.create("test-group"),
-              clients = test.Client(user1) :: test.Client(user2) :: Nil,
-              events = sample(user1, cesenaCampus) :: sample(user2, bolognaCampus) :: Nil,
+              clients = test.Client(luke) :: test.Client(eve) :: Nil,
+              events = sample(Scope(luke, group), cesenaCampus) :: sample(Scope(eve, group), bolognaCampus) :: Nil,
             )
             val expectedEvents = scenario.events.map(_.toUserUpdate)
             val result = test.runTest(scenario)
@@ -72,4 +80,4 @@ class WebSocketsTest extends AnyWordSpecLike with Matchers with WebSocketTestDSL
         .unsafeRunSync()
 
   extension (e: SampledLocation)
-    private def toUserUpdate: UserUpdate = UserUpdate(e.timestamp, e.user, Some(e.position), Active)
+    private def toUserUpdate: UserUpdate = UserUpdate(e.timestamp, e.scope, Some(e.position), Active)

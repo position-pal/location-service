@@ -37,7 +37,7 @@ class RabbitMQGroupsEventConsumerTest extends AnyWordSpec with Matchers with Moc
     import io.github.positionpal.{AvroSerializer, User, AddedMemberToGroup, RemovedMemberToGroup, MessageType}
     import io.github.positionpal.MessageType.*
     import lepus.client.{Connection, Message}
-    import lepus.protocol.domains.{ExchangeType, FieldTable, ShortString}
+    import lepus.protocol.domains.{ExchangeType, ShortString}
 
     private val user = User.create("uid-test", "name-test", "surname-test", "email-test", "role-test")
     private val serializer = AvroSerializer()
@@ -50,7 +50,6 @@ class RabbitMQGroupsEventConsumerTest extends AnyWordSpec with Matchers with Moc
         serializer.serializeRemovedMemberToGroup(e).toMessage(Map(msgTypeKey -> MEMBER_REMOVED.name().asShortOrEmpty))
     def testProducer(conn: Connection[IO]): IO[Unit] = conn.channel.use: ch =>
       for
-        _ <- IO.println(conn.capabilities.toFieldTable)
         _ <- ch.exchange.declare(groupsEventsExchange, ExchangeType.Headers)
         publish = fs2.Stream(messageEvents*).evalMap(ch.messaging.publish(groupsEventsExchange, ShortString.empty, _))
         _ <- publish.compile.drain

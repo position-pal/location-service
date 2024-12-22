@@ -22,13 +22,13 @@ object PreCheckNotifier:
   extension (event: DrivingEvent)
     private def notify(s: Session) =
       val notification = event match
-        case RoutingStarted(_, _, _, mode, destination, eta) =>
+        case RoutingStarted(_, _, _, _, mode, destination, eta) =>
           Some("started a journey", s"is on their way to $destination ($mode). ETA: ${eta.format}.")
-        case SOSAlertTriggered(_, _, position) =>
+        case SOSAlertTriggered(_, _, _, position) =>
           Some("triggered an SOS alert!", s"has triggered an SOS help request at $position!")
-        case WentOffline(_, _) if s.userState == Routing || s.userState == Routing =>
+        case _: WentOffline if s.userState == Routing || s.userState == Routing =>
           Some("went offline!", "went offline while on a journey.")
-        case RoutingStopped(_, _) => Some("journey ended", "journey completed successfully.")
-        case SOSAlertStopped(_, _) => Some("SOS alarm stopped!", "has stopped the SOS alarm.")
+        case _: RoutingStopped => Some("journey ended", "journey completed successfully.")
+        case _: SOSAlertStopped => Some("SOS alarm stopped!", "has stopped the SOS alarm.")
         case _ => None
       notification.map((t, b) => event.user.username().let(u => NotificationMessage.create(s"$u $t", s"$u $b")))

@@ -61,18 +61,18 @@ class UserSessionProjectionHandler[T](
     val storage: UserSessionWriter[IO, T],
 ) extends Handler[EventEnvelope[RealTimeUserTracker.Event]]:
 
-//  import cats.effect.unsafe.implicits.global
-//  import io.github.positionpal.location.domain.EventConversions.given
+  import cats.effect.unsafe.implicits.global
+  import io.github.positionpal.location.domain.EventConversions.given
+  import io.github.positionpal.location.domain.Session.Snapshot
 
   override def process(envelope: EventEnvelope[Event]): Future[Done] =
     system.log.debug("Process envelope {}", envelope.event)
     envelope.event match
-      case RealTimeUserTracker.StatefulDrivingEvent(_, _) =>
-        ???
-//        val operation = event match
-//          case e: SampledLocation => storage.update(Snapshot(e.user, state, Some(e)))
-//          case e: RoutingStarted => storage.update(Snapshot(e.user, state, Some(e)))
-//          case e: SOSAlertTriggered => storage.update(Snapshot(e.user, state, Some(e)))
-//          case e: (SOSAlertStopped | WentOffline | RoutingStopped) => storage.update(Snapshot(e.user, state, None))
-//        operation.map(_ => Done).unsafeToFuture()
+      case RealTimeUserTracker.StatefulDrivingEvent(state, event) =>
+        val operation = event match
+          case e: SampledLocation => storage.update(Snapshot(e.scope, state, Some(e)))
+          case e: RoutingStarted => storage.update(Snapshot(e.scope, state, Some(e)))
+          case e: SOSAlertTriggered => storage.update(Snapshot(e.scope, state, Some(e)))
+          case e: (SOSAlertStopped | WentOffline | RoutingStopped) => storage.update(Snapshot(e.scope, state, None))
+        operation.map(_ => Done).unsafeToFuture()
       case _ => Future.successful(Done)

@@ -9,7 +9,6 @@ import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
 import cats.effect.kernel.Async
 import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps, toTraverseOps}
 import com.datastax.oss.driver.api.core.cql.Row
-import io.github.positionpal.entities.UserId
 import io.github.positionpal.location.application.sessions.UserSessionStore
 import io.github.positionpal.location.commons.CanRaise
 import io.github.positionpal.location.domain
@@ -46,10 +45,10 @@ object CassandraUserSessionStore:
     override def sessionOf(scope: Scope): F[Option[Session]] = executeWithErrorHandling:
       for
         userInfoRow <- session.selectOne(getUserInfoQuery(scope))
-        userInfo <- userInfoRow.traverse(row => (row.userState, row.sampledLocationOf(scope.user)).pure[Future])
+        userInfo <- userInfoRow.traverse(row => (row.userState, row.sampledLocationOf(scope)).pure[Future])
         routes <- session.select(getTrackingQuery(scope))
           .runFold(List.empty[(Instant, GPSLocation)])((acc, row) => (row.timestamp, row.location) :: acc)
-        tracking = Option.when(routes.nonEmpty)(Tracking(routes.reverse.map(SampledLocation(_, scope.user, _))))
+        tracking = Option.when(routes.nonEmpty)(Tracking(routes.reverse.map(SampledLocation(_, scope, _))))
       yield userInfo.map((state, location) => Session.from(scope, state, location, tracking))
 
     override def update(variation: Session.Snapshot): F[Unit] = executeWithErrorHandling:
@@ -72,11 +71,11 @@ object CassandraUserSessionStore:
         def timestamp = r.getInstant("Timestamp")
         def userState = UserState.valueOf(r.getString("Status"))
         def location = GPSLocation(r.getDouble("Latitude"), r.getDouble("Longitude"))
-        def sampledLocationOf(userId: UserId) =
+        def sampledLocationOf(scope: Scope) =
           for
             timestamp <- Option(r.getInstant("LastUpdated"))
             location <- r.location.unlessNullIsland
-          yield SampledLocation(timestamp, userId, location)
+          yield SampledLocation(timestamp, scope, location)
 
       extension (l: GPSLocation)
         private def unlessNullIsland: Option[GPSLocation] = Option(l).filter(l => l._1 != 0.0 || l._2 != 0.0)

@@ -45,18 +45,18 @@ class RealTimeUserTrackerTest
     def notificationService: NotificationService[IO] = notifier
     def mapsService: MapsService[IO] = maps
     def initialStates(ins: List[UserState]): List[ObservableSession] =
-      ins.map(s => ObservableSession(Session.from(Scope(testUser, testGroup), s, sampling(s), tracking(s)), Set.empty))
+      ins.map(s => ObservableSession(Session.from(testScope, s, sampling(s), tracking(s)), Set.empty))
 
   "RealTimeUserTracker" when:
     "in inactive or active state" when:
       "receives a new location sample" should:
         "update the last known location" in:
-          (Active | Inactive) -- SampledLocation(now, testUser, cesenaCampus) --> Active verifying: (e, s) =>
+          (Active | Inactive) -- SampledLocation(now, testScope, cesenaCampus) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing started event" should:
         "transition to routing mode" in:
-          val routingStarted = RoutingStarted(now, testUser, bolognaCampus, Driving, cesenaCampus, inTheFuture)
+          val routingStarted = RoutingStarted(now, testScope, bolognaCampus, Driving, cesenaCampus, inTheFuture)
           (Active | Inactive) -- routingStarted --> Routing verifying: (_, s) =>
             s shouldMatch (Some(routingStarted.toMonitorableTracking), Some(routingStarted: SampledLocation))
 
@@ -64,18 +64,18 @@ class RealTimeUserTrackerTest
       "reaching the destination" should:
         "transition to active mode" in:
           given Eventually.PatienceConfig = longLastingPatience
-          Routing -- SampledLocation(now, testUser, destination) --> Active verifying: (e, s) =>
+          Routing -- SampledLocation(now, testScope, destination) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing stopped event" should:
         "transition to active mode" in:
-          Routing -- RoutingStopped(now, testUser) --> Active verifying: (_, s) =>
+          Routing -- RoutingStopped(now, testScope) --> Active verifying: (_, s) =>
             s shouldMatch (None, Some(defaultContextSample))
 
     "in SOS state" when:
       "receives a SOS stopped event" should:
         "transition to active mode" in:
-          SOS -- SOSAlertStopped(now, testUser) --> Active verifying: (_, s) =>
+          SOS -- SOSAlertStopped(now, testScope) --> Active verifying: (_, s) =>
             s shouldMatch (None, Some(defaultContextSample))
 
     "in routing or SOS state" when:
@@ -87,14 +87,14 @@ class RealTimeUserTrackerTest
 
     "receives an SOS alert triggered event" should:
       "transition to SOS mode" in:
-        val sosAlertTriggered = SOSAlertTriggered(now, testUser, cesenaCampus)
+        val sosAlertTriggered = SOSAlertTriggered(now, testScope, cesenaCampus)
         (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
           s shouldMatch (Some(Tracking()), Some(sosAlertTriggered: SampledLocation))
 
     "inactive for a while" should:
       "transition to inactive mode" in:
         given Eventually.PatienceConfig = longLastingPatience
-        val sampledLocation = SampledLocation(now, testUser, cesenaCampus)
+        val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
         Inactive -- sampledLocation --> Inactive verifying: (_, s) =>
           s.session.lastSampledLocation shouldBe Some(sampledLocation)
 
@@ -104,9 +104,9 @@ class RealTimeUserTrackerTest
       s.session.lastSampledLocation shouldBe lastSample
 
   private def generateTrace: List[SampledLocation] =
-    SampledLocation(now, testUser, GPSLocation(44, 12))
-      :: SampledLocation(now, testUser, GPSLocation(43, 13))
-      :: SampledLocation(now, testUser, GPSLocation(42, 14))
+    SampledLocation(now, testScope, GPSLocation(44, 12))
+      :: SampledLocation(now, testScope, GPSLocation(43, 13))
+      :: SampledLocation(now, testScope, GPSLocation(42, 14))
       :: Nil
 
   private def sampling(state: UserState, sample: SampledLocation = defaultContextSample): Option[SampledLocation] =
@@ -126,5 +126,6 @@ object RealTimeUserTrackerTest:
     .withFallback(EventSourcedBehaviorTestKit.config).resolve()
   val testUser: UserId = UserId.create("luke")
   val testGroup: GroupId = GroupId.create("astro")
-  val defaultContextSample: SampledLocation = SampledLocation(now, testUser, bolognaCampus)
+  val testScope: Scope = Scope(testUser, testGroup)
+  val defaultContextSample: SampledLocation = SampledLocation(now, testScope, bolognaCampus)
   val destination: GPSLocation = cesenaCampus
