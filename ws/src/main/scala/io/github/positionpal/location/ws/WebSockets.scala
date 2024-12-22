@@ -35,6 +35,7 @@ object WebSockets:
     import akka.stream.typed.scaladsl.ActorSource
     import cats.effect.unsafe.implicits.global
     import io.bullet.borer.Json
+    import io.github.positionpal.location.commons.ScopeFunctions.*
 
     private val activeSessions = TrieMap[GroupId, Set[(UserId, ActorRef[DrivenEvent])]]()
 
@@ -45,8 +46,9 @@ object WebSockets:
     ): Flow[Message, Message, NotUsed] =
       val scope = Scope(userId, groupId)
       val routeToGroupActor: Sink[Message, Unit] = Flow[Message].map:
-        case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
-        case _ => Left("Invalid message")
+        case TextMessage.Strict(msg) =>
+          Json.decode(msg.getBytes).to[DrivingEvent].valueEither.also(_.left.foreach(println))
+        case _ => println("[WS] Invalid message"); Left("Invalid message")
       .collect { case Right(e) => e }.watchTermination(): (_, done) =>
         done.onComplete: _ =>
           var sessions = Set.empty[(UserId, ActorRef[DrivenEvent])]
