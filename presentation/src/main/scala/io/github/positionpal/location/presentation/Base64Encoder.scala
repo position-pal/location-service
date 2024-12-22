@@ -12,7 +12,7 @@ object Base64Encoder:
 object ScopeUtils:
   import io.github.positionpal.location.domain.Scope
 
-  extension (scope: Scope) def concatenated: String = s"${scope.group.value()}-${scope.user.username()}"
+  extension (scope: Scope) def concatenated: String = s"${scope.user.username()}-${scope.group.value()}"
 
   extension (s: String)
     def splitted: Scope =
