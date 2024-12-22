@@ -8,8 +8,8 @@ import akka.http.scaladsl.server.RouteResult.Complete
 import cats.effect.IO
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.tracking.ActorBasedRealTimeTracking
 import io.github.positionpal.location.presentation.ModelCodecs
+import io.github.positionpal.location.tracking.ActorBasedRealTimeTracking
 
 /** Web socket port service implementation for real time tracking. */
 object WebSockets:
@@ -44,20 +44,18 @@ object WebSockets:
         service: ActorBasedRealTimeTracking.Service[IO, Scope],
     ): Flow[Message, Message, NotUsed] =
       val scope = Scope(userId, groupId)
-      val routeToGroupActor: Sink[Message, Unit] = Flow[Message]
-        .map:
-          case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
-          case _ => Left("Invalid message")
-        .collect { case Right(e) => e }
-        .watchTermination(): (_, done) =>
-          done.onComplete: _ =>
-            var sessions = Set.empty[(UserId, ActorRef[DrivenEvent])]
-            synchronized:
-              sessions = activeSessions.getOrElse(groupId, Set.empty)
-              activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
-            sessions.find(_._1 == userId).map(_._2).foreach: ref =>
-              sessions.foreach((uid, _) => service.removeObserverFor(Scope(uid, groupId))(Set(ref)).unsafeRunSync())
-        .to(Sink.foreach(service.handle(scope)(_).unsafeRunSync()))
+      val routeToGroupActor: Sink[Message, Unit] = Flow[Message].map:
+        case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
+        case _ => Left("Invalid message")
+      .collect { case Right(e) => e }.watchTermination(): (_, done) =>
+        done.onComplete: _ =>
+          var sessions = Set.empty[(UserId, ActorRef[DrivenEvent])]
+          synchronized:
+            sessions = activeSessions.getOrElse(groupId, Set.empty)
+            activeSessions.updateWith(groupId)(_.map(_.filterNot(_._1 == userId)))
+          sessions.find(_._1 == userId).map(_._2).foreach: ref =>
+            sessions.foreach((uid, _) => service.removeObserverFor(Scope(uid, groupId))(Set(ref)).unsafeRunSync())
+      .to(Sink.foreach(service.handle(scope)(_).unsafeRunSync()))
       val routeToClient: Source[Message, ActorRef[DrivenEvent]] =
         ActorSource.actorRef(
           completionMatcher = { case Complete => },

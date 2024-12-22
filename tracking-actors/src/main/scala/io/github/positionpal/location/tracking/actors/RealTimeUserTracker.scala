@@ -95,8 +95,10 @@ object RealTimeUserTracker:
       case UnWire(o) => state.removeObserver(o)
       case StatefulDrivingEvent(_, e) => state.update(e)
 
-  private def commandHandler(timer: TimerScheduler[Command])(
-    using ActorContext[Command], NotificationService[IO], MapsService[IO],
+  private def commandHandler(timer: TimerScheduler[Command])(using
+      ActorContext[Command],
+      NotificationService[IO],
+      MapsService[IO],
   ): (ObservableSession, Command) => Effect[Event, ObservableSession] = (state, command) =>
     command match
       case e: ProtocolCommand => Effect.persist(e)
@@ -108,8 +110,10 @@ object RealTimeUserTracker:
 
   import cats.effect.unsafe.implicits.global
 
-  private def trackingHandler(
-    using ctx: ActorContext[Command], notifier: NotificationService[IO], maps: MapsService[IO],
+  private def trackingHandler(using
+      ctx: ActorContext[Command],
+      notifier: NotificationService[IO],
+      maps: MapsService[IO],
   ): (Session, DrivingEvent) => Effect[Event, ObservableSession] = (s, e) =>
     val reaction = (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(s, e)
     ctx.pipeToSelf(reaction.unsafeToFuture()):
@@ -117,13 +121,13 @@ object RealTimeUserTracker:
       case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
     Effect.persist(StatefulDrivingEvent.from(s, e))
 
-  private def aliveCheckHandler(timer: TimerScheduler[Command])(
-    using notifier: NotificationService[IO],
+  private def aliveCheckHandler(timer: TimerScheduler[Command])(using
+      notifier: NotificationService[IO],
   ): (Session, AliveCheck.type) => Effect[Event, ObservableSession] = (s, _) =>
     if s.userState != Inactive && s.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(60))
     then
       timer.cancelAll()
-      val event = WentOffline(s.lastSampledLocation.get.timestamp, s.lastSampledLocation.get.user)
+      val event = WentOffline(s.lastSampledLocation.get.timestamp, s.scope)
       if s.userState == SOS || s.userState == Routing then
         val notification = NotificationMessage.create(
           s"${event.user.username()} connection lost!",

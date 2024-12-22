@@ -10,8 +10,8 @@ import io.github.positionpal.location.application.groups.impl.BasicUserGroupsSer
 import io.github.positionpal.location.application.sessions.impl.BasicUsersSessionService
 import io.github.positionpal.location.commons.ConfigurationError
 import io.github.positionpal.location.grpc.{GrpcServer, GrpcUserSessionService}
-import io.github.positionpal.location.tracking.services.ActorBasedRealTimeTracking
-import io.github.positionpal.location.tracking.services.projections.UserSessionProjection
+import io.github.positionpal.location.tracking.ActorBasedRealTimeTracking
+import io.github.positionpal.location.tracking.projections.UserSessionProjection
 import io.github.positionpal.location.tracking.utils.AkkaUtils
 import io.github.positionpal.location.messages.groups.RabbitMQGroupsEventConsumer
 import io.github.positionpal.location.messages.{MessageBrokerConnectionFactory, RabbitMQ}

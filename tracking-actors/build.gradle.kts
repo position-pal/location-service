@@ -1,7 +1,7 @@
 dependencies {
     api(project(":presentation"))
     with(libs) {
-        implementation(bundles.http4s)
+        api(bundles.http4s)
         api(akka.cluster.typed)
         api(akka.cluster.sharding.typed)
         implementation(akka.persistence.typed)
