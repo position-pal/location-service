@@ -1,3 +1,82 @@
+## [1.0.0](https://github.com/position-pal/location-service/compare/0.7.1...1.0.0) (2024-12-23)
+
+### ⚠ BREAKING CHANGES
+
+* **entrypoint:** add complete entrypoint
+* **tracking:** add group info to domain events to make the projection work scope-based
+
+### Features
+
+* **application:** add basic user groups service impl ([8b77e0e](https://github.com/position-pal/location-service/commit/8b77e0ee61ea4e850e686db56e93bb8055a2c9a5))
+* **entrypoint:** add complete entrypoint ([75f56db](https://github.com/position-pal/location-service/commit/75f56dbdbc1c6c26abc4036afab5b41e835760dd))
+* **entrypoint:** add entrypoint skeleton ([9c54914](https://github.com/position-pal/location-service/commit/9c5491468df9912b4ed08ff16783fd6cfd753197))
+
+### Dependency updates
+
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.13 ([#129](https://github.com/position-pal/location-service/issues/129)) ([22613d0](https://github.com/position-pal/location-service/commit/22613d0acf0b0f38dbec4463006bc03c971c8f61))
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.14 ([#133](https://github.com/position-pal/location-service/issues/133)) ([a560ae4](https://github.com/position-pal/location-service/commit/a560ae4381a81bdb256aa51564e28f17f413db18))
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.15 ([#138](https://github.com/position-pal/location-service/issues/138)) ([0797a05](https://github.com/position-pal/location-service/commit/0797a05af22fb322123003d1319165faa0bdec9f))
+* **deps:** update dependency com.google.protobuf:protoc to v4.29.2 ([#130](https://github.com/position-pal/location-service/issues/130)) ([f8f6894](https://github.com/position-pal/location-service/commit/f8f6894dcbf1f0f57901fce5bf90ca3f17c69119))
+* **deps:** update dependency dev.hnaderi:named-codec-circe_3 to v0.3.0 ([#132](https://github.com/position-pal/location-service/issues/132)) ([155d5c6](https://github.com/position-pal/location-service/commit/155d5c6579107918f48f15a1bd52e37a38fd8336))
+* **deps:** update dependency gradle to v8.12 ([#135](https://github.com/position-pal/location-service/issues/135)) ([412ce37](https://github.com/position-pal/location-service/commit/412ce3768dc97b144114f6267fe2e63a91b45c6e))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.117 ([#139](https://github.com/position-pal/location-service/issues/139)) ([550327f](https://github.com/position-pal/location-service/commit/550327fe8e6ec9ced4d7fddb2b14a4761034f72d))
+* **deps:** update eclipse-temurin:21 docker digest to 843686b ([#114](https://github.com/position-pal/location-service/issues/114)) ([f0dd1e6](https://github.com/position-pal/location-service/commit/f0dd1e62338443ebb1679279a9b52b9d5e38d435))
+* **deps:** update junit5 monorepo to v1.11.4 ([#123](https://github.com/position-pal/location-service/issues/123)) ([6a01c24](https://github.com/position-pal/location-service/commit/6a01c245c655555519cea23329e99393f8e0bd60))
+* **deps:** update lepus to v0.5.4 ([#124](https://github.com/position-pal/location-service/issues/124)) ([c1aabe9](https://github.com/position-pal/location-service/commit/c1aabe9cd043d9d26d17afc367e2e9b7cb428a26))
+* **deps:** update plugin com.gradle.develocity to v3.19 ([#118](https://github.com/position-pal/location-service/issues/118)) ([b186f00](https://github.com/position-pal/location-service/commit/b186f006c5fcaa708d3c608e008dc3d709e6fc4b))
+* **deps:** update plugin gradle-docker-compose to v0.17.12 ([#120](https://github.com/position-pal/location-service/issues/120)) ([f4133cb](https://github.com/position-pal/location-service/commit/f4133cbab8164c3c91f119a2a8d789429789fe74))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.17 ([#125](https://github.com/position-pal/location-service/issues/125)) ([50cc944](https://github.com/position-pal/location-service/commit/50cc944d0585f0ee84e02f9ef40b0d1a58eb949b))
+* **deps:** update plugin scala-extras to v3 ([#111](https://github.com/position-pal/location-service/issues/111)) ([1e84615](https://github.com/position-pal/location-service/commit/1e84615f4ff56f63286bf17c36011f9aca44c95a))
+* **deps:** update rabbitmq:4-management docker digest to 144d782 ([#116](https://github.com/position-pal/location-service/issues/116)) ([15a820a](https://github.com/position-pal/location-service/commit/15a820a50a2a73e95abfff064a9dde2bea56a486))
+* **deps:** update rabbitmq:4-management docker digest to 4a2b95d ([#131](https://github.com/position-pal/location-service/issues/131)) ([71598cf](https://github.com/position-pal/location-service/commit/71598cf0ddac6cfb569e611996122e191659c158))
+* **deps:** update rabbitmq:4-management docker digest to 57513d2 ([#115](https://github.com/position-pal/location-service/issues/115)) ([3a8e07f](https://github.com/position-pal/location-service/commit/3a8e07f59090d382c906351902ef13d1b6ceff4f))
+
+### Bug Fixes
+
+* **reactions:** from routing to SOS in went offline logic ([1e8a10c](https://github.com/position-pal/location-service/commit/1e8a10cb20d623bd3b633e89ff23f09bcdb2585b))
+* **tracking:** encode scope in expected format ([40afe89](https://github.com/position-pal/location-service/commit/40afe89a570981232be7945686c0b729be4370bd))
+* **tracking:** start a timer to realize an user went offline ([3bfdf11](https://github.com/position-pal/location-service/commit/3bfdf11bb7ff9bee7b319cb7ae88de33c96b8580))
+
+### Tests
+
+* add cucumbers features and location sharing steps ([46bab12](https://github.com/position-pal/location-service/commit/46bab12ce4f0e6846d8fbccd3f160fe5e077646e))
+* **application:** adapt tests to use kernel `NotificationMessage` in place of Strings ([79b0ae1](https://github.com/position-pal/location-service/commit/79b0ae1abe612b863e1d286a7b5047a0faef9c4d))
+* remove unuseful print and improve testable akka config ([a9821e9](https://github.com/position-pal/location-service/commit/a9821e9ecee22551d2450b92c835e5fe1461ac39))
+* use test fixtures plugin to dry test utilities ([98a93b5](https://github.com/position-pal/location-service/commit/98a93b59d98a595c16953214970b93e2ff0b3603))
+
+### Build and continuous integration
+
+* add git semantic versioning and shadow jar plugins ([62c375e](https://github.com/position-pal/location-service/commit/62c375eae43a9b9e43badb125a1d7fafd1cc6cd1))
+* add template sync workflow ([6196efa](https://github.com/position-pal/location-service/commit/6196efabac51f047b553bd26b4e8b3a480b654a2))
+* **deps:** update actions/setup-java digest to 7a6d8a8 ([#127](https://github.com/position-pal/location-service/issues/127)) ([823624a](https://github.com/position-pal/location-service/commit/823624adad5e42fe7e88f6f34849700a893840eb))
+* **deps:** update docker/setup-buildx-action digest to 6524bf6 ([#121](https://github.com/position-pal/location-service/issues/121)) ([3e7be3e](https://github.com/position-pal/location-service/commit/3e7be3eca3e99fda2228cdcbbe2239205b41845b))
+* drop template sync action, aggregate delivery-related jobs in a single workflow file and scaladoc generation ([003bd91](https://github.com/position-pal/location-service/commit/003bd9196c02d1830f16f83017a96ac03d314557))
+* drop unused plugins ([270566b](https://github.com/position-pal/location-service/commit/270566b99e92533d8dd1c329be7a6ee51a5dba4c))
+* fix `is_force_push_pr` parameter position and add `pr_title` ([1ad6ccc](https://github.com/position-pal/location-service/commit/1ad6ccc16f7046cd0057b7b9df2748b0980b1e8b))
+* fix cron job to run daily at 00:00 instead of at 00:00 on day-of-month 1 ([79a65e7](https://github.com/position-pal/location-service/commit/79a65e75a7445c8f1026a82a40b0041807f3e1c7))
+* use custom pat in order to push workflow updates ([525d489](https://github.com/position-pal/location-service/commit/525d48930ad04b8338f31d10b2fe02964ac58de3))
+
+### General maintenance
+
+* add prerequisites to readme ([68c9228](https://github.com/position-pal/location-service/commit/68c9228a3c7ae41d46819e27976f751248e7d7a7))
+
+### Refactoring
+
+* **application:** drop `Async` bound to effect type ([2326000](https://github.com/position-pal/location-service/commit/2326000d8ddc7c5fa6fbbdd74a4d0213e1730224))
+* **application:** separate reactions in a file each and add `EventPreCheckNotifier` ([63271e7](https://github.com/position-pal/location-service/commit/63271e780d91d177f228d9c4a2e878009cce3932))
+* **application:** use kernel `NotificationMessage` and move tracking related services in a per se package ([059b832](https://github.com/position-pal/location-service/commit/059b832ffb69cb4e299a4d7106b25a31d5c4c484))
+* **build:** use `==` instead of `equals` ([b3c0fa6](https://github.com/position-pal/location-service/commit/b3c0fa67b43999d789c60b08385867ec1f051dcc))
+* **domain:** make session scoped to a specific user and group ([405f764](https://github.com/position-pal/location-service/commit/405f7642990caa141624ba2073737aeff0ba95a3))
+* **domain:** move in domain the event reaction adt and add time utils ([ec940c1](https://github.com/position-pal/location-service/commit/ec940c14fdb811bb3942451a70458cbdb67cce14))
+* **entrypoint:** improve readability of entrypoint ([94e5c12](https://github.com/position-pal/location-service/commit/94e5c1294b73a265debb7256e7719a1ae1580a30))
+* **grpc:** modify grpc endpoint requests to get a scope instead of only the user ([d2a2b9d](https://github.com/position-pal/location-service/commit/d2a2b9d3305e2795b38ca75d66105fd98508b690))
+* **presentation:** adapt seriaizers to use scoped sessions ([1703fbb](https://github.com/position-pal/location-service/commit/1703fbbba09e33aff1e7fa598bd057b98fc740d1))
+* **storage:** save scoped sessions ([62b9ff8](https://github.com/position-pal/location-service/commit/62b9ff828c463d91301ada94c5378197bd3e6077))
+* **tracking:** add group info to domain events to make the projection work scope-based ([666c1fb](https://github.com/position-pal/location-service/commit/666c1fb7d2fafbeafab34ee1a7b842d5cf23e12c))
+* **tracking:** rename infrastructure in tracking module ([7161368](https://github.com/position-pal/location-service/commit/7161368475bb89b5580b6ccea6dae917124017be))
+* **ws:** move websockets in a separate submodule ([4345f70](https://github.com/position-pal/location-service/commit/4345f70405d12233cf815d5e03396f575c112fb7))
+* **ws:** use scoped sessions ([2b36309](https://github.com/position-pal/location-service/commit/2b36309855d54962a446c052835458772f82e516))
+
 ## [0.7.1](https://github.com/position-pal/location-service/compare/0.7.0...0.7.1) (2024-12-12)
 
 ### Dependency updates
