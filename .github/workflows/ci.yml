@@ -30,6 +30,8 @@ jobs:
         run: ./gradlew test
       - name: Check
         run: ./gradlew check
+      - name: Generate shadow jar
+        run: ./gradlew shadowJar
 
   success:
     needs:
@@ -51,6 +53,6 @@ jobs:
   deploy:
     needs:
       - success
-    uses: ./.github/workflows/release.yml
+    uses: ./.github/workflows/cd.yml
     if: github.ref_name == github.event.repository.default_branch
     secrets: inherit

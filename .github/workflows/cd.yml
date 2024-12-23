@@ -1,8 +1,12 @@
-name: Release and Delivery
+name: CD
 
 on:
   workflow_call:
   workflow_dispatch:
+
+env:
+  USERNAME: ${{ secrets.USERNAME }}
+  TOKEN: ${{ secrets.TOKEN }}
 
 jobs:
   release:
@@ -39,6 +43,7 @@ jobs:
   publish-images:
     needs:
       - release
+    # Trigger this job only if the semantic release bot has released a new version
     if: ${{ needs.release.outputs.release-status == 'released' }}
     runs-on: ubuntu-24.04
     permissions:
@@ -63,3 +68,19 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ needs.release.outputs.container_version }}
+
+  publish-doc:
+    needs:
+      - release
+    # Trigger this job only if the semantic release bot has released a new version
+    if: ${{ needs.release.outputs.release-status == 'released' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Generate scaladoc
+        run: ./gradlew :aggregateScaladoc
+      - name: Publish on Github pages
+        uses: JamesIves/github-pages-deploy-action@15de0f09300eea763baee31dff6c6184995c5f6a # v4
+        with:
+          folder: build/docs/aggregated-scaladoc
