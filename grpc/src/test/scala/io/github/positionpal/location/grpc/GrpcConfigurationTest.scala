@@ -28,7 +28,7 @@ class GrpcConfigurationTest extends AnyWordSpec with Matchers:
 
     "created by non-existing environment variables" should:
       "be invalid" in:
-        val configuration = GrpcServer.Configuration.byEnv[IO]
+        val configuration = GrpcServer.Configuration.fromEnv[IO]
         val result: ValidatedNec[ConfigurationError, GrpcServer.Configuration] = configuration.unsafeRunSync()
         result.isInvalid shouldBe true
         result match

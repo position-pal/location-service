@@ -26,7 +26,7 @@ class RabbitMQGroupsEventConsumerTest extends AnyWordSpec with Matchers with Moc
         when(userGroupsService.removeMember).expects(removedEvent).returns(IO.unit).once
         connection.use: conn =>
           for
-            _ <- consumer.start(conn).start
+            _ <- consumer.flatMap(_.start(conn).start)
             _ <- IO.sleep(5.seconds)
             _ <- testProducer(conn)
             _ <- IO.sleep(10.seconds)

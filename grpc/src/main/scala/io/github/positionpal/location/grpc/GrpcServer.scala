@@ -29,18 +29,18 @@ object GrpcServer:
       * @return a [[Validated]] instance containing either a valid [[Configuration]] or a [[ConfigurationError]].
       */
     def apply[F[_]: Sync](port: Int): F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
-      port.positive.map(BasicConfiguration.apply)
+      port.positive.map(BasicGrpcConfiguration.apply)
     .handleError(e => Invalid(e.toString).invalidNec)
 
     /** Create a new [[Configuration]] instance with the parameters read from environment variables,
       * expected in `GRPC_<PARAMETER>` format.
       * @return a [[Validated]] instance containing either a valid [[Configuration]] or a [[ConfigurationError]].
       */
-    def byEnv[F[_]: Sync]: F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
-      "GRPC_PORT".let(s => sys.env.get(s).validStr(s).andThen(_.toInt.positive)).map(BasicConfiguration.apply)
+    def fromEnv[F[_]: Sync]: F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
+      "GRPC_PORT".let(s => sys.env.get(s).validStr(s).andThen(_.toInt.positive)).map(BasicGrpcConfiguration.apply)
     .handleError(e => Invalid(e.toString).invalidNec)
 
-    private case class BasicConfiguration(port: Int) extends Configuration
+    private case class BasicGrpcConfiguration(port: Int) extends Configuration
 
   /** Startup a new gRPC server configured as per the given [[Configuration]] and wired with the given [[services]].
     * @return a [[Resource]] encapsulating a [[Server]] instance in the `F` effect type context,

@@ -4,6 +4,7 @@ import scala.concurrent.duration.DurationInt
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
+import cats.data.Validated.*
 import cats.effect.IO
 import cats.effect.kernel.Resource
 import cats.effect.unsafe.implicits.global
@@ -37,12 +38,16 @@ class WebSocketsTest
   private val notifier: NotificationService[IO] = mock[NotificationService[IO]]
   private val timeout = Timeout(Span(5, Seconds))
   private val interval = Interval(Span(100, Milliseconds))
-  private val config = WebSocketTestConfig(baseEndpoint = "ws://localhost:8080/group", connectionTimeout = 5.seconds)
+  private val testConfig =
+    WebSocketTestConfig(baseEndpoint = "ws://localhost:8080/group", connectionTimeout = 5.seconds)
   private val systemResource: Resource[IO, Unit] = for
     actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("akka.conf"))(Behaviors.empty)
     given ActorSystem[Any] = actorSystem
     realTimeTrackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps))
-    _ <- HttpService.start[IO](8080)(realTimeTrackingService)
+    httpServiceConfig <- Resource.eval(HttpService.Configuration[IO](8080))
+    _ <- httpServiceConfig match
+      case Valid(config) => HttpService.start[IO](config)(realTimeTrackingService)
+      case Invalid(errors) => Resource.eval(IO.raiseError(new Exception(errors.toNonEmptyList.toList.mkString(", "))))
   yield ()
 
   "WebSocket clients" when:
@@ -50,7 +55,7 @@ class WebSocketsTest
       "successfully establish a connection" in:
         systemResource.use: _ =>
           IO:
-            val test = WebSocketTest(config)
+            val test = WebSocketTest(testConfig)
             val scenario = test.Scenario(GroupId.create("guid1"), clients = test.Client(UserId.create("uid1")) :: Nil)
             val result = test.runTest(scenario)
             whenReady(result, timeout, interval): connectionResults =>
@@ -64,7 +69,7 @@ class WebSocketsTest
             val luke = UserId.create("luke")
             val eve = UserId.create("eve")
             val group = GroupId.create("astro")
-            val test = WebSocketTest(config)
+            val test = WebSocketTest(testConfig)
             val scenario = test.Scenario(
               group = GroupId.create("test-group"),
               clients = test.Client(luke) :: test.Client(eve) :: Nil,
