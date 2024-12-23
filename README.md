@@ -6,16 +6,16 @@ PositionPal service for location tracking.
 
 For the correct operation of the service, it is necessary the following environment variables are set and available at startup: 
 
-| Variable Name | Description                                                                                                                                                                                |
-| --- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `MAPBOX_API_KEY` | [Mapbox access token](https://docs.mapbox.com/help/getting-started/access-tokens/) used to authenticate API requests to the Mapbox services.                                               |
-| `RABBITMQ_HOST` | The host address of the RabbitMQ server where the message broker is running (e.g. `localhost`)                                                                                             |
-| `RABBITMQ_VIRTUAL_HOST` | The [virtual host](https://www.rabbitmq.com/docs/vhosts) in RabbitMQ used for logical separation of resources (e.g. `/`).                                                                  |
-| `RABBITMQ_PORT` | The port on which the RabbitMQ server is listening for incoming connections.                                                                                                               |
-| `RABBITMQ_USERNAME` | The username used to authenticate with the RabbitMQ server. This should be an account with sufficient permissions to interact with the necessary queues and exchanges in the virtual host. |
-| `RABBITMQ_PASSWORD` | The password associated with the RABBITMQ_USERNAME. This password is used in conjunction with the username for authentication purposes.                                                    |
-| `GRPC_PORT` | The port on which the gRPC server listens for incoming requests.                                                                                                                           |
-| `HTTP_PORT` | The port on which the HTTP server listens for incoming HTTP requests, including WebSocket connections for real-time communications.                                                        |
+| Variable Name | Description                                                                                                                                                                                                                                    |
+| --- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `MAPBOX_API_KEY` | [Mapbox access token](https://docs.mapbox.com/help/getting-started/access-tokens/) used to authenticate API requests to the Mapbox services. Ensure the token is stored and used securely, for example, by using Docker or Kubernetes secrets. |
+| `RABBITMQ_HOST` | The host address of the RabbitMQ server where the message broker is running (e.g. `localhost`)                                                                                                                                                 |
+| `RABBITMQ_VIRTUAL_HOST` | The [virtual host](https://www.rabbitmq.com/docs/vhosts) in RabbitMQ used for logical separation of resources (e.g. `/`).                                                                                                                      |
+| `RABBITMQ_PORT` | The port on which the RabbitMQ server is listening for incoming connections.                                                                                                                                                                   |
+| `RABBITMQ_USERNAME` | The username used to authenticate with the RabbitMQ server. This should be an account with sufficient permissions to interact with the necessary queues and exchanges in the virtual host.                                                     |
+| `RABBITMQ_PASSWORD` | The password associated with the RABBITMQ_USERNAME. This password is used in conjunction with the username for authentication purposes. Ensure the password is stored and used securely, for example, by using Docker or Kubernetes secrets.   |
+| `GRPC_PORT` | The port on which the gRPC server listens for incoming requests.                                                                                                                                                                               |
+| `HTTP_PORT` | The port on which the HTTP server listens for incoming HTTP requests, including WebSocket connections for real-time communications.                                                                                                            |
 
 An example of valid environment setup is shown below:
 

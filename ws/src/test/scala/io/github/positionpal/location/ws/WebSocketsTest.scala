@@ -41,7 +41,7 @@ class WebSocketsTest
   private val testConfig =
     WebSocketTestConfig(baseEndpoint = "ws://localhost:8080/group", connectionTimeout = 5.seconds)
   private val systemResource: Resource[IO, Unit] = for
-    actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("akka.conf"))(Behaviors.empty)
+    actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("testable-akka-config.conf"))(Behaviors.empty)
     given ActorSystem[Any] = actorSystem
     realTimeTrackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps))
     httpServiceConfig <- Resource.eval(HttpService.Configuration[IO](8080))
