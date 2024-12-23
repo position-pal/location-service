@@ -37,4 +37,6 @@ The scripts to create the tables can be found in the following CQL scripts:
 
 ## Documentation
 
+The scaladoc can be found [here](https://position-pal.github.io/location-service/).
+
 Refer to the [project documentation](https://position-pal.github.io/docs/design/location-service/) for more details on the service implementation.
