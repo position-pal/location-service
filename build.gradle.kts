@@ -8,6 +8,8 @@ plugins {
     id("scala")
     alias(libs.plugins.scala.extras)
     alias(libs.plugins.gradle.docker.compose)
+    alias(libs.plugins.git.sensitive.semantic.versioning)
+    alias(libs.plugins.shadowJar)
 }
 
 allprojects {
@@ -18,6 +20,7 @@ allprojects {
         apply(plugin = "scala")
         apply(plugin = scala.extras.get().pluginId)
         apply(plugin = gradle.docker.compose.get().pluginId)
+        apply(plugin = shadowJar.get().pluginId)
     }
 
     repositories {
@@ -55,4 +58,9 @@ allprojects {
     afterEvaluate {
         rootProject.dotenv?.let { dotenv -> injectInto(JavaExec::class, Test::class) environmentsFrom dotenv }
     }
+}
+
+/* Set the project version based on the git history. */
+gitSemVer {
+    assignGitSemanticVersion()
 }
