@@ -13,6 +13,8 @@ jobs:
     permissions: # Not specified scopes are set to `none`!
       packages: write
       contents: write
+      issues: write
+      pull-requests: write
     concurrency:
       group: release-and-delivery-${{ github.event.number || github.ref }}
     runs-on: ubuntu-24.04
@@ -38,7 +40,7 @@ jobs:
           npm install
           npx semantic-release
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.POSITION_PAL_BOT_TOKEN }}
 
   publish-images:
     needs:
