@@ -39,7 +39,7 @@ class WebSocketsTest
   private val timeout = Timeout(Span(5, Seconds))
   private val interval = Interval(Span(100, Milliseconds))
   private val testConfig =
-    WebSocketTestConfig(baseEndpoint = "ws://localhost:8080/group", connectionTimeout = 5.seconds)
+    WebSocketTestConfig(baseEndpoint = "ws://localhost:8080/v1/group", connectionTimeout = 5.seconds)
   private val systemResource: Resource[IO, Unit] = for
     actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("testable-akka-config.conf"))(Behaviors.empty)
     given ActorSystem[Any] = actorSystem
