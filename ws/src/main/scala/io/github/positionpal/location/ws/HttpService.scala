@@ -1,5 +1,8 @@
 package io.github.positionpal.location.ws
 
+import io.github.positionpal.location.ws.handlers.v1.V1RoutesHandler
+import io.github.positionpal.location.ws.routes.v1.V1Routes
+
 object HttpService:
 
   /** Configuration for the HTTP service. */
@@ -48,5 +51,5 @@ object HttpService:
       Async[F].fromFuture:
         Async[F].delay:
           Http(actorSystem.classicSystem).newServerAt("localhost", configuration.port)
-            .bind(WebSockets.Routes.groupRoute(service)),
+            .bind(V1Routes(V1RoutesHandler(service)).versionedRoutes),
     )(binding => Async[F].fromFuture(Async[F].delay(binding.unbind())).void)
