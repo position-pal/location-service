@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs: # see release.config.js
       release-status: ${{ env.RELEASE_STATUS }}
-      container_version: ${{ env.CONTAINER_VERSION }}
+      release_version: ${{ env.RELEASE_VERSION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -69,7 +69,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ needs.release.outputs.container_version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ needs.release.outputs.release_version }}
 
   publish-doc:
     needs:
@@ -81,6 +81,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
+          ref: ${{ needs.release.outputs.release_version }}
           fetch-tags: true
       - name: Generate scaladoc
         run: ./gradlew :aggregateScaladoc
