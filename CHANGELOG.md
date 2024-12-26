@@ -1,3 +1,27 @@
+## [2.0.0](https://github.com/position-pal/location-service/compare/1.0.0...2.0.0) (2024-12-26)
+
+### ⚠ BREAKING CHANGES
+
+* **ws:** switch to versioned ws, starting from v1
+
+### Dependency updates
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.18 ([#140](https://github.com/position-pal/location-service/issues/140)) ([67d4440](https://github.com/position-pal/location-service/commit/67d4440beb3999502baa83a5edd161b65d3d07cd))
+
+### Build and continuous integration
+
+* add issues and pr permissions and use position-pal bot token to release ([953ba02](https://github.com/position-pal/location-service/commit/953ba02a8feb9670157461a475a7ade9ea9b1a44))
+* fetch tags when checkout repository in doc generation ([2899163](https://github.com/position-pal/location-service/commit/2899163c1229ed974e2c4d1686351f13a0cb2384))
+
+### General maintenance
+
+* update readme with link to scaladoc ([a8b9c46](https://github.com/position-pal/location-service/commit/a8b9c46e45047d33304f9041fda6d33313dc9c76))
+
+### Refactoring
+
+* **ws:** log income and outgoing messages ([7841ccf](https://github.com/position-pal/location-service/commit/7841ccfcdc661c047f6087b66909947204d13b76))
+* **ws:** switch to versioned ws, starting from v1 ([fdc0389](https://github.com/position-pal/location-service/commit/fdc0389ccf968d335d1f3c16cb4f0574cc6ffeb3))
+
 ## [1.0.0](https://github.com/position-pal/location-service/compare/0.7.1...1.0.0) (2024-12-23)
 
 ### ⚠ BREAKING CHANGES
