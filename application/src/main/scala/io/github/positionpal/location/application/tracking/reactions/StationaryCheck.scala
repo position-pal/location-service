@@ -3,14 +3,19 @@ package io.github.positionpal.location.application.tracking.reactions
 import cats.Monad
 import cats.effect.Async
 import cats.implicits.{toFlatMapOps, toFunctorOps, toTraverseOps}
-import io.github.positionpal.entities.{GroupId, NotificationMessage, UserId}
+import io.github.positionpal.entities.NotificationMessage
 import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.location.application.tracking.MapsService
 import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.domain.Alert.Stuck
 import io.github.positionpal.location.domain.Distance.*
-import io.github.positionpal.location.domain.{MonitorableTracking, SampledLocation}
 
-/** A [[TrackingEventReaction]] checking if the position curried by the event is continually in the same location. */
+/** A [[TrackingEventReaction]] checking whether the position curried by the event has remained
+  * approximately in the same location for some time, possibly indicating a suspicious situation.
+  * In this case, it triggers a notification, returning as an [[Outcome]] a [[StuckAlertTriggered]].
+  * Once the user moves again, it stops the alert, returning a [[StuckAlertStopped]].
+  */
 object StationaryCheck:
 
   def apply[F[_]: Async](using maps: MapsService[F], notifier: NotificationService[F]): EventReaction[F] =
@@ -24,12 +29,17 @@ object StationaryCheck:
             distances <- samples.traverse(s => maps.distance(tracking.mode)(s.position, e.position))
             isStationary = distances.size >= config.stationarySamples &&
               distances.forall(_.toMeters.value <= config.proximityToleranceMeters.meters.value)
-            _ <- if isStationary then sendNotification(session.scope.group, e.user) else Async[F].unit
-          yield if isStationary then Left(()) else Right(Continue)
+            res <-
+              if isStationary && !(tracking has Stuck) then
+                sendNotification(session.scope).map(_ => Left(StuckAlertTriggered(e.timestamp, e.scope)))
+              else if !isStationary && (tracking has Stuck) then
+                Monad[F].pure(Left(StuckAlertStopped(e.timestamp, e.user, e.group)))
+              else Monad[F].pure(Right(Continue))
+          yield res
         case _ => Monad[F].pure(Right(Continue))
 
-  private def sendNotification[F[_]: Async](group: GroupId, user: UserId)(using notifier: NotificationService[F]) =
-    Async[F].start(notifier.sendToGroup(group, user, alertMessage(user.username()))).void
+  private def sendNotification[F[_]: Async](scope: Scope)(using notifier: NotificationService[F]) =
+    Async[F].start(notifier.sendToGroup(scope.group, scope.user, alertMessage(scope.user.username()))).void
 
   private def alertMessage(username: String) = NotificationMessage
     .create(s"$username() stationary alert!", s"$username has been stuck in the same position for a while.")

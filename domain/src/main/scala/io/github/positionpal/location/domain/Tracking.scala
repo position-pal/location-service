@@ -17,7 +17,7 @@ trait Tracking:
   def addSample(sample: SampledLocation): Tracking
 
   /** An alias for [[addSample]], allowing to use the `+` operator to add a sample. */
-  def +(sample: SampledLocation): Tracking = addSample(sample)
+  infix def +(sample: SampledLocation): Tracking = addSample(sample)
 
 /** A [[Tracking]] with additional information to monitor the user's route. */
 trait MonitorableTracking extends Tracking:
@@ -35,21 +35,22 @@ trait MonitorableTracking extends Tracking:
   override def addSample(sample: SampledLocation): MonitorableTracking
 
   /** An alias for [[addSample]], allowing to use the `+` operator to add a sample. */
-  override def +(sample: SampledLocation): MonitorableTracking = addSample(sample)
+  override infix def +(sample: SampledLocation): MonitorableTracking = addSample(sample)
+
+  /** @return a new [[MonitorableTracking]] with the added [[alert]]. */
+  def addAlert(alert: Alert): MonitorableTracking
+
+  /** @return a new [[MonitorableTracking]] without the removed [[alert]]. */
+  def removeAlert(alert: Alert): MonitorableTracking
+
+  /** @return `true` if the tracking has the given [[alert]], `false` otherwise. */
+  infix def has(alert: Alert): Boolean
 
 /** The mode of routing to a destination. */
 enum RoutingMode:
   case Driving, Walking, Cycling
 
 object Tracking:
-
-  extension (t: Tracking | MonitorableTracking)
-    /** @return `true` if the tracking is monitorable (i.e. is an instance
-      *         of [[MonitorableTracking]]), `false` otherwise.
-      */
-    def isMonitorable: Boolean = t match
-      case _: MonitorableTracking => true
-      case _ => false
 
   /** Creates a new [[Tracking]]. */
   def apply(route: Route = List()): Tracking = TrackingImpl(route)
@@ -70,6 +71,25 @@ object Tracking:
       override val mode: RoutingMode,
       override val destination: GPSLocation,
       override val expectedArrival: Instant,
+      private val alerts: Set[Alert] = Set(),
   ) extends MonitorableTracking:
     override def addSample(sample: SampledLocation): MonitorableTracking =
       MonitorableTrackingImpl(sample :: route, mode, destination, expectedArrival)
+    override def removeAlert(alert: Alert): MonitorableTracking = copy(alerts = alerts - alert)
+    override def addAlert(alert: Alert): MonitorableTracking = copy(alerts = alerts + alert)
+    override def has(alert: Alert): Boolean = alerts.contains(alert)
+
+  extension (t: Tracking | MonitorableTracking)
+    /** @return `true` if the tracking is monitorable (i.e., is an instance
+      *          of [[MonitorableTracking]]), `false` otherwise.
+      */
+    def isMonitorable: Boolean = t match
+      case _: MonitorableTracking => true
+      case _ => false
+
+    /** @return a [[Some]] with the [[MonitorableTracking]] instance if the
+      *         tracking is monitorable, [[None]] otherwise.
+      */
+    def asMonitorable: Option[MonitorableTracking] = t match
+      case m: MonitorableTracking => Some(m)
+      case _ => None
