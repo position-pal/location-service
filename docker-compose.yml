@@ -29,4 +29,4 @@ services:
       RABBITMQ_DEFAULT_PASS: admin
     ports:
       - "5672:5672"   # the port RabbitMQ will listen on
-      - "8080:15672"  # the port the dashboard web service will be available from
+      - "15672:15672" # the port the dashboard web service will be available from

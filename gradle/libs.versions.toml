@@ -1,6 +1,7 @@
 [versions]
 akka = "2.9.7"
 akkaprojection = "1.5.9"
+akkamanagement = "1.5.3"
 borer = "1.15.0"
 circe = "0.14.10"
 fs2 = "3.11.0"
@@ -32,6 +33,10 @@ akka-projection-eventsourced = { module = "com.lightbend.akka:akka-projection-ev
 akka-projection-testkit = { module = "com.lightbend.akka:akka-projection-testkit_3", version.ref = "akkaprojection" }
 akka-stream-typed = { module = "com.typesafe.akka:akka-stream-typed_3", version.ref = "akka" }
 akka-stream-testkit = { module = "com.typesafe.akka:akka-stream-testkit_3", version.ref = "akka" }
+akka-management-cluster-http = { module = "com.lightbend.akka.management:akka-management-cluster-http_3", version.ref = "akkamanagement"}
+akka-management-cluster-bootstrap = { module = "com.lightbend.akka.management:akka-management-cluster-bootstrap_3", version.ref = "akkamanagement"}
+akka-discovery = { module = "com.typesafe.akka:akka-discovery_3", version.ref = "akka" }
+akka-discovery-kubernetes-api = { module = "com.lightbend.akka.discovery:akka-discovery-kubernetes-api_3", version.ref = "akkamanagement"}
 borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
 borer-derivation = { module = "io.bullet:borer-derivation_3", version.ref = "borer" }
 cats-core = "org.typelevel:cats-core_3:2.12.0"
@@ -83,6 +88,12 @@ fs2 = [ "fs2-core", "fs2-io" ]
 circe = [ "circe-core", "circe-generic", "circe-parser" ]
 http4s = [ "http4s-ember-client", "http4s-ember-server", "http4s-dsl", "http4s-circe" ]
 pureconfig = [ "pureconfig-core", "pureconfig-cats-effect" ]
+clusterman = [
+    "akka-management-cluster-http",
+    "akka-management-cluster-bootstrap",
+    "akka-discovery",
+    "akka-discovery-kubernetes-api"
+]
 scala-testing = [
     "scalatest",
     "scalatestplus-junit5",

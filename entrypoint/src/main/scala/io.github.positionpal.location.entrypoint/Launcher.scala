@@ -2,6 +2,8 @@ package io.github.positionpal.location.entrypoint
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
+import akka.management.cluster.bootstrap.ClusterBootstrap
+import akka.management.scaladsl.AkkaManagement
 import cats.data.{Validated, ValidatedNec}
 import cats.effect.{IO, IOApp, Resource}
 import cats.mtl.Handle.handleForApplicativeError
@@ -25,8 +27,11 @@ import io.github.positionpal.location.tracking.projections.UserSessionProjection
 import io.github.positionpal.location.tracking.utils.{AkkaUtils, HTTPUtils}
 import io.github.positionpal.location.tracking.{ActorBasedRealTimeTracking, MapboxService}
 import io.github.positionpal.location.ws.HttpService
+import org.slf4j.LoggerFactory
 
 object Launcher extends IOApp.Simple:
+
+  private val logger = LoggerFactory.getLogger(getClass)
 
   override def run: IO[Unit] = app.use(_ => IO.never)
 
@@ -35,6 +40,8 @@ object Launcher extends IOApp.Simple:
     notificationService <- Resource.eval(RabbitMQNotificationsPublisher[IO]())
     actorSystem <- configureTrackingService(mapsService, notificationService)
     given ActorSystem[?] = actorSystem
+    _ <- Resource.eval(IO.fromFuture(IO(AkkaManagement(actorSystem).start())))
+    _ <- Resource.eval(IO(ClusterBootstrap(actorSystem).start()))
     cassandraConnection <- Resource.pure(CassandraConnectionFactory[IO](actorSystem).get)
     userGroupsStore <- Resource.eval(CassandraUserGroupsStore[IO](cassandraConnection))
     userSessionsStore <- Resource.eval(CassandraUserSessionStore[IO](cassandraConnection))
@@ -45,6 +52,7 @@ object Launcher extends IOApp.Simple:
     _ <- Resource.eval(IO(UserSessionProjection.init(actorSystem, userSessionsStore)))
     _ <- configureGrpcServices(sessionService)
     _ <- configureQueueServices(groupsEventService, notificationService)
+    _ <- Resource.eval(IO(logger.info("All services have been started.")))
   yield ()
 
   private def configureMapsService(): Resource[IO, MapsService[IO]] =
@@ -72,8 +80,8 @@ object Launcher extends IOApp.Simple:
     validatedRabbitMQConfig <- Resource.eval(RabbitMQ.Configuration.fromEnv[IO])
     rabbitMQConfig <- Resource.eval(validatedRabbitMQConfig.get)
     rabbitMQConnection <- MessageBrokerConnectionFactory.ofRabbitMQ[IO](rabbitMQConfig)
-    _ <- Resource.eval(groupsEventConsumer.start(rabbitMQConnection))
-    _ <- Resource.eval(notificationService.start(rabbitMQConnection))
+    _ <- Resource.eval(groupsEventConsumer.start(rabbitMQConnection).start)
+    _ <- Resource.eval(notificationService.start(rabbitMQConnection).start)
   yield ()
 
   private def configureGrpcServices(sessionService: GrpcUserSessionService[IO]) =

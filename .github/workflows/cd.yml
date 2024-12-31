@@ -65,11 +65,14 @@ jobs:
         uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6
         with:
           context: .
-          file: ./Dockerfile-app
+          file: ./Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ needs.release.outputs.release_version }}
+          secrets: |
+            github_username=${{ secrets.USERNAME }}
+            github_token=${{ secrets.TOKEN }}
 
   publish-doc:
     needs:
