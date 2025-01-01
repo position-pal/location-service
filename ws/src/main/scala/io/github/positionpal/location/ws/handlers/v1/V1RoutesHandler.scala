@@ -43,6 +43,7 @@ class V1RoutesHandler(service: ActorBasedRealTimeTracking.Service[IO, Scope])(us
           scopeActorRef.foreach: ref =>
             oldConnections
               .foreach((uid, _) => service.removeObserverFor(Scope(uid, scope.group))(Set(ref)).unsafeRunSync())
+            service.removeObserverFor(scope)(oldConnections.map(_._2) - ref).unsafeRunSync()
       .to(Sink.foreach(service.handle(scope)(_).unsafeRunSync()))
 
   private def routeToClient(scope: Scope): Source[Message, ActorRef[DrivenEvent]] =
@@ -50,7 +51,7 @@ class V1RoutesHandler(service: ActorBasedRealTimeTracking.Service[IO, Scope])(us
       completionMatcher = { case Complete => },
       failureMatcher = { case ex: Throwable => ex },
       bufferSize = 1_000,
-      overflowStrategy = OverflowStrategy.fail,
+      overflowStrategy = OverflowStrategy.dropHead,
     ).mapMaterializedValue: ref =>
       val oldConnections = ConnectionsManager.addConnection(scope.group, scope.user, ref)
       oldConnections.foreach((uid, _) => service.addObserverFor(Scope(uid, scope.group))(Set(ref)).unsafeRunSync())
