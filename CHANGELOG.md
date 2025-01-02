@@ -1,3 +1,18 @@
+## [2.0.1](https://github.com/position-pal/location-service/compare/2.0.0...2.0.1) (2025-01-02)
+
+### Bug Fixes
+
+* **ws:** use as overflow strategy `dropHead` and make sure to unwire all observers for a leaving user ([f762e99](https://github.com/position-pal/location-service/commit/f762e99caf7fe6e178150c77a699ea2f77c34825))
+
+### Build and continuous integration
+
+* **scaladoc:** checkout repository to tag of the release version ([38f3638](https://github.com/position-pal/location-service/commit/38f3638e54f552815e9ac5fb9460e1114f67f882))
+* upload fatjar during build job to download it and use during image building and add dry-delivery ([cabc665](https://github.com/position-pal/location-service/commit/cabc665324f31698ccf80028f4da5efc97840d14))
+
+### Refactoring
+
+* changing configuration of the service in order to operate with kubernetes ([acb5096](https://github.com/position-pal/location-service/commit/acb5096961338b2c10bdc9dc3091d03a5ced0d39))
+
 ## [2.0.0](https://github.com/position-pal/location-service/compare/1.0.0...2.0.0) (2024-12-26)
 
 ### ⚠ BREAKING CHANGES
