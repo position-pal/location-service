@@ -1,7 +1,7 @@
 package io.github.positionpal.location.storage.sessions
 
-import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import io.github.positionpal.location.storage.CassandraConnectionFactory
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -24,9 +24,10 @@ class UserSessionStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecL
   "User Session Database" when:
     "attempting to get the latest updated session of an unknown user" should:
       "return None" in:
-        storeResource.use:
-          _.sessionOf(Scope(UserId.create("unknown-user"), GroupId.create("unknown-group")))
-        .unsafeRunSync() shouldBe None
+        storeResource
+          .use:
+            _.sessionOf(Scope(UserId.create("unknown-user"), GroupId.create("unknown-group")))
+          .unsafeRunSync() shouldBe None
 
     val scope = Scope(UserId.create("luke"), GroupId.create("astro"))
     val initialVariation = Snapshot(scope, Active, Some(SampledLocation(now, scope, bolognaCampus)))

@@ -1,14 +1,14 @@
 package io.github.positionpal.location.grpc
 
-import cats.effect.kernel.Async
-import cats.implicits.{catsSyntaxApplicativeError, toFunctorOps}
-import fs2.Stream
-import io.github.positionpal.location.application.sessions.UsersSessionService
-import io.github.positionpal.location.domain.Session
 import io.github.positionpal.location.presentation.ProtoConversions.given
+import fs2.Stream
 import io.github.positionpal.location.presentation.ProtoUtils.*
-import io.github.positionpal.location.presentation.{ProtoUtils, proto}
+import cats.implicits.{catsSyntaxApplicativeError, toFunctorOps}
 import io.grpc.Metadata
+import io.github.positionpal.location.domain.Session
+import cats.effect.kernel.Async
+import io.github.positionpal.location.presentation.{proto, ProtoUtils}
+import io.github.positionpal.location.application.sessions.UsersSessionService
 
 /** A gRPC service adapter for the [[UsersSessionService]] to expose the session information of users.
   * @param usersSessionService the service to which delegate the session queries logic
@@ -37,11 +37,15 @@ class GrpcUserSessionService[F[_]: Async](
     .map((s, r) => proto.TrackingResponse(s, r.map(trackingToProto(_))))
 
   private def ofUser[T](scope: proto.Scope)(onSuccess: Session => (Some[proto.Status], Option[T])) =
-    usersSessionService.ofScope(scope).map:
-      case Some(s) => onSuccess(s)
-      case None => (notFoundResponse(s"No session found for user ${scope.getUser.username}"), None)
-    .handleError(e => (errorResponse(s"Error while fetching session related data: ${e.getMessage}"), None))
+    usersSessionService
+      .ofScope(scope)
+      .map:
+        case Some(s) => onSuccess(s)
+        case None => (notFoundResponse(s"No session found for user ${scope.getUser.username}"), None)
+      .handleError(e => (errorResponse(s"Error while fetching session related data: ${e.getMessage}"), None))
 
   override def getCurrentSession(request: proto.GroupId, ctx: Metadata): Stream[F, proto.SessionResponse] =
-    usersSessionService.ofGroup(request).map(s => proto.SessionResponse(okResponse, Some(s)))
+    usersSessionService
+      .ofGroup(request)
+      .map(s => proto.SessionResponse(okResponse, Some(s)))
       .handleError(e => proto.SessionResponse(errorResponse(s"Error while fetching group sessions: ${e.getMessage}")))

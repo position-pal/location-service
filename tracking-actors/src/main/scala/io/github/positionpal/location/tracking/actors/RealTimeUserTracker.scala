@@ -2,27 +2,27 @@ package io.github.positionpal.location.tracking.actors
 
 import java.time.Instant.now
 
-import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
+import scala.concurrent.duration.DurationInt
 
-import akka.actor.typed.SupervisorStrategy.restartWithBackoff
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
-import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
-import akka.cluster.Cluster
-import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.*
-import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.RetentionCriteria.snapshotEvery
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
-import cats.effect.IO
-import io.github.positionpal.entities.NotificationMessage
+import akka.cluster.Cluster
 import io.github.positionpal.location.application.notifications.NotificationService
-import io.github.positionpal.location.application.tracking.MapsService
-import io.github.positionpal.location.application.tracking.reactions.*
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
-import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
+import io.github.positionpal.location.application.tracking.reactions.*
+import io.github.positionpal.location.application.tracking.MapsService
+import akka.actor.typed.SupervisorStrategy.restartWithBackoff
 import io.github.positionpal.location.domain.UserState.*
+import akka.cluster.sharding.typed.scaladsl.*
+import cats.effect.IO
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
+import akka.persistence.typed.PersistenceId
+import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.NotificationMessage
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import io.github.positionpal.location.presentation.ScopeUtils.*
 
 /** The actor in charge of tracking the real-time location of users, reacting to
@@ -117,7 +117,9 @@ object RealTimeUserTracker:
   ): (Session, DrivingEvent) => Effect[Event, ObservableSession] = (s, e) =>
     val reaction = (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(s, e)
     ctx.pipeToSelf(reaction.unsafeToFuture()):
-      case Success(result) => result match { case Left(value: DrivingEvent) => value; case _ => Ignore }
+      case Success(result) =>
+        result match
+          case Left(value: DrivingEvent) => value; case _ => Ignore
       case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
     Effect.persist(StatefulDrivingEvent.from(s, e))
 

@@ -5,7 +5,7 @@ import io.github.positionpal.location.commons.ConnectionFactory
 /** A factory for creating connections to a Cassandra database. */
 object CassandraConnectionFactory:
   import akka.actor.typed.ActorSystem
-  import akka.stream.alpakka.cassandra.scaladsl.{CassandraSessionRegistry, CassandraSession}
+  import akka.stream.alpakka.cassandra.scaladsl.{CassandraSession, CassandraSessionRegistry}
   import cats.effect.kernel.Async
 
   /** Creates a new instance of a connection factory for Cassandra leveraging akka persistence plugin.

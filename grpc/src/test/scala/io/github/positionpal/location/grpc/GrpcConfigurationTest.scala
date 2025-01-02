@@ -1,11 +1,11 @@
 package io.github.positionpal.location.grpc
 
 import cats.data.{Validated, ValidatedNec}
-import cats.effect.IO
 import cats.implicits.toFoldableOps
-import io.github.positionpal.location.commons.ConfigurationError
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.location.commons.ConfigurationError
 import org.scalatest.wordspec.AnyWordSpec
+import cats.effect.IO
 
 class GrpcConfigurationTest extends AnyWordSpec with Matchers:
 

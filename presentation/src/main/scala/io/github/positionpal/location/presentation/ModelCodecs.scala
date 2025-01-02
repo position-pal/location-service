@@ -6,9 +6,9 @@ import scala.Option.empty
 
 import cats.implicits.catsSyntaxTuple4Semigroupal
 import io.bullet.borer.derivation.MapBasedCodecs.{deriveAllCodecs, deriveCodec}
-import io.bullet.borer.{Codec, Decoder, Encoder, Writer}
-import io.github.positionpal.entities.{GroupId, UserId}
+import io.bullet.borer.*
 import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.{GroupId, UserId}
 
 /** Provides codecs for the domain model and application services. */
 trait ModelCodecs:
@@ -50,9 +50,17 @@ trait ModelCodecs:
 
   given monitorableTrackingCodec: Codec[MonitorableTracking] = Codec[MonitorableTracking](
     Encoder[MonitorableTracking]: (writer, tracking) =>
-      writer.writeMapOpen(4).writeString("route").write(tracking.route).writeString("mode").write(tracking.mode)
-        .writeString("destination").write(tracking.destination).writeString("expectedArrival")
-        .write(tracking.expectedArrival).writeMapClose(),
+      writer
+        .writeMapOpen(4)
+        .writeString("route")
+        .write(tracking.route)
+        .writeString("mode")
+        .write(tracking.mode)
+        .writeString("destination")
+        .write(tracking.destination)
+        .writeString("expectedArrival")
+        .write(tracking.expectedArrival)
+        .writeMapClose(),
     Decoder[MonitorableTracking]: reader =>
       val unbounded = reader.readMapOpen(4)
       val fields = (0 until 4).foldLeft((empty[RoutingMode], empty[GPSLocation], empty[Instant], empty[Route])):
@@ -69,10 +77,16 @@ trait ModelCodecs:
 
   given sessionCodec: Codec[Session] = Codec[Session](
     Encoder[Session]: (writer, session) =>
-      writer.writeMapOpen(4).writeString("scope").write(session.scope).writeString("state").write(session.userState)
-        .writeString("lastSampledLocation").write(session.lastSampledLocation)
+      writer
+        .writeMapOpen(4)
+        .writeString("scope")
+        .write(session.scope)
+        .writeString("state")
+        .write(session.userState)
+        .writeString("lastSampledLocation")
+        .write(session.lastSampledLocation)
       if session.tracking.exists(_.isMonitorable) then
-        writer.writeString("monitorableTracking").write(session.tracking.map(_.asMonitorable))
+        writer.writeString("monitorableTracking").write(session.tracking.flatMap(_.asMonitorable))
       else writer.writeString("tracking").write(session.tracking)
       writer.writeMapClose()
     ,
@@ -96,6 +110,3 @@ trait ModelCodecs:
       val res = fields.mapN(Session.from).getOrElse(reader.validationFailure("Missing required fields"))
       reader.readMapClose(unbounded, res),
   )
-
-  extension (t: Tracking | MonitorableTracking)
-    private def asMonitorable: MonitorableTracking = t.asInstanceOf[MonitorableTracking]

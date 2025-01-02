@@ -2,18 +2,18 @@ package io.github.positionpal.location.grpc
 
 import scala.language.postfixOps
 
-import cats.effect.IO
-import cats.effect.kernel.Resource
-import eu.monniot.scala3mock.cats.withExpectations
 import eu.monniot.scala3mock.scalatest.MockFactory
-import io.github.positionpal.location.application.sessions.UsersSessionService
-import io.github.positionpal.location.domain.Session
 import io.github.positionpal.location.presentation.ProtoConversions.given
-import io.github.positionpal.location.presentation.proto
+import eu.monniot.scala3mock.cats.withExpectations
 import io.github.positionpal.location.presentation.proto.UserSessionServiceFs2Grpc
 import io.grpc.Metadata
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.location.domain.Session
+import cats.effect.kernel.Resource
 import org.scalatest.wordspec.AnyWordSpec
+import cats.effect.IO
+import io.github.positionpal.location.presentation.proto
+import io.github.positionpal.location.application.sessions.UsersSessionService
 
 class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFactory:
 
@@ -40,7 +40,7 @@ class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFact
     import fs2.grpc.syntax.all.*
     import io.github.positionpal.location.commons.ScopeFunctions.*
     import io.github.positionpal.entities.{GroupId, UserId}
-    import io.github.positionpal.location.domain.{UserState, SampledLocation, Scope}
+    import io.github.positionpal.location.domain.{SampledLocation, Scope, UserState}
     import io.github.positionpal.location.domain.UserState.*
     import io.github.positionpal.location.presentation.proto
     import io.github.positionpal.location.domain.GeoUtils.*
@@ -62,10 +62,16 @@ class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFact
     def grpcServerFrom(service: GrpcUserSessionService[IO]): IO[Nothing] =
       grpcLocalConfiguration.flatMap:
         case Valid(c) =>
-          UserSessionServiceFs2Grpc.bindServiceResource[IO](service).flatMap(s => GrpcServer.start[IO](c, Set(s)))
-            .evalMap(s => IO(s.start())).useForever
+          UserSessionServiceFs2Grpc
+            .bindServiceResource[IO](service)
+            .flatMap(s => GrpcServer.start[IO](c, Set(s)))
+            .evalMap(s => IO(s.start()))
+            .useForever
         case Invalid(e) => IO.raiseError(new RuntimeException(e.toString))
     val managedChannelRes: Resource[IO, UserSessionServiceFs2Grpc[IO, Metadata]] =
-      NettyChannelBuilder.forAddress("127.0.0.1", port).usePlaintext().resource[IO]
+      NettyChannelBuilder
+        .forAddress("127.0.0.1", port)
+        .usePlaintext()
+        .resource[IO]
         .flatMap(ch => UserSessionServiceFs2Grpc.stubResource[IO](ch))
   end Utils

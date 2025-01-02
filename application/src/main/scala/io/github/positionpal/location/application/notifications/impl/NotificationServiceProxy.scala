@@ -1,8 +1,8 @@
 package io.github.positionpal.location.application.notifications.impl
 
+import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.commands.{CoMembersPushNotification, GroupWisePushNotification, PushNotificationCommand}
 import io.github.positionpal.entities.{GroupId, NotificationMessage, UserId}
-import io.github.positionpal.location.application.notifications.NotificationService
 
 /** A base implementation for a proxy notification service that delegates the actual logic to an external component.
   * @tparam F the effect type

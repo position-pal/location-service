@@ -2,22 +2,22 @@ package io.github.positionpal.location.tracking.projections
 
 import scala.concurrent.Future
 
-import akka.Done
 import akka.actor.typed.ActorSystem
-import akka.cluster.sharding.typed.ShardedDaemonProcessSettings
-import akka.cluster.sharding.typed.scaladsl.ShardedDaemonProcess
-import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
-import akka.persistence.query.Offset
-import akka.projection.cassandra.scaladsl.CassandraProjection
-import akka.projection.eventsourced.EventEnvelope
-import akka.projection.eventsourced.scaladsl.EventSourcedProvider
-import akka.projection.scaladsl.{AtLeastOnceProjection, Handler}
-import akka.projection.{ProjectionBehavior, ProjectionId}
-import cats.effect.IO
-import io.github.positionpal.location.application.sessions.UserSessionWriter
-import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker
+import akka.projection.{ProjectionBehavior, ProjectionId}
+import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker.Event
+import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
+import cats.effect.IO
+import akka.cluster.sharding.typed.ShardedDaemonProcessSettings
+import akka.Done
+import akka.persistence.query.Offset
+import akka.projection.scaladsl.{AtLeastOnceProjection, Handler}
+import akka.projection.eventsourced.EventEnvelope
+import io.github.positionpal.location.application.sessions.UserSessionWriter
+import akka.projection.eventsourced.scaladsl.EventSourcedProvider
+import akka.projection.cassandra.scaladsl.CassandraProjection
+import akka.cluster.sharding.typed.scaladsl.ShardedDaemonProcess
 
 /** A projection that listens to the events emitted by the [[RealTimeUserTracker]]
   * actors and updates the user's session state, implementing the CQRS pattern.

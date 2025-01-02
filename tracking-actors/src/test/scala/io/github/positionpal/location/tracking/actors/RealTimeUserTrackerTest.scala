@@ -4,24 +4,24 @@ import java.io.File
 
 import scala.language.postfixOps
 
-import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
-import cats.effect.IO
 import eu.monniot.scala3mock.scalatest.MockFactory
-import io.github.positionpal.location.application.notifications.NotificationService
+import io.github.positionpal.location.domain.EventConversions.{*, given}
+import io.github.positionpal.location.domain.TimeUtils.*
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import io.github.positionpal.location.application.tracking.MapsService
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.domain.Distance.meters
-import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.GeoUtils.*
-import io.github.positionpal.location.domain.RoutingMode.*
-import io.github.positionpal.location.domain.TimeUtils.*
-import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker.*
-import org.scalatest.OneInstancePerTest
-import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Seconds, Span}
+import io.github.positionpal.location.domain.RoutingMode.*
+import io.github.positionpal.location.domain.UserState.*
 import org.scalatest.wordspec.AnyWordSpecLike
+import cats.effect.IO
+import io.github.positionpal.location.domain.Distance.meters
+import org.scalatest.concurrent.Eventually
+import io.github.positionpal.location.application.notifications.NotificationService
+import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
+import org.scalatest.OneInstancePerTest
+import org.scalatest.time.{Seconds, Span}
 
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)
@@ -38,8 +38,10 @@ class RealTimeUserTrackerTest
   private val maps = mock[MapsService[IO]]
 
   when(notifier.sendToGroup).expects(*, *, *).returns(IO.unit).anyNumberOfTimes
-  when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation)).expects(*, *, *)
-    .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters)).anyNumberOfTimes
+  when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation))
+    .expects(*, *, *)
+    .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters))
+    .anyNumberOfTimes
 
   given ctx: Context[UserState, ObservableSession] with
     def notificationService: NotificationService[IO] = notifier
@@ -122,8 +124,10 @@ object RealTimeUserTrackerTest:
   import com.typesafe.config.{Config, ConfigFactory}
   import io.github.positionpal.entities.{GroupId, UserId}
 
-  val config: Config = ConfigFactory.parseFile(File(ClassLoader.getSystemResource("testable-akka-config.conf").toURI))
-    .withFallback(EventSourcedBehaviorTestKit.config).resolve()
+  val config: Config = ConfigFactory
+    .parseFile(File(ClassLoader.getSystemResource("testable-akka-config.conf").toURI))
+    .withFallback(EventSourcedBehaviorTestKit.config)
+    .resolve()
   val testUser: UserId = UserId.create("luke")
   val testGroup: GroupId = GroupId.create("astro")
   val testScope: Scope = Scope(testUser, testGroup)

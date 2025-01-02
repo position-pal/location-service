@@ -1,14 +1,14 @@
 package io.github.positionpal.location.messages.notifications
 
-import cats.effect.Async
-import cats.effect.std.Queue
-import cats.implicits.{toFlatMapOps, toFunctorOps}
-import io.github.positionpal.AvroSerializer
-import io.github.positionpal.commands.{CoMembersPushNotification, GroupWisePushNotification, PushNotificationCommand}
-import io.github.positionpal.location.application.notifications.impl.NotificationServiceProxy
-import io.github.positionpal.location.messages.RabbitMQ
-import lepus.client.{Connection, Message}
 import lepus.protocol.domains.{ExchangeType, ShortString}
+import io.github.positionpal.commands.{CoMembersPushNotification, GroupWisePushNotification, PushNotificationCommand}
+import cats.implicits.{toFlatMapOps, toFunctorOps}
+import io.github.positionpal.location.application.notifications.impl.NotificationServiceProxy
+import lepus.client.{Connection, Message}
+import io.github.positionpal.location.messages.RabbitMQ
+import cats.effect.Async
+import io.github.positionpal.AvroSerializer
+import cats.effect.std.Queue
 
 /** A [[NotificationServiceProxy]] implementing the [[send()]] method for publishing notifications
   * command to a RabbitMQ broker, expecting some downstream consumer service to handle the actual sending.
@@ -32,12 +32,14 @@ object RabbitMQNotificationsPublisher:
       for
         _ <- ch.exchange.declare(notificationsCommandExchange, ExchangeType.Headers)
         publish =
-          fs2.Stream.fromQueueUnterminated(queue).map:
-            case c: GroupWisePushNotification =>
-              serializer.serializeGroupWiseNotification(c).toMessage(Map(msgTypeKey -> c.toShortString))
-            case c: CoMembersPushNotification =>
-              serializer.serializeCoMembersNotification(c).toMessage(Map(msgTypeKey -> c.toShortString))
-          .evalMap(ch.messaging.publish(notificationsCommandExchange, ShortString.empty, _))
+          fs2.Stream
+            .fromQueueUnterminated(queue)
+            .map:
+              case c: GroupWisePushNotification =>
+                serializer.serializeGroupWiseNotification(c).toMessage(Map(msgTypeKey -> c.toShortString))
+              case c: CoMembersPushNotification =>
+                serializer.serializeCoMembersNotification(c).toMessage(Map(msgTypeKey -> c.toShortString))
+            .evalMap(ch.messaging.publish(notificationsCommandExchange, ShortString.empty, _))
         _ <- publish.compile.drain
       yield ()
 

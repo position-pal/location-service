@@ -2,7 +2,7 @@ package io.github.positionpal.location.presentation
 
 /** A set of given instances for converting domain entities to and from their protocol buffer representations. */
 object ProtoConversions:
-  import io.github.positionpal.entities.{UserId, GroupId}
+  import io.github.positionpal.entities.{GroupId, UserId}
   import io.github.positionpal.location.domain.*
   import scalapb.TimestampConverters.fromJavaInstant
 

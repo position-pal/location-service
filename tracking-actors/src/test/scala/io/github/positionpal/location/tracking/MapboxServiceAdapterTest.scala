@@ -1,14 +1,14 @@
 package io.github.positionpal.location.tracking
 
-import cats.effect.IO
-import cats.effect.unsafe.implicits.global
-import io.github.positionpal.location.commons.EnvVariablesProvider
 import io.github.positionpal.location.domain.Distance.DistanceUnit
-import io.github.positionpal.location.domain.GeoUtils.*
-import io.github.positionpal.location.domain.RoutingMode.Driving
 import io.github.positionpal.location.tracking.utils.HTTPUtils
-import org.scalatest.funspec.AnyFunSpec
+import cats.effect.unsafe.implicits.global
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.location.domain.GeoUtils.*
+import org.scalatest.funspec.AnyFunSpec
+import io.github.positionpal.location.commons.EnvVariablesProvider
+import io.github.positionpal.location.domain.RoutingMode.Driving
+import cats.effect.IO
 
 class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
 

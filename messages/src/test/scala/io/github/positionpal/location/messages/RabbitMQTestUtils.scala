@@ -1,8 +1,8 @@
 package io.github.positionpal.location.messages
 
 import cats.data.Validated.*
-import cats.effect.{IO, Resource}
 import lepus.client.Connection
+import cats.effect.{IO, Resource}
 
 object RabbitMQTestUtils:
 
@@ -14,6 +14,8 @@ object RabbitMQTestUtils:
     virtualHost = "/",
   )
 
-  val connection: Resource[IO, Connection[IO]] = Resource.eval(configuration).flatMap:
-    case Valid(config) => MessageBrokerConnectionFactory.ofRabbitMQ[IO](config)
-    case Invalid(errors) => Resource.eval(IO.raiseError(new Exception(errors.toNonEmptyList.toList.mkString(", "))))
+  val connection: Resource[IO, Connection[IO]] = Resource
+    .eval(configuration)
+    .flatMap:
+      case Valid(config) => MessageBrokerConnectionFactory.ofRabbitMQ[IO](config)
+      case Invalid(errors) => Resource.eval(IO.raiseError(new Exception(errors.toNonEmptyList.toList.mkString(", "))))

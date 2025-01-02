@@ -1,8 +1,8 @@
 package io.github.positionpal.location.application.sessions
 
 import fs2.Stream
-import io.github.positionpal.entities.GroupId
 import io.github.positionpal.location.domain.{Scope, Session}
+import io.github.positionpal.entities.GroupId
 
 /** A service to query and retrieve the tracking session information of users.
   * @tparam F the effect type

@@ -43,14 +43,6 @@ enum RoutingMode:
 
 object Tracking:
 
-  extension (t: Tracking | MonitorableTracking)
-    /** @return `true` if the tracking is monitorable (i.e. is an instance
-      *         of [[MonitorableTracking]]), `false` otherwise.
-      */
-    def isMonitorable: Boolean = t match
-      case _: MonitorableTracking => true
-      case _ => false
-
   /** Creates a new [[Tracking]]. */
   def apply(route: Route = List()): Tracking = TrackingImpl(route)
 
@@ -73,3 +65,18 @@ object Tracking:
   ) extends MonitorableTracking:
     override def addSample(sample: SampledLocation): MonitorableTracking =
       MonitorableTrackingImpl(sample :: route, mode, destination, expectedArrival)
+
+  extension (t: Tracking | MonitorableTracking)
+    /** @return `true` if the tracking is monitorable (i.e. is an instance
+      *          of [[MonitorableTracking]]), `false` otherwise.
+      */
+    def isMonitorable: Boolean = t match
+      case _: MonitorableTracking => true
+      case _ => false
+
+    /** @return the tracking as a [[MonitorableTracking]] if it is monitorable
+      *          (i.e. is an instance of [[MonitorableTracking]]), `None` otherwise.
+      */
+    def asMonitorable: Option[MonitorableTracking] = t match
+      case m: MonitorableTracking => Some(m)
+      case _ => None

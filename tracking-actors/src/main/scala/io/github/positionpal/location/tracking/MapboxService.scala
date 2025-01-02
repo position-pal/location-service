@@ -1,8 +1,8 @@
 package io.github.positionpal.location.tracking
 
-import cats.effect.kernel.Async
 import io.github.positionpal.location.application.tracking.MapsService
 import org.http4s.client.Client
+import cats.effect.kernel.Async
 
 /** A [[MapService]] adapter interacting with the Mapbox service.
   * @see <a href="https://docs.mapbox.com/api/navigation/directions/">Mapbox Directions API</a>.
@@ -44,7 +44,8 @@ object MapboxService:
 
     private def dirRoute(mode: RoutingMode, origin: GPSLocation, destination: GPSLocation, token: String): Uri =
       val smode = mode.toString.toLowerCase.appendedAll(if mode == Driving then "-traffic" else "")
-      uri"https://api.mapbox.com/directions/v5/mapbox/".addPath(smode)
+      uri"https://api.mapbox.com/directions/v5/mapbox/"
+        .addPath(smode)
         .addSegment(s"${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}")
         .withQueryParam("access_token", token)
 

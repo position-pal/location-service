@@ -43,26 +43,30 @@ object RabbitMQ:
         username: String,
         password: String,
         virtualHost: String,
-    ): F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
-      (host.nonEmpty, port.positive, username.nonEmpty, password.nonEmpty, virtualHost.nonEmpty).mapN(ConfigImpl.apply)
-    .handleError(e => Invalid(e.toString).invalidNec)
+    ): F[ValidatedNec[ConfigurationError, Configuration]] =
+      Sync[F]
+        .delay:
+          (host.nonEmpty, port.positive, username.nonEmpty, password.nonEmpty, virtualHost.nonEmpty).mapN(Impl.apply)
+        .handleError(e => Invalid(e.toString).invalidNec)
 
     /** Create a new [[Configuration]] instance with the parameters read from environment variables,
       * expected in `RABBITMQ_<PARAMETER>` format.
       * @return a [[ValidatedNec]] instance containing either a valid [[Configuration]] or a
       *         [[ConfigurationError]] in case of missing or invalid environment variables.
       */
-    def fromEnv[F[_]: Sync]: F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
-      (
-        "RABBITMQ_HOST".let(s => sys.env.get(s).validStr(s)),
-        "RABBITMQ_PORT".let(s => sys.env.get(s).validStr(s).andThen(_.toInt.positive)),
-        "RABBITMQ_USERNAME".let(s => sys.env.get(s).validStr(s)),
-        "RABBITMQ_PASSWORD".let(s => sys.env.get(s).validStr(s)),
-        "RABBITMQ_VIRTUAL_HOST".let(s => sys.env.get(s).validStr(s)),
-      ).mapN(ConfigImpl.apply)
-    .handleError(e => Invalid(e.toString).invalidNec)
+    def fromEnv[F[_]: Sync]: F[ValidatedNec[ConfigurationError, Configuration]] =
+      Sync[F]
+        .delay:
+          (
+            "RABBITMQ_HOST".let(s => sys.env.get(s).validStr(s)),
+            "RABBITMQ_PORT".let(s => sys.env.get(s).validStr(s).andThen(_.toInt.positive)),
+            "RABBITMQ_USERNAME".let(s => sys.env.get(s).validStr(s)),
+            "RABBITMQ_PASSWORD".let(s => sys.env.get(s).validStr(s)),
+            "RABBITMQ_VIRTUAL_HOST".let(s => sys.env.get(s).validStr(s)),
+          ).mapN(Impl.apply)
+        .handleError(e => Invalid(e.toString).invalidNec)
 
-    private case class ConfigImpl(host: String, port: Int, username: String, password: String, virtualHost: String)
+    private case class Impl(host: String, port: Int, username: String, password: String, virtualHost: String)
         extends Configuration
 
   import cats.effect.kernel.{Resource, Temporal}
@@ -105,7 +109,7 @@ object RabbitMQ:
 
   trait Utils extends Protocol:
     import lepus.client.Message
-    import lepus.protocol.domains.{FieldTable, FieldData, ShortString}
+    import lepus.protocol.domains.{FieldData, FieldTable, ShortString}
     import lepus.protocol.classes.basic.Properties
     export Error.*
 

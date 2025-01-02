@@ -2,25 +2,25 @@ package io.github.positionpal.location.tracking.projections
 
 import scala.collection.concurrent.TrieMap
 
-import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import akka.persistence.query.Offset
-import akka.projection.ProjectionId
-import akka.projection.eventsourced.EventEnvelope
-import akka.projection.testkit.scaladsl.{ProjectionTestKit, TestProjection, TestSourceProvider}
 import akka.stream.scaladsl.Source
-import cats.effect.IO
-import io.github.positionpal.entities.{GroupId, UserId}
-import io.github.positionpal.location.application.sessions.UserSessionWriter
 import io.github.positionpal.location.domain.EventConversions.given
-import io.github.positionpal.location.domain.GeoUtils.*
-import io.github.positionpal.location.domain.RoutingMode.Driving
-import io.github.positionpal.location.domain.Session.Snapshot
 import io.github.positionpal.location.domain.TimeUtils.*
-import io.github.positionpal.location.domain.UserState.*
-import io.github.positionpal.location.domain.{RoutingStarted, SampledLocation, Scope, Session}
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker
+import akka.projection.ProjectionId
+import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker.StatefulDrivingEvent
+import io.github.positionpal.location.domain.RoutingMode.Driving
+import io.github.positionpal.location.domain.UserState.*
 import org.scalatest.wordspec.AnyWordSpecLike
+import cats.effect.IO
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
+import io.github.positionpal.location.domain.Session.Snapshot
+import akka.projection.testkit.scaladsl.{ProjectionTestKit, TestProjection, TestSourceProvider}
+import akka.persistence.query.Offset
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.{GroupId, UserId}
+import akka.projection.eventsourced.EventEnvelope
+import io.github.positionpal.location.application.sessions.UserSessionWriter
 
 class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWordSpecLike:
   import UserSessionProjectionTest.*

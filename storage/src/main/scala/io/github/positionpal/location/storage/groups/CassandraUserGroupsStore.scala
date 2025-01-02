@@ -2,15 +2,15 @@ package io.github.positionpal.location.storage.groups
 
 import scala.concurrent.ExecutionContext
 
+import io.github.positionpal.location.storage.{StorageUtils, StoreError}
 import akka.actor.typed.ActorSystem
-import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
-import cats.effect.kernel.Async
 import cats.implicits.toFunctorOps
-import com.datastax.oss.driver.api.core.cql.SimpleStatement
+import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
 import io.github.positionpal.entities.{GroupId, UserId}
+import cats.effect.kernel.Async
 import io.github.positionpal.location.application.groups.UserGroupsStore
 import io.github.positionpal.location.commons.CanRaise
-import io.github.positionpal.location.storage.{StorageUtils, StoreError}
+import com.datastax.oss.driver.api.core.cql.SimpleStatement
 
 object CassandraUserGroupsStore:
 
@@ -32,11 +32,13 @@ object CassandraUserGroupsStore:
       session.executeWrite(insertMemberQuery(groupId, userId)).map(_ => ())
 
     override def groupsOf(userId: UserId): F[Set[GroupId]] = executeWithErrorHandling:
-      session.select(getGroupsQuery(userId))
+      session
+        .select(getGroupsQuery(userId))
         .runFold(Set.empty[GroupId])((acc, row) => acc + GroupId.create(row.getString("GroupId")))
 
     override def membersOf(groupId: GroupId): F[Set[UserId]] = executeWithErrorHandling:
-      session.select(getMembersQuery(groupId))
+      session
+        .select(getMembersQuery(groupId))
         .runFold(Set.empty[UserId])((acc, row) => acc + UserId.create(row.getString("UserId")))
 
     override def removeMember(groupId: GroupId, userId: UserId): F[Unit] = executeWithErrorHandling:

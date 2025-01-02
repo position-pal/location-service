@@ -2,16 +2,16 @@ package io.github.positionpal.location.messages.notifications
 
 import scala.concurrent.duration.DurationInt
 
-import cats.effect.IO
-import cats.effect.kernel.Outcome
 import eu.monniot.scala3mock.scalatest.MockFactory
+import org.scalatest.matchers.should.Matchers
 import io.github.positionpal.commands.CommandType.*
+import lepus.client.DeliveredMessage
+import org.scalatest.wordspec.AnyWordSpec
+import cats.effect.IO
+import io.github.positionpal.location.messages.RabbitMQTestUtils.*
 import io.github.positionpal.commands.{CoMembersPushNotification, GroupWisePushNotification}
 import io.github.positionpal.location.messages.RabbitMQ
-import io.github.positionpal.location.messages.RabbitMQTestUtils.*
-import lepus.client.DeliveredMessage
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import cats.effect.kernel.Outcome
 
 class RabbitMQNotificationsPublisherTest extends AnyWordSpec with Matchers with MockFactory with RabbitMQ.Utils:
 
@@ -25,15 +25,16 @@ class RabbitMQNotificationsPublisherTest extends AnyWordSpec with Matchers with 
         _ <- p.send(GroupWisePushNotification.of(group, user, notification))
         _ <- p.send(CoMembersPushNotification.of(user, user, notification))
       yield p
-      val result = connection.use: conn =>
-        for
-          a <- app
-          c <- Utils.consumer(conn).start
-          _ <- IO.sleep(5.seconds)
-          _ <- a.start(conn).start
-          c <- c.join
-        yield c
-      .unsafeRunSync()
+      val result = connection
+        .use: conn =>
+          for
+            a <- app
+            c <- Utils.consumer(conn).start
+            _ <- IO.sleep(5.seconds)
+            _ <- a.start(conn).start
+            c <- c.join
+          yield c
+        .unsafeRunSync()
       result.isSuccess shouldBe true
       result match
         case Outcome.Succeeded(fa) =>
@@ -42,9 +43,9 @@ class RabbitMQNotificationsPublisherTest extends AnyWordSpec with Matchers with 
         case _ => fail("Expected successful outcome")
 
   object Utils:
-    import io.github.positionpal.entities.{UserId, GroupId, NotificationMessage}
+    import io.github.positionpal.entities.{GroupId, NotificationMessage, UserId}
     import lepus.client.{Connection, ConsumeMode}
-    import lepus.protocol.domains.{QueueName, ShortString, ExchangeType}
+    import lepus.protocol.domains.{ExchangeType, QueueName, ShortString}
 
     val user: UserId = UserId.create("uid-test")
     val group: GroupId = GroupId.create("gid-test")

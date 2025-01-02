@@ -2,7 +2,7 @@ package io.github.positionpal.location.messages
 
 /** A factory for creating connections to RabbitMQ message broker. */
 object MessageBrokerConnectionFactory:
-  import cats.effect.kernel.{Temporal, Resource}
+  import cats.effect.kernel.{Resource, Temporal}
   import cats.effect.std.Console
   import lepus.client.Connection
   import fs2.io.net.Network
