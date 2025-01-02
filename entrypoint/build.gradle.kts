@@ -5,18 +5,18 @@ plugins {
     application
 }
 
-with(libs) {
-    dependencies {
-        implementation(project(":tracking-actors"))
-        implementation(project(":ws"))
-        implementation(project(":grpc"))
-        implementation(project(":storage"))
-        implementation(project(":messages"))
+dependencies {
+    implementation(project(":tracking-actors"))
+    implementation(project(":ws"))
+    implementation(project(":grpc"))
+    implementation(project(":storage"))
+    implementation(project(":messages"))
+    with(libs) {
         implementation(bundles.clusterman)
-        testImplementation(testFixtures(project(":domain")))
-        testImplementation(testFixtures(project(":ws")))
+        testImplementation(archunit)
     }
-
+    testImplementation(testFixtures(project(":domain")))
+    testImplementation(testFixtures(project(":ws")))
 }
 
 application {
