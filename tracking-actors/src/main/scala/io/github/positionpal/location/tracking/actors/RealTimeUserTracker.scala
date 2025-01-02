@@ -119,7 +119,8 @@ object RealTimeUserTracker:
     ctx.pipeToSelf(reaction.unsafeToFuture()):
       case Success(result) =>
         result match
-          case Left(value: DrivingEvent) => value; case _ => Ignore
+          case Left(value: DrivingEvent) => value
+          case _ => Ignore
       case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
     Effect.persist(StatefulDrivingEvent.from(s, e))
 

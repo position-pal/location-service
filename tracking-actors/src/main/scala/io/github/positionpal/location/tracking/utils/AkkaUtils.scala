@@ -63,16 +63,14 @@ object AkkaUtils:
                     .recoverWith:
                       case _: TimeoutException =>
                         Async[F].delay:
-                          logger.error(
-                            """
-                          |Timed out waiting for Cats-Effect to catch up!
-                          |This might indicate either a non-terminating cancellation logic,
-                          |or a misconfiguration of Akka.
-                          |""".stripMargin,
-                          )
+                          logger.error("""
+                            |Timed out waiting for Cats-Effect to catch up!
+                            |This might indicate either a non-terminating cancellation logic,
+                            |or a misconfiguration of Akka.
+                            |""".stripMargin)
                     .as(Done)
-              CoordinatedShutdown(sys).addTask(CoordinatedShutdown.PhaseActorSystemTerminate, "system-terminated"):
-                () => dispatcher.unsafeToFuture(awaitTermination.complete(()).as(Done))
+              CoordinatedShutdown(sys).addTask(CoordinatedShutdown.PhaseActorSystemTerminate, "sys-terminated"): () =>
+                dispatcher.unsafeToFuture(awaitTermination.complete(()).as(Done))
               sys
           yield
             val cancel =

@@ -41,31 +41,25 @@ trait RealTimeUserTrackerVerifierDSL:
   private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DrivingEvent])
       extends SystemVerifier[UserState, DrivingEvent, ObservableSession](ins, events):
 
-    infix override def -->(
-        outs: List[UserState],
-    )(using ctx: Context[UserState, ObservableSession]): Verification[DrivingEvent, ObservableSession] =
-      new Verification[DrivingEvent, ObservableSession]:
-        infix override def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using
-            PatienceConfig,
-        ): Unit =
-          val testKit = EventSourcedBehaviorTestKit[Command, Event, ObservableSession](
-            system,
-            RealTimeUserTracker(
-              Scope(UserId.create("luke"), GroupId.create("astro")),
-              "rtut-0",
-            )(using ctx.notificationService, ctx.mapsService),
-          )
-          ctx
-            .initialStates(ins)
-            .zipWithIndex
-            .foreach: (state, idx) =>
-              testKit.initialize(state)
-              events.foreach: e =>
-                testKit.runCommand(e).events should contain only StatefulDrivingEvent(
-                  state.session.userState.next(e),
-                  e,
-                )
-              eventually:
-                val currentState = testKit.getState()
-                currentState.session.userState shouldBe outs(if outs.size == 1 then 0 else idx)
-                verifyLast(events.last, currentState)
+    infix override def -->(outs: List[UserState])(using
+        ctx: Context[UserState, ObservableSession],
+    ): Verification[DrivingEvent, ObservableSession] = new Verification[DrivingEvent, ObservableSession]:
+      infix override def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using PatienceConfig): Unit =
+        val testKit = EventSourcedBehaviorTestKit[Command, Event, ObservableSession](
+          system,
+          RealTimeUserTracker(
+            scope = Scope(UserId.create("luke"), GroupId.create("astro")),
+            tag = "rtut-0",
+          )(using ctx.notificationService, ctx.mapsService),
+        )
+        ctx
+          .initialStates(ins)
+          .zipWithIndex
+          .foreach: (state, idx) =>
+            testKit.initialize(state)
+            events.foreach: e =>
+              testKit.runCommand(e).events should contain only StatefulDrivingEvent(state.session.userState.next(e), e)
+            eventually:
+              val currentState = testKit.getState()
+              currentState.session.userState shouldBe outs(if outs.size == 1 then 0 else idx)
+              verifyLast(events.last, currentState)
