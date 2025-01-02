@@ -2,12 +2,12 @@ package io.github.positionpal.location.presentation
 
 import java.time.Instant
 
-import io.bullet.borer.Cbor
-import io.github.positionpal.entities.{GroupId, UserId}
-import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.domain.GeoUtils.*
 import org.scalatest.flatspec.AnyFlatSpec
+import io.bullet.borer.Cbor
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.location.domain.GeoUtils.*
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.{GroupId, UserId}
 
 class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
 

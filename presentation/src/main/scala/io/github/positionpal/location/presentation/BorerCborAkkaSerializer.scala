@@ -2,14 +2,15 @@ package io.github.positionpal.location.presentation
 
 import scala.reflect.ClassTag
 
+import io.bullet.borer.*
 import akka.serialization.Serializer
-import io.bullet.borer.{Cbor, Codec, Decoder, Encoder}
 
 /** A custom Akka serializer that uses <a href="https://sirthias.github.io/borer/index.html">Borer</a>
   * CBOR for encoding and decoding messages.
   *
   * @see <a href="https://github.com/scala-steward/csw/blob/e3f1970b1c374693be0c4bbec068183e3395010f/csw-commons/src/main/scala/csw/commons/CborAkkaSerializer.scala">original source</a>.
   */
+@SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
 trait BorerCborAkkaSerializer extends Serializer:
 
   private var registrations: List[(Class[?], Codec[?])] = Nil
@@ -30,6 +31,7 @@ trait BorerCborAkkaSerializer extends Serializer:
     Cbor.decode(bytes).to[AnyRef](using decoder).value
 
   private def getCodec(classValue: Class[?], action: String): Codec[?] =
-    registrations.collectFirst:
-      case (clazz, codec) if clazz.isAssignableFrom(classValue) => codec
-    .getOrElse(throw new RuntimeException(s"$action of $classValue is not configured"))
+    registrations
+      .collectFirst:
+        case (clazz, codec) if clazz.isAssignableFrom(classValue) => codec
+      .getOrElse(throw new RuntimeException(s"$action of $classValue is not configured"))

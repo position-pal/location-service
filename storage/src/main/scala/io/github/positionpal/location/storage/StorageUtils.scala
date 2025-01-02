@@ -4,7 +4,7 @@ package io.github.positionpal.location.storage
 trait StorageUtils:
   import com.datastax.oss.driver.api.core.cql.SimpleStatement
   import scala.concurrent.Future
-  import scala.jdk.CollectionConverters._
+  import scala.jdk.CollectionConverters.*
   import cats.effect.kernel.Async
   import cats.implicits.catsSyntaxMonadError
 

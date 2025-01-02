@@ -1,12 +1,12 @@
 package io.github.positionpal.location.storage.groups
 
-import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import cats.effect.{IO, Resource}
-import cats.mtl.Handle.handleForApplicativeError
-import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.storage.CassandraConnectionFactory
+import cats.mtl.Handle.handleForApplicativeError
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.entities.{GroupId, UserId}
 import org.scalatest.wordspec.AnyWordSpecLike
+import cats.effect.{IO, Resource}
 
 class UserGroupsStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecLike with Matchers:
 

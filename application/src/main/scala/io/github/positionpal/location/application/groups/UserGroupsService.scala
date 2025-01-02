@@ -1,7 +1,7 @@
 package io.github.positionpal.location.application.groups
 
-import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.{AddedMemberToGroup, RemovedMemberToGroup}
+import io.github.positionpal.entities.{GroupId, UserId}
 
 /** A service for managing user groups.
   * @tparam F the effect type

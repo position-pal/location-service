@@ -1,14 +1,14 @@
 package io.github.positionpal.location.application.tracking.reactions
 
+import io.github.positionpal.location.domain.Distance.*
+import io.github.positionpal.location.application.notifications.NotificationService
+import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
+import cats.implicits.{toFlatMapOps, toFunctorOps, toTraverseOps}
+import io.github.positionpal.location.application.tracking.MapsService
 import cats.Monad
 import cats.effect.Async
-import cats.implicits.{toFlatMapOps, toFunctorOps, toTraverseOps}
+import io.github.positionpal.location.domain.SampledLocation
 import io.github.positionpal.entities.{GroupId, NotificationMessage, UserId}
-import io.github.positionpal.location.application.notifications.NotificationService
-import io.github.positionpal.location.application.tracking.MapsService
-import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
-import io.github.positionpal.location.domain.Distance.*
-import io.github.positionpal.location.domain.{MonitorableTracking, SampledLocation}
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is continually in the same location. */
 object StationaryCheck:
@@ -16,10 +16,10 @@ object StationaryCheck:
   def apply[F[_]: Async](using maps: MapsService[F], notifier: NotificationService[F]): EventReaction[F] =
     on[F]: (session, event) =>
       event match
-        case e: SampledLocation if session.tracking.isDefined && session.tracking.get.isMonitorable =>
+        case e: SampledLocation if session.tracking.exists(_.isMonitorable) =>
           for
             config <- ReactionsConfiguration.get
-            tracking = session.tracking.get.asInstanceOf[MonitorableTracking]
+            tracking <- Async[F].pure(session.tracking.flatMap(_.asMonitorable).get)
             samples = tracking.route.take(config.stationarySamples)
             distances <- samples.traverse(s => maps.distance(tracking.mode)(s.position, e.position))
             isStationary = distances.size >= config.stationarySamples &&

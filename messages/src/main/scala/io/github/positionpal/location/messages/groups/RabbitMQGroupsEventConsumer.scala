@@ -1,12 +1,12 @@
 package io.github.positionpal.location.messages.groups
 
-import cats.effect.Async
-import cats.implicits.{toFlatMapOps, toFunctorOps}
-import io.github.positionpal.location.application.groups.UserGroupsService
-import io.github.positionpal.location.messages.RabbitMQ
-import io.github.positionpal.{AvroSerializer, MessageType}
-import lepus.client.{Connection, ConsumeMode, Message}
 import lepus.protocol.domains.{ExchangeType, FieldTable, ShortString}
+import io.github.positionpal.{AvroSerializer, MessageType}
+import cats.implicits.{toFlatMapOps, toFunctorOps}
+import lepus.client.{Connection, ConsumeMode, Message}
+import io.github.positionpal.location.messages.RabbitMQ
+import cats.effect.Async
+import io.github.positionpal.location.application.groups.UserGroupsService
 
 /** A consumer of groups-related events from RabbitMQ broker. */
 object RabbitMQGroupsEventConsumer:
@@ -26,7 +26,8 @@ object RabbitMQGroupsEventConsumer:
         q <- ch.queue.declare(groupsEventsQueue, autoDelete = false, durable = true, exclusive = false)
         q <- Async[F].fromOption(q, QueueDeclarationFailed)
         _ <- ch.queue.bind(q.queue, groupsEventsExchange, ShortString.empty)
-        consumer = ch.messaging.consume[Array[Byte]](q.queue, mode = ConsumeMode.RaiseOnError(true))
+        consumer = ch.messaging
+          .consume[Array[Byte]](q.queue, mode = ConsumeMode.RaiseOnError(true))
           .evalMap(e => handleGroupEvent(e.message))
         _ <- consumer.compile.drain
       yield ()

@@ -1,8 +1,8 @@
 package io.github.positionpal.location.application.groups.impl
 
+import io.github.positionpal.{AddedMemberToGroup, RemovedMemberToGroup}
 import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.application.groups.{UserGroupsService, UserGroupsStore}
-import io.github.positionpal.{AddedMemberToGroup, RemovedMemberToGroup}
 
 class BasicUserGroupsService[F[_]](userGroupsStore: UserGroupsStore[F, Unit]) extends UserGroupsService[F]:
 

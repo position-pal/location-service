@@ -1,12 +1,12 @@
 package io.github.positionpal.location.tracking.actors
 
-import akka.actor.ExtendedActorSystem
-import akka.actor.typed.scaladsl.adapter.*
 import akka.actor.typed.{ActorRef, ActorRefResolver}
-import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
+import akka.actor.ExtendedActorSystem
 import io.bullet.borer.{Codec, Decoder, Encoder}
 import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent}
 import io.github.positionpal.location.presentation.*
+import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
+import akka.actor.typed.scaladsl.adapter.*
 
 /** Custom Akka serializer for the actor entities, where actor events and commands are registered into
   * [[BorerCborAkkaSerializer]] for serialization and deserialization.

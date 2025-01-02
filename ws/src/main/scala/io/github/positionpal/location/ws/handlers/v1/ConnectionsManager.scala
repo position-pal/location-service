@@ -3,8 +3,8 @@ package io.github.positionpal.location.ws.handlers.v1
 import scala.collection.concurrent.TrieMap
 
 import akka.actor.typed.ActorRef
-import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.domain.DrivenEvent
+import io.github.positionpal.entities.{GroupId, UserId}
 
 /** A thread-safe web sockets connections manager that is responsible for
   * keeping track of the active connections for each group.

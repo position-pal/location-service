@@ -1,7 +1,7 @@
 package io.github.positionpal.location.ws
 
-import io.github.positionpal.location.ws.handlers.v1.V1RoutesHandler
 import io.github.positionpal.location.ws.routes.v1.V1Routes
+import io.github.positionpal.location.ws.handlers.v1.V1RoutesHandler
 
 object HttpService:
 
@@ -23,17 +23,19 @@ object HttpService:
       * @param port the port the server should listen on.
       * @return a [[Validated]] instance containing either a valid [[Configuration]] or a [[ConfigurationError]].
       */
-    def apply[F[_]: Sync](port: Int): F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
-      port.positive.map(BasicHttpConfiguration.apply)
-    .handleError(e => Invalid(e.toString).invalidNec)
+    def apply[F[_]: Sync](port: Int): F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F]
+      .delay:
+        port.positive.map(BasicHttpConfiguration.apply)
+      .handleError(e => Invalid(e.toString).invalidNec)
 
     /** Create a new [[Configuration]] instance with the parameters read from environment variables,
       * expected in `HTTP_<PARAMETER>` format.
       * @return a [[Validated]] instance containing either a valid [[Configuration]] or a [[ConfigurationError]].
       */
-    def fromEnv[F[_]: Sync]: F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F].delay:
-      "HTTP_PORT".let(s => sys.env.get(s).validStr(s).andThen(_.toInt.positive)).map(BasicHttpConfiguration.apply)
-    .handleError(e => Invalid(e.toString).invalidNec)
+    def fromEnv[F[_]: Sync]: F[ValidatedNec[ConfigurationError, Configuration]] = Sync[F]
+      .delay:
+        "HTTP_PORT".let(s => sys.env.get(s).validStr(s).andThen(_.toInt.positive)).map(BasicHttpConfiguration.apply)
+      .handleError(e => Invalid(e.toString).invalidNec)
 
     private case class BasicHttpConfiguration(port: Int) extends Configuration
 
@@ -50,6 +52,7 @@ object HttpService:
     Resource.make(
       Async[F].fromFuture:
         Async[F].delay:
-          Http(actorSystem.classicSystem).newServerAt("localhost", configuration.port)
+          Http(actorSystem.classicSystem)
+            .newServerAt("localhost", configuration.port)
             .bind(V1Routes(V1RoutesHandler(service)).versionedRoutes),
     )(binding => Async[F].fromFuture(Async[F].delay(binding.unbind())).void)

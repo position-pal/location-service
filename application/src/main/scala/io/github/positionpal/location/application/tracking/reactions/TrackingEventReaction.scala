@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.tracking.reactions
 
-import io.github.positionpal.location.domain.{BinaryShortCircuitReaction, DrivingEvent, FilterableOps, Session}
+import io.github.positionpal.location.domain.*
 
 /** A binary short circuit reaction to [[DrivingEvent]]s producing as an [[Outcome]] a [[Notification]]
   * (either a [[Notification.Alert]] or a [[Notification.Success]]).

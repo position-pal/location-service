@@ -1,12 +1,12 @@
 package io.github.positionpal.location.tracking.actors
 
-import cats.effect.IO
-import io.github.positionpal.entities.{GroupId, UserId}
 import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.location.application.tracking.MapsService
-import io.github.positionpal.location.domain.Scope
-import org.scalatest.concurrent.Eventually.PatienceConfig
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.concurrent.Eventually.PatienceConfig
+import cats.effect.IO
+import io.github.positionpal.location.domain.Scope
+import io.github.positionpal.entities.{GroupId, UserId}
 
 trait SystemVerifier[S, E, X](val ins: List[S], val events: List[E]):
   infix def -->(outs: List[S])(using ctx: Context[S, X]): Verification[E, X]
@@ -41,11 +41,11 @@ trait RealTimeUserTrackerVerifierDSL:
   private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DrivingEvent])
       extends SystemVerifier[UserState, DrivingEvent, ObservableSession](ins, events):
 
-    override infix def -->(
+    infix override def -->(
         outs: List[UserState],
     )(using ctx: Context[UserState, ObservableSession]): Verification[DrivingEvent, ObservableSession] =
       new Verification[DrivingEvent, ObservableSession]:
-        override infix def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using
+        infix override def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using
             PatienceConfig,
         ): Unit =
           val testKit = EventSourcedBehaviorTestKit[Command, Event, ObservableSession](
@@ -55,11 +55,17 @@ trait RealTimeUserTrackerVerifierDSL:
               "rtut-0",
             )(using ctx.notificationService, ctx.mapsService),
           )
-          ctx.initialStates(ins).zipWithIndex.foreach: (state, idx) =>
-            testKit.initialize(state)
-            events.foreach: e =>
-              testKit.runCommand(e).events should contain only StatefulDrivingEvent(state.session.userState.next(e), e)
-            eventually:
-              val currentState = testKit.getState()
-              currentState.session.userState shouldBe outs(if outs.size == 1 then 0 else idx)
-              verifyLast(events.last, currentState)
+          ctx
+            .initialStates(ins)
+            .zipWithIndex
+            .foreach: (state, idx) =>
+              testKit.initialize(state)
+              events.foreach: e =>
+                testKit.runCommand(e).events should contain only StatefulDrivingEvent(
+                  state.session.userState.next(e),
+                  e,
+                )
+              eventually:
+                val currentState = testKit.getState()
+                currentState.session.userState shouldBe outs(if outs.size == 1 then 0 else idx)
+                verifyLast(events.last, currentState)

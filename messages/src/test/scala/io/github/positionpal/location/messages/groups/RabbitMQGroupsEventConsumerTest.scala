@@ -2,14 +2,14 @@ package io.github.positionpal.location.messages.groups
 
 import scala.concurrent.duration.DurationInt
 
-import cats.effect.IO
-import eu.monniot.scala3mock.cats.withExpectations
 import eu.monniot.scala3mock.scalatest.MockFactory
-import io.github.positionpal.location.application.groups.UserGroupsService
-import io.github.positionpal.location.messages.RabbitMQ
+import eu.monniot.scala3mock.cats.withExpectations
 import io.github.positionpal.location.messages.RabbitMQTestUtils.*
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.location.messages.RabbitMQ
 import org.scalatest.wordspec.AnyWordSpec
+import cats.effect.IO
+import io.github.positionpal.location.application.groups.UserGroupsService
 
 class RabbitMQGroupsEventConsumerTest extends AnyWordSpec with Matchers with MockFactory with RabbitMQ.Utils:
 
@@ -34,7 +34,7 @@ class RabbitMQGroupsEventConsumerTest extends AnyWordSpec with Matchers with Moc
       }.unsafeRunSync()
 
   private object Utils:
-    import io.github.positionpal.{AvroSerializer, User, AddedMemberToGroup, RemovedMemberToGroup, MessageType}
+    import io.github.positionpal.{AddedMemberToGroup, AvroSerializer, MessageType, RemovedMemberToGroup, User}
     import io.github.positionpal.MessageType.*
     import lepus.client.{Connection, Message}
     import lepus.protocol.domains.{ExchangeType, ShortString}

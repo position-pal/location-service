@@ -1,13 +1,13 @@
 package io.github.positionpal.location.application.tracking.reactions
 
-import cats.effect.Async
-import cats.implicits.catsSyntaxApplicativeId
-import io.github.positionpal.entities.NotificationMessage
+import io.github.positionpal.location.commons.ScopeFunctions.let
 import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
-import io.github.positionpal.location.commons.ScopeFunctions.let
-import io.github.positionpal.location.domain.*
+import cats.implicits.catsSyntaxApplicativeId
 import io.github.positionpal.location.domain.UserState.*
+import cats.effect.Async
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.NotificationMessage
 
 /** A [[TrackingEventReaction]] performing a preliminary check on the event, possibly emitting a
   * notification if it is a noteworthy event.
@@ -16,8 +16,11 @@ object PreCheckNotifier:
 
   def apply[F[_]: Async](using notifier: NotificationService[F]): EventReaction[F] =
     on[F]: (session, event) =>
-      event.notify(session).map(n => Async[F].start(notifier.sendToGroup(session.scope.group, event.user, n)))
-        .map(_ => Left(()).pure[F]).getOrElse(Right(Continue).pure[F])
+      event
+        .notify(session)
+        .map(n => Async[F].start(notifier.sendToGroup(session.scope.group, event.user, n)))
+        .map(_ => Left(()).pure[F])
+        .getOrElse(Right(Continue).pure[F])
 
   extension (event: DrivingEvent)
     private def notify(s: Session) =

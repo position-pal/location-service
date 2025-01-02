@@ -1,8 +1,8 @@
 package io.github.positionpal.location.domain
 
 import eu.monniot.scala3mock.scalatest.MockFactory
-import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
 class EventReactionsTest extends AnyFunSpec with Matchers with MockFactory:
 

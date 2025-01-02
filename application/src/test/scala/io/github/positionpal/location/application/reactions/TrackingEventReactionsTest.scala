@@ -1,27 +1,29 @@
 package io.github.positionpal.location.application.reactions
 
-import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import eu.monniot.scala3mock.scalatest.MockFactory
-import io.github.positionpal.entities.{GroupId, UserId}
-import io.github.positionpal.location.application.notifications.NotificationService
-import io.github.positionpal.location.application.tracking.MapsService
-import io.github.positionpal.location.application.tracking.reactions.*
-import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
-import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.Distance.*
-import io.github.positionpal.location.domain.GeoUtils.*
-import io.github.positionpal.location.domain.RoutingMode.*
+import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.location.domain.TimeUtils.*
-import org.scalatest.funspec.AnyFunSpec
+import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
+import cats.effect.unsafe.implicits.global
+import io.github.positionpal.location.application.tracking.reactions.*
+import io.github.positionpal.location.application.tracking.MapsService
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.location.domain.GeoUtils.*
+import org.scalatest.funspec.AnyFunSpec
+import io.github.positionpal.location.domain.RoutingMode.*
+import cats.effect.IO
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.{GroupId, UserId}
 
 class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFactory:
 
   private val scope = Scope(UserId.create("luke"), GroupId.create("astro"))
   private val maps = mock[MapsService[IO]]
-  when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation)).expects(*, *, *)
-    .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters)).anyNumberOfTimes
+  when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation))
+    .expects(*, *, *)
+    .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters))
+    .anyNumberOfTimes
   private val notifier = mock[NotificationService[IO]]
 
   given MapsService[IO] = maps
@@ -61,9 +63,11 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
 
       it("if the user is stuck in the same position for too long"):
         val event = SampledLocation(now, scope, bolognaCampus)
-        val tracking = List.fill(50)(event).foldLeft(
-          Tracking.withMonitoring(RoutingMode.Driving, arrivalLocation = cesenaCampus, estimatedArrival = inTheFuture),
-        )(_ + _)
+        val tracking = List
+          .fill(50)(event)
+          .foldLeft(
+            Tracking.withMonitoring(RoutingMode.Driving, arrivalLocation = cesenaCampus, estimatedArrival = inTheFuture),
+          )(_ + _)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
         expectNotification("luke has been stuck in the same position"):
           doChecks(session, event).unsafeRunSync() shouldBe Left(())
@@ -88,5 +92,6 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
   private def expectNotification(content: String)(testBlock: => Unit): Unit =
     when(notifier.sendToGroup)
       .expects(where((guid, uid, n) => guid == scope.group && uid == scope.user && n.body().contains(content)))
-      .returning(IO.unit).once
+      .returning(IO.unit)
+      .once
     testBlock

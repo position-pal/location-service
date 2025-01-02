@@ -6,12 +6,12 @@ import scala.collection.mutable
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
-import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.scaladsl.Sink
 import io.bullet.borer.Json
-import io.github.positionpal.entities.{GroupId, UserId}
-import io.github.positionpal.location.domain.*
+import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import io.github.positionpal.location.presentation.ModelCodecs
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.{GroupId, UserId}
 
 trait WebSocketTestDSL:
   context: ModelCodecs =>

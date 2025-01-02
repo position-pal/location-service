@@ -4,18 +4,18 @@ import java.time.Instant
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import akka.actor.typed.ActorSystem
-import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
-import cats.effect.kernel.Async
-import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps, toTraverseOps}
-import com.datastax.oss.driver.api.core.cql.Row
-import io.github.positionpal.location.application.sessions.UserSessionStore
-import io.github.positionpal.location.commons.CanRaise
-import io.github.positionpal.location.domain
-import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.domain.Session.Snapshot
-import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.storage.{StorageUtils, StoreError}
+import io.github.positionpal.location.domain
+import akka.actor.typed.ActorSystem
+import io.github.positionpal.location.domain.Session.Snapshot
+import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps, toTraverseOps}
+import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.location.application.sessions.UserSessionStore
+import cats.effect.kernel.Async
+import io.github.positionpal.location.domain.UserState.*
+import io.github.positionpal.location.commons.CanRaise
+import com.datastax.oss.driver.api.core.cql.Row
 
 /** A Cassandra-based implementation of the [[UserSessionStore]]. */
 object CassandraUserSessionStore:
@@ -46,7 +46,8 @@ object CassandraUserSessionStore:
       for
         userInfoRow <- session.selectOne(getUserInfoQuery(scope))
         userInfo <- userInfoRow.traverse(row => (row.userState, row.sampledLocationOf(scope)).pure[Future])
-        routes <- session.select(getTrackingQuery(scope))
+        routes <- session
+          .select(getTrackingQuery(scope))
           .runFold(List.empty[(Instant, GPSLocation)])((acc, row) => (row.timestamp, row.location) :: acc)
         tracking = Option.when(routes.nonEmpty)(Tracking(routes.reverse.map(SampledLocation(_, scope, _))))
       yield userInfo.map((state, location) => Session.from(scope, state, location, tracking))
