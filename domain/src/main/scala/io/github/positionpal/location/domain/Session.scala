@@ -26,7 +26,7 @@ trait Session:
   def tracking: Option[Tracking | MonitorableTracking]
 
   /** @return a new [[Session]] updated according to the given [[event]]. */
-  def updateWith(event: DrivingEvent): Session
+  def updateWith(event: DrivingEvent | InternalEvent): Session
 
 object Session:
 
@@ -81,12 +81,23 @@ object Session:
       override val lastSampledLocation: Option[SampledLocation],
       override val tracking: Option[Tracking | MonitorableTracking],
   ) extends Session:
-    override def updateWith(event: DrivingEvent): Session = event match
+    override def updateWith(event: DrivingEvent | InternalEvent): Session = event match
       case e: SampledLocation =>
         copy(userState = userState.next(e), tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
+      case e: WentOffline =>
+        copy(userState = userState.next(e))
       case e: RoutingStarted =>
         copy(userState = userState.next(e), tracking = Some(e.toMonitorableTracking), lastSampledLocation = Some(e))
       case e: SOSAlertTriggered =>
         copy(userState = userState.next(e), tracking = Some(Tracking()), lastSampledLocation = Some(e))
-      case e: (SOSAlertStopped | RoutingStopped) => copy(userState = userState.next(e), tracking = None)
-      case e: WentOffline => copy(userState = userState.next(e))
+      case e: SOSAlertStopped =>
+        copy(userState = userState.next(e), tracking = None)
+      case e: RoutingStopped if userState == Routing =>
+        copy(userState = userState.next(e), tracking = None)
+      case _: StuckAlertTriggered if userState == Routing =>
+        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Stuck)))
+      case _: StuckAlertStopped if userState == Routing =>
+        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.removeAlert(Alert.Stuck)))
+      case _: TimeoutAlertTriggered if userState == Routing =>
+        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Late)))
+      case _ => this

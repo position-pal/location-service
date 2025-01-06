@@ -70,14 +70,14 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
           )(_ + _)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
         expectNotification("luke has been stuck in the same position"):
-          doChecks(session, event).unsafeRunSync() shouldBe Left(())
+          doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: StuckAlertTriggered) => }
 
       it("if the user has not reached the destination within the expected time"):
         val tracking = Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, inThePast)
         val event = SampledLocation(now, scope, bolognaCampus)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
         expectNotification("luke has not reached their destination as expected"):
-          doChecks(session, event).unsafeRunSync() shouldBe Left(())
+          doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: TimeoutAlertTriggered) => }
 
       it("if the user has arrived to the expected destination in time"):
         val tracking = Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, inTheFuture)
