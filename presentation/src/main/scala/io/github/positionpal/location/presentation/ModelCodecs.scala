@@ -5,7 +5,7 @@ import java.time.Instant
 import scala.Option.empty
 
 import cats.implicits.catsSyntaxTuple4Semigroupal
-import io.bullet.borer.derivation.MapBasedCodecs.{deriveAllCodecs, deriveCodec}
+import io.bullet.borer.derivation.MapBasedCodecs.{deriveAllCodecs, deriveCodec, deriveEncoder}
 import io.bullet.borer.*
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.{GroupId, UserId}
@@ -32,6 +32,8 @@ trait ModelCodecs:
   given routingStoppedCodec: Codec[RoutingStopped] = deriveCodec[RoutingStopped]
 
   given sampledLocationCodec: Codec[SampledLocation] = deriveCodec[SampledLocation]
+
+  given internalEventCodec: Codec[InternalEvent] = deriveAllCodecs[InternalEvent]
 
   given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
 

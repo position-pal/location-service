@@ -18,6 +18,30 @@ trait DomainEvent:
   /** The [[Scope]] of the event, i.e., an aggregation of the user and group this event is related to. */
   def scope: Scope = Scope(user, group)
 
+/** An event driving a use case triggered by the system itself. */
+sealed trait InternalEvent extends DomainEvent
+
+/** An event triggered when a user is stuck in the same position for a suspicious amount of time. */
+case class StuckAlertTriggered(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
+
+object StuckAlertTriggered:
+  def apply(timestamp: Instant, scope: Scope): StuckAlertTriggered =
+    StuckAlertTriggered(timestamp, scope.user, scope.group)
+
+/** An event triggered when a user stops being stuck. */
+case class StuckAlertStopped(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
+
+object StuckAlertStopped:
+  def apply(timestamp: Instant, scope: Scope): StuckAlertStopped =
+    StuckAlertStopped(timestamp, scope.user, scope.group)
+
+/** An event triggered when a user is late to reach a destination. */
+case class TimeoutAlertTriggered(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
+
+object TimeoutAlertTriggered:
+  def apply(timestamp: Instant, scope: Scope): TimeoutAlertTriggered =
+    TimeoutAlertTriggered(timestamp, scope.user, scope.group)
+
 /** An event driving an application use case. */
 sealed trait DrivingEvent extends DomainEvent
 

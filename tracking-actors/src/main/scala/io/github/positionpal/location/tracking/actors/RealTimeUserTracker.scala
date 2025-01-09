@@ -53,8 +53,8 @@ object RealTimeUserTracker:
   case object AliveCheck extends SelfResponse
 
   type Observer = ActorRef[DrivenEvent]
-  type Command = DrivingEvent | ProtocolCommand | SelfResponse
-  type Event = StatefulDrivingEvent | ProtocolCommand
+  type Command = DrivingEvent | InternalEvent | ProtocolCommand | SelfResponse
+  type Event = StatefulDrivingEvent | InternalEvent | ProtocolCommand
 
   case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
   object StatefulDrivingEvent:
@@ -94,6 +94,7 @@ object RealTimeUserTracker:
       case Wire(o) => state.addObserver(o)
       case UnWire(o) => state.removeObserver(o)
       case StatefulDrivingEvent(_, e) => state.update(e)
+      case e: InternalEvent => state.copy(state.session.updateWith(e))
 
   private def commandHandler(timer: TimerScheduler[Command])(using
       ActorContext[Command],
@@ -101,7 +102,7 @@ object RealTimeUserTracker:
       MapsService[IO],
   ): (ObservableSession, Command) => Effect[Event, ObservableSession] = (state, command) =>
     command match
-      case e: ProtocolCommand => Effect.persist(e)
+      case e: (ProtocolCommand | InternalEvent) => Effect.persist(e)
       case e: AliveCheck.type => aliveCheckHandler(timer)(state.session, e)
       case e: DrivingEvent =>
         if state.session.userState == Inactive then timer.startTimerAtFixedRate(msg = AliveCheck, interval = 20.seconds)
@@ -119,7 +120,7 @@ object RealTimeUserTracker:
     ctx.pipeToSelf(reaction.unsafeToFuture()):
       case Success(result) =>
         result match
-          case Left(value: DrivingEvent) => value
+          case Left(e: (DrivingEvent | InternalEvent)) => e
           case _ => Ignore
       case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
     Effect.persist(StatefulDrivingEvent.from(s, e))
