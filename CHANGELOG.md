@@ -1,3 +1,32 @@
+## [2.0.2](https://github.com/position-pal/location-service/compare/2.0.1...2.0.2) (2025-01-09)
+
+### Dependency updates
+
+* **deps:** update akka to v2.10.0 (minor) ([#70](https://github.com/position-pal/location-service/issues/70)) ([85472d9](https://github.com/position-pal/location-service/commit/85472d935485ce4a4755f9b9af2dca651acdef66))
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.16 ([#148](https://github.com/position-pal/location-service/issues/148)) ([addcc46](https://github.com/position-pal/location-service/commit/addcc464138a2736fbb07402440daf12c0fa8b8f))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.118 ([#150](https://github.com/position-pal/location-service/issues/150)) ([06865ca](https://github.com/position-pal/location-service/commit/06865ca54468b3e2ab9400aad2dd0bf31fdfe7b6))
+* **deps:** update node.js to 22.13 ([#149](https://github.com/position-pal/location-service/issues/149)) ([f440d69](https://github.com/position-pal/location-service/commit/f440d69d4e4f52c8037516023ff327f401aef7fc))
+* **deps:** update plugin scala-extras to v3.1.3 ([c37cf90](https://github.com/position-pal/location-service/commit/c37cf90529276d528d9905b9dc1e9a5ad6be2c62))
+* **deps:** update plugin scala-extras to v3.1.4 ([ec92f84](https://github.com/position-pal/location-service/commit/ec92f8455b6b5c6c660c1f0651f945e0dfcfa82a))
+
+### Bug Fixes
+
+* **application:** do not trigger multiple notifications for the same alert in check reactions ([#146](https://github.com/position-pal/location-service/issues/146)) ([643efdc](https://github.com/position-pal/location-service/commit/643efdc579fddfe68f21a3ef64990ba46a5ab4a1))
+
+### Tests
+
+* add architectural unit test ([9ce060f](https://github.com/position-pal/location-service/commit/9ce060fa09413006fc4039de0213fc520654ce8d))
+
+### Build and continuous integration
+
+* **deps:** pin dependencies ([#144](https://github.com/position-pal/location-service/issues/144)) ([566e54b](https://github.com/position-pal/location-service/commit/566e54b04a5a79a3019cd38299f5d349f5491f50))
+* **deps:** update docker/build-push-action digest to b32b51a ([#147](https://github.com/position-pal/location-service/issues/147)) ([763404f](https://github.com/position-pal/location-service/commit/763404f1e68497b2687a9eab4f97308cf6431caf))
+
+### Style improvements
+
+* format accordingly to qa rules ([576fd1a](https://github.com/position-pal/location-service/commit/576fd1a80d4a943fdacffd4bb695e7ead4e22a37))
+* improve readability ([acb816f](https://github.com/position-pal/location-service/commit/acb816f18ca4358d64b6e98d723b821b175994b9))
+
 ## [2.0.1](https://github.com/position-pal/location-service/compare/2.0.0...2.0.1) (2025-01-02)
 
 ### Bug Fixes
