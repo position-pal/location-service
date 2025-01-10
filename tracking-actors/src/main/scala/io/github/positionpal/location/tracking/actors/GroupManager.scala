@@ -4,10 +4,9 @@ import io.github.positionpal.location.commons.ScopeFunctions.also
 import akka.persistence.typed.PersistenceId
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.actor.typed.{ActorRef, Behavior}
-import akka.cluster.typed.Cluster
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import io.github.positionpal.location.domain.DrivenEvent
 import io.github.positionpal.entities.GroupId
 
@@ -40,19 +39,23 @@ object GroupManager:
 
   def apply(groupId: GroupId): Behavior[Command] =
     Behaviors.setup: ctx =>
-      ctx.log.debug("Starting GroupManager::{}@{}", groupId, Cluster(ctx.system).selfMember.address)
+      given ActorContext[Command] = ctx
       val persistenceId = PersistenceId(key.name, groupId.value())
       EventSourcedBehavior(persistenceId, State(), commandHandler, eventHandler)
       // .snapshotWhen((_, event, _) => event == RoutingStopped, deleteEventsOnSnapshot = true)
       // .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
       // .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
 
-  private def commandHandler: (State, Command) => Effect[Event, State] = (state, command) =>
-    command match
-      case e: ProtocolCommand => Effect.persist(e)
-      case e: DrivenEvent => Effect.none.thenRun(_.update(e))
+  private def commandHandler(using ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] =
+    (_, command) =>
+      ctx.log.debug("Received command: {}", command)
+      command match
+        case e: ProtocolCommand => Effect.persist(e)
+        case e: DrivenEvent => Effect.none.thenRun(_.update(e))
 
-  private def eventHandler: (State, Event) => State = (state, event) =>
-    event match
-      case Wire(observer) => state.copy(observers = state.observers + observer)
-      case UnWire(observer) => state.copy(observers = state.observers - observer)
+  private def eventHandler(using ctx: ActorContext[Command]): (State, Event) => State =
+    (state, event) =>
+      ctx.log.debug("Received event: {}", event)
+      event match
+        case Wire(observer) => state.copy(observers = state.observers + observer)
+        case UnWire(observer) => state.copy(observers = state.observers - observer)

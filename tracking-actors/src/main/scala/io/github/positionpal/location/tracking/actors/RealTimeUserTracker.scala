@@ -7,11 +7,11 @@ import scala.concurrent.duration.DurationInt
 
 import akka.persistence.typed.scaladsl.RetentionCriteria.snapshotEvery
 import akka.cluster.Cluster
-import akka.persistence.typed.PersistenceId
 import io.github.positionpal.location.application.notifications.NotificationService
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
+import akka.actor.typed.*
 import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
+import io.github.positionpal.location.tracking.utils.AkkaUtils.refOf
 import io.github.positionpal.location.application.tracking.reactions.*
 import io.github.positionpal.location.application.tracking.MapsService
 import akka.actor.typed.SupervisorStrategy.restartWithBackoff
@@ -19,6 +19,8 @@ import io.github.positionpal.location.domain.UserState.*
 import akka.cluster.sharding.typed.scaladsl.*
 import cats.effect.IO
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
+import akka.persistence.typed.PersistenceId
+import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.NotificationMessage
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
@@ -57,13 +59,12 @@ object RealTimeUserTracker:
   end StatefulDrivingEvent
 
   case class ObservableSession(session: Session) extends AkkaSerializable:
-    def update(e: DrivingEvent | InternalEvent): ObservableSession =
-      val updatedSession = session.updateWith(e)
-      // e match
-      //  case _: DrivingEvent =>
-      // TODO: notify group manager actor of the user's state change
-      //  observers.foreach(_ ! userUpdateFrom(e, updatedSession))
-      copy(session = updatedSession)
+    def update(e: DrivingEvent | InternalEvent)(using ActorSystem[?]): ObservableSession =
+      val newSession = session.updateWith(e)
+      e match
+        case ev: DrivingEvent => refOf(GroupManager.key, session.scope.group.value()) ! userUpdateFrom(ev, newSession)
+        case _ =>
+      copy(session = newSession)
   end ObservableSession
   object ObservableSession:
     def of(scope: Scope): ObservableSession = ObservableSession(Session.of(scope))
@@ -84,10 +85,10 @@ object RealTimeUserTracker:
           .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
           .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
 
-  private def eventHandler: (ObservableSession, Event) => ObservableSession = (state, event) =>
-    event match
-      case StatefulDrivingEvent(_, e) => state.update(e)
-      case e: InternalEvent => state.update(e)
+  private def eventHandler(using ctx: ActorContext[Command]): (ObservableSession, Event) => ObservableSession =
+    (state, event) => event match
+      case StatefulDrivingEvent(_, e) => state.update(e)(using ctx.system)
+      case e: InternalEvent => state.update(e)(using ctx.system)
 
   private def commandHandler(timer: TimerScheduler[Command])(using
       ActorContext[Command],

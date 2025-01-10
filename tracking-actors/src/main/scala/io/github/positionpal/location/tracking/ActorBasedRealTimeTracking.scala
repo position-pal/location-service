@@ -5,10 +5,11 @@ import io.github.positionpal.location.application.tracking.{MapsService, RealTim
 object ActorBasedRealTimeTracking extends RealTimeTracking:
 
   import akka.actor.typed.{ActorRef, ActorSystem}
-  import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef, EntityTypeKey}
+  import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
   import cats.effect.kernel.Async
   import cats.effect.IO
   import cats.implicits.{toFlatMapOps, toFunctorOps}
+  import io.github.positionpal.location.tracking.utils.AkkaUtils
   import io.github.positionpal.entities.GroupId
   import io.github.positionpal.location.domain.*
   import io.github.positionpal.location.tracking.actors.{GroupManager, RealTimeUserTracker}
@@ -43,10 +44,7 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
       observer.foreach(refOf(resource.group) ! GroupManager.UnWire(_))
 
     private def refOf(group: GroupId): EntityRef[GroupManager.Command] =
-      refOf(GroupManager.key, group.value())
+      AkkaUtils.refOf(GroupManager.key, group.value())(using actorSystem)
 
     private def refOf(scope: Scope): EntityRef[RealTimeUserTracker.Command] =
-      refOf(RealTimeUserTracker.key, scope.concatenated)
-
-    private def refOf[T](entityTypeKey: EntityTypeKey[T], entityId: String): EntityRef[T] =
-      ClusterSharding(actorSystem).entityRefFor(entityTypeKey, entityId)
+      AkkaUtils.refOf(RealTimeUserTracker.key, scope.concatenated)(using actorSystem)
