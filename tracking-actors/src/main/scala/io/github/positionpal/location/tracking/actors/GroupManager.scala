@@ -1,5 +1,6 @@
 package io.github.positionpal.location.tracking.actors
 
+import akka.actor.typed.SupervisorStrategy.restartWithBackoff
 import io.github.positionpal.location.commons.ScopeFunctions.also
 import akka.persistence.typed.PersistenceId
 import akka.cluster.sharding.typed.ShardingEnvelope
@@ -7,8 +8,10 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
+import akka.persistence.typed.scaladsl.RetentionCriteria.snapshotEvery
 import io.github.positionpal.location.domain.DrivenEvent
 import io.github.positionpal.entities.GroupId
+import scala.concurrent.duration.DurationInt
 
 /** An akka sharded actor that manages a group of users, acting as an intermediary
   * between the clients and the [[RealTimeUserTracker]] actors that track the users.
@@ -42,9 +45,8 @@ object GroupManager:
       given ActorContext[Command] = ctx
       val persistenceId = PersistenceId(key.name, groupId.value())
       EventSourcedBehavior(persistenceId, State(), commandHandler, eventHandler)
-      // .snapshotWhen((_, event, _) => event == RoutingStopped, deleteEventsOnSnapshot = true)
-      // .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
-      // .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
+        .withRetention(snapshotEvery(numberOfEvents = 100, keepNSnapshots = 1).withDeleteEventsOnSnapshot)
+        .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
 
   private def commandHandler(using ctx: ActorContext[Command]): (State, Command) => Effect[Event, State] =
     (_, command) =>
