@@ -42,11 +42,9 @@ class V1RoutesHandler(service: ActorBasedRealTimeTracking.Service[IO, Scope])(us
       .watchTermination(): (_, done) =>
         done.onComplete: _ =>
           val oldConnections = ConnectionsManager.removeConnection(scope.group, scope.user)
-          val scopeActorRef = oldConnections.find(_._1 == scope.user).map(_._2)
-          scopeActorRef.foreach: ref =>
-            oldConnections
-              .foreach((uid, _) => service.removeObserverFor(Scope(uid, scope.group))(Set(ref)).unsafeRunSync())
-            service.removeObserverFor(scope)(oldConnections.map(_._2) - ref).unsafeRunSync()
+          val wsClientActorRef = oldConnections.find(_._1 == scope.user).map(_._2)
+          wsClientActorRef.foreach: ref =>
+            service.removeObserverFor(scope)(Set(ref)).unsafeRunSync()
       .to(Sink.foreach(service.handle(scope)(_).unsafeRunSync()))
 
   private def routeToClient(scope: Scope): Source[Message, ActorRef[DrivenEvent]] =
@@ -58,9 +56,8 @@ class V1RoutesHandler(service: ActorBasedRealTimeTracking.Service[IO, Scope])(us
         overflowStrategy = OverflowStrategy.dropHead,
       )
       .mapMaterializedValue: ref =>
-        val oldConnections = ConnectionsManager.addConnection(scope.group, scope.user, ref)
-        oldConnections.foreach((uid, _) => service.addObserverFor(Scope(uid, scope.group))(Set(ref)).unsafeRunSync())
-        service.addObserverFor(scope)(oldConnections.map(_._2) + ref).unsafeRunSync()
+        ConnectionsManager.addConnection(scope.group, scope.user, ref)
+        service.addObserverFor(scope)(Set(ref)).unsafeRunSync()
         ref
       .log("Websocket message from tracker to client")
       .withAttributes(attributes)
