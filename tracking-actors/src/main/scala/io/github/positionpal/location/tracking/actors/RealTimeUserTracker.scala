@@ -86,9 +86,10 @@ object RealTimeUserTracker:
           .onPersistFailure(restartWithBackoff(minBackoff = 2.second, maxBackoff = 15.seconds, randomFactor = 0.2))
 
   private def eventHandler(using ctx: ActorContext[Command]): (ObservableSession, Event) => ObservableSession =
-    (state, event) => event match
-      case StatefulDrivingEvent(_, e) => state.update(e)(using ctx.system)
-      case e: InternalEvent => state.update(e)(using ctx.system)
+    (state, event) =>
+      event match
+        case StatefulDrivingEvent(_, e) => state.update(e)(using ctx.system)
+        case e: InternalEvent => state.update(e)(using ctx.system)
 
   private def commandHandler(timer: TimerScheduler[Command])(using
       ActorContext[Command],

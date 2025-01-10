@@ -46,8 +46,8 @@ trait RealTimeUserTrackerVerifierDSL:
     ): Verification[DrivingEvent, ObservableSession] = new Verification[DrivingEvent, ObservableSession]:
       infix override def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using PatienceConfig): Unit =
         val testKit = EventSourcedBehaviorTestKit[Command, Event, ObservableSession](
-          system,
-          RealTimeUserTracker(
+          system = system,
+          behavior = RealTimeUserTracker(
             scope = Scope(UserId.create("luke"), GroupId.create("astro")),
             tag = "rtut-0",
           )(using ctx.notificationService, ctx.mapsService),
