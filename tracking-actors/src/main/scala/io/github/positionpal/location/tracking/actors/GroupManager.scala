@@ -1,17 +1,18 @@
 package io.github.positionpal.location.tracking.actors
 
-import akka.actor.typed.SupervisorStrategy.restartWithBackoff
-import io.github.positionpal.location.commons.ScopeFunctions.also
+import scala.concurrent.duration.DurationInt
+
 import akka.persistence.typed.PersistenceId
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.actor.typed.SupervisorStrategy.restartWithBackoff
 import akka.cluster.sharding.typed.scaladsl.{Entity, EntityTypeKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.persistence.typed.scaladsl.RetentionCriteria.snapshotEvery
+import io.github.positionpal.location.commons.ScopeFunctions.also
 import io.github.positionpal.location.domain.DrivenEvent
 import io.github.positionpal.entities.GroupId
-import scala.concurrent.duration.DurationInt
 
 /** An akka sharded actor that manages a group of users, acting as an intermediary
   * between the clients and the [[RealTimeUserTracker]] actors that track the users.
