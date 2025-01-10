@@ -7,6 +7,7 @@ import scala.concurrent.duration.DurationInt
 
 import akka.persistence.typed.scaladsl.RetentionCriteria.snapshotEvery
 import akka.cluster.Cluster
+import akka.persistence.typed.PersistenceId
 import io.github.positionpal.location.application.notifications.NotificationService
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
@@ -18,8 +19,6 @@ import io.github.positionpal.location.domain.UserState.*
 import akka.cluster.sharding.typed.scaladsl.*
 import cats.effect.IO
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
-import akka.persistence.typed.PersistenceId
-import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.NotificationMessage
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
@@ -38,23 +37,18 @@ object RealTimeUserTracker:
     */
   val tags: Seq[String] = Vector.tabulate(5)(i => s"${getClass.getSimpleName}-$i")
 
-  /** The commands that can be sent to the actor to interact with it. */
-  sealed trait ProtocolCommand extends AkkaSerializable
+  /** A message sent by the actor to itself in response to an async operation or to initiate an action proactively. */
+  sealed trait SelfMessage
 
-  /** The command to attach an observer to the actor, receiving updates about the user's state. */
-  case class Wire(observer: ActorRef[DrivenEvent]) extends ProtocolCommand
+  /** A [[SelfMessage]] indicating the spawned async operation has completed with an unuseful result. */
+  case object Ignore extends SelfMessage
 
-  /** The command to detach an observer from the actor, stopping to receive updates about the user's state. */
-  case class UnWire(observer: ActorRef[DrivenEvent]) extends ProtocolCommand
-
-  /** The responses that the actor can send to itself in respose to an asynchronous operation. */
-  sealed trait SelfResponse
-  case object Ignore extends SelfResponse
-  case object AliveCheck extends SelfResponse
+  /** A [[SelfMessage]] triggered regularly by a timer to check whether the user went offline. */
+  case object AliveCheck extends SelfMessage
 
   type Observer = ActorRef[DrivenEvent]
-  type Command = DrivingEvent | InternalEvent | ProtocolCommand | SelfResponse
-  type Event = StatefulDrivingEvent | InternalEvent | ProtocolCommand
+  type Command = DrivingEvent | InternalEvent | SelfMessage
+  type Event = StatefulDrivingEvent | InternalEvent
 
   case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
   object StatefulDrivingEvent:
@@ -62,16 +56,17 @@ object RealTimeUserTracker:
       StatefulDrivingEvent(session.userState.next(event), event)
   end StatefulDrivingEvent
 
-  case class ObservableSession(session: Session, observers: Set[Observer]) extends AkkaSerializable:
-    def addObserver(observer: Observer): ObservableSession = copy(observers = observers + observer)
-    def removeObserver(observer: Observer): ObservableSession = copy(observers = observers - observer)
-    def update(e: DrivingEvent): ObservableSession =
+  case class ObservableSession(session: Session) extends AkkaSerializable:
+    def update(e: DrivingEvent | InternalEvent): ObservableSession =
       val updatedSession = session.updateWith(e)
-      observers.foreach(_ ! userUpdateFrom(e, updatedSession))
+      // e match
+      //  case _: DrivingEvent =>
+      // TODO: notify group manager actor of the user's state change
+      //  observers.foreach(_ ! userUpdateFrom(e, updatedSession))
       copy(session = updatedSession)
   end ObservableSession
   object ObservableSession:
-    def of(scope: Scope): ObservableSession = ObservableSession(Session.of(scope), Set.empty)
+    def of(scope: Scope): ObservableSession = ObservableSession(Session.of(scope))
   end ObservableSession
 
   def apply(using NotificationService[IO], MapsService[IO]): Entity[Command, ShardingEnvelope[Command]] =
@@ -91,10 +86,8 @@ object RealTimeUserTracker:
 
   private def eventHandler: (ObservableSession, Event) => ObservableSession = (state, event) =>
     event match
-      case Wire(o) => state.addObserver(o)
-      case UnWire(o) => state.removeObserver(o)
       case StatefulDrivingEvent(_, e) => state.update(e)
-      case e: InternalEvent => state.copy(state.session.updateWith(e))
+      case e: InternalEvent => state.update(e)
 
   private def commandHandler(timer: TimerScheduler[Command])(using
       ActorContext[Command],
@@ -102,7 +95,7 @@ object RealTimeUserTracker:
       MapsService[IO],
   ): (ObservableSession, Command) => Effect[Event, ObservableSession] = (state, command) =>
     command match
-      case e: (ProtocolCommand | InternalEvent) => Effect.persist(e)
+      case e: InternalEvent => Effect.persist(e)
       case e: AliveCheck.type => aliveCheckHandler(timer)(state.session, e)
       case e: DrivingEvent =>
         if state.session.userState == Inactive then timer.startTimerAtFixedRate(msg = AliveCheck, interval = 20.seconds)

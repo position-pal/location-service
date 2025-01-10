@@ -5,12 +5,13 @@ import io.github.positionpal.location.application.tracking.{MapsService, RealTim
 object ActorBasedRealTimeTracking extends RealTimeTracking:
 
   import akka.actor.typed.{ActorRef, ActorSystem}
-  import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+  import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef, EntityTypeKey}
   import cats.effect.kernel.Async
   import cats.effect.IO
   import cats.implicits.{toFlatMapOps, toFunctorOps}
+  import io.github.positionpal.entities.GroupId
   import io.github.positionpal.location.domain.*
-  import io.github.positionpal.location.tracking.actors.RealTimeUserTracker
+  import io.github.positionpal.location.tracking.actors.{GroupManager, RealTimeUserTracker}
   import io.github.positionpal.location.presentation.ScopeUtils.concatenated
   import io.github.positionpal.location.application.notifications.NotificationService
 
@@ -34,10 +35,16 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
       refOf(resource) ! event
 
     override def addObserverFor(resource: Scope)(observer: OutcomeObserver): F[Unit] = Async[F].delay:
-      observer.foreach(refOf(resource) ! RealTimeUserTracker.Wire(_))
+      observer.foreach(refOf(resource.group) ! GroupManager.Wire(_))
 
     override def removeObserverFor(resource: Scope)(observer: OutcomeObserver): F[Unit] = Async[F].delay:
-      observer.foreach(refOf(resource) ! RealTimeUserTracker.UnWire(_))
+      observer.foreach(refOf(resource.group) ! GroupManager.UnWire(_))
 
-    private def refOf(scope: Scope) =
-      ClusterSharding(actorSystem).entityRefFor(RealTimeUserTracker.key, scope.concatenated)
+    private def refOf(group: GroupId): EntityRef[GroupManager.Command] =
+      refOf(GroupManager.key, group.value())
+
+    private def refOf(scope: Scope): EntityRef[RealTimeUserTracker.Command] =
+      refOf(RealTimeUserTracker.key, scope.concatenated)
+
+    private def refOf[T](entityTypeKey: EntityTypeKey[T], entityId: String): EntityRef[T] =
+      ClusterSharding(actorSystem).entityRefFor(entityTypeKey, entityId)

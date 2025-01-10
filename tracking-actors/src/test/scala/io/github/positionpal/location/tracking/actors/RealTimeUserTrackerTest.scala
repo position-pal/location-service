@@ -47,7 +47,7 @@ class RealTimeUserTrackerTest
     def notificationService: NotificationService[IO] = notifier
     def mapsService: MapsService[IO] = maps
     def initialStates(ins: List[UserState]): List[ObservableSession] =
-      ins.map(s => ObservableSession(Session.from(testScope, s, sampling(s), tracking(s)), Set.empty))
+      ins.map(s => ObservableSession(Session.from(testScope, s, sampling(s), tracking(s))))
 
   "RealTimeUserTracker" when:
     "in inactive or active state" when:
