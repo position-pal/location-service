@@ -1,27 +1,29 @@
 package io.github.positionpal.location.tracking.actors
 
 import java.io.File
+
 import scala.language.postfixOps
-import eu.monniot.scala3mock.scalatest.MockFactory
+
 import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.TimeUtils.*
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import akka.cluster.Cluster
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import io.github.positionpal.location.application.tracking.MapsService
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker.*
 import io.github.positionpal.location.domain.RoutingMode.*
 import io.github.positionpal.location.domain.UserState.*
-import org.scalatest.wordspec.AnyWordSpecLike
 import cats.effect.IO
+import akka.cluster.Cluster
+import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.domain.Distance.meters
 import org.scalatest.concurrent.Eventually
 import io.github.positionpal.location.application.notifications.NotificationService
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import org.scalatest.{BeforeAndAfterEach, OneInstancePerTest}
 import org.scalatest.time.{Seconds, Span}
+import org.scalatest.wordspec.AnyWordSpecLike
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)
