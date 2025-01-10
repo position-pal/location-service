@@ -36,8 +36,9 @@ GRPC_PORT=50051
 HTTP_PORT=8080
 ```
 
-Moreover, the service requires a Cassandra database instance running and accessible at port `9042`. Before starting the service, make sure the database is properly configured with all the necessary tables.
-The scripts to create the tables can be found in the following CQL scripts:
+Moreover, the service requires a Cassandra database that is accessible based on the environment variables specified above. 
+Before starting the service, ensure the database is correctly configured with all the required tables. 
+The necessary CQL scripts for creating these tables can be found here:
 - [`./tracking-actors/src/main/resources/db-scripts/create-tables.cql`](./tracking-actors/src/main/resources/db-scripts/create-tables.cql)
 - [`./storage/src/main/resources/db-scripts/create-tables.cql`](./storage/src/main/resources/db-scripts/create-tables.cql)
 
