@@ -1,3 +1,17 @@
+## [2.1.0](https://github.com/position-pal/location-service/compare/2.0.2...2.1.0) (2025-01-11)
+
+### Features
+
+* add group manager sharded actor for handling group-based updates ([#152](https://github.com/position-pal/location-service/issues/152)) ([bcdecda](https://github.com/position-pal/location-service/commit/bcdecda499cfa064a3ab1b35f0ac99c3dc3b92cd))
+
+### Dependency updates
+
+* **deps:** update dependency com.google.protobuf:protoc to v4.29.3 ([#151](https://github.com/position-pal/location-service/issues/151)) ([6a9c3a1](https://github.com/position-pal/location-service/commit/6a9c3a13935ebc5fcbc20364a4b49a192315b1f7))
+
+### General maintenance
+
+* **readme:** fix misleading information about cassandra port ([b1b00ee](https://github.com/position-pal/location-service/commit/b1b00eeeb22287324fc6da7b0fb94ab7698e89d3))
+
 ## [2.0.2](https://github.com/position-pal/location-service/compare/2.0.1...2.0.2) (2025-01-09)
 
 ### Dependency updates
