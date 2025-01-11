@@ -4,7 +4,6 @@ import java.io.File
 
 import scala.language.postfixOps
 
-import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.TimeUtils.*
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
@@ -14,21 +13,25 @@ import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker.*
 import io.github.positionpal.location.domain.RoutingMode.*
 import io.github.positionpal.location.domain.UserState.*
-import org.scalatest.wordspec.AnyWordSpecLike
 import cats.effect.IO
+import akka.cluster.Cluster
+import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.domain.Distance.meters
 import org.scalatest.concurrent.Eventually
 import io.github.positionpal.location.application.notifications.NotificationService
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
-import org.scalatest.OneInstancePerTest
+import org.scalatest.{BeforeAndAfterEach, OneInstancePerTest}
 import org.scalatest.time.{Seconds, Span}
+import org.scalatest.wordspec.AnyWordSpecLike
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 
 class RealTimeUserTrackerTest
     extends ScalaTestWithActorTestKit(RealTimeUserTrackerTest.config)
     with AnyWordSpecLike
     with RealTimeUserTrackerVerifierDSL
     with MockFactory
-    with OneInstancePerTest:
+    with OneInstancePerTest
+    with BeforeAndAfterEach:
 
   import RealTimeUserTrackerTest.*
 
@@ -47,7 +50,12 @@ class RealTimeUserTrackerTest
     def notificationService: NotificationService[IO] = notifier
     def mapsService: MapsService[IO] = maps
     def initialStates(ins: List[UserState]): List[ObservableSession] =
-      ins.map(s => ObservableSession(Session.from(testScope, s, sampling(s), tracking(s)), Set.empty))
+      ins.map(s => ObservableSession(Session.from(testScope, s, sampling(s), tracking(s))))
+
+  override def beforeEach(): Unit =
+    super.beforeEach()
+    Cluster(system).join(Cluster(system).selfAddress)
+    ClusterSharding(system).init(GroupManager())
 
   "RealTimeUserTracker" when:
     "in inactive or active state" when:

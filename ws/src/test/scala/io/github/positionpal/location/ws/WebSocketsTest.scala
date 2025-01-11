@@ -73,7 +73,7 @@ class WebSocketsTest
               val group = GroupId.create("astro")
               val test = WebSocketTest(testConfig)
               val scenario = test.Scenario(
-                group = GroupId.create("test-group"),
+                group = group,
                 clients = test.Client(luke) :: test.Client(eve) :: Nil,
                 events = sample(Scope(luke, group), cesenaCampus) :: sample(Scope(eve, group), bolognaCampus) :: Nil,
               )

@@ -11,7 +11,7 @@ import io.github.positionpal.entities.{GroupId, UserId}
   */
 object ConnectionsManager:
 
-  /** A tuple of the user id and the reference to the actor in charge of their tracking in a group. */
+  /** A tuple of the user id and the reference to the actor in charge of managing the web socket connection. */
   type Connection = (UserId, ActorRef[DrivenEvent])
 
   private val activeConnections = TrieMap[GroupId, Set[Connection]]()

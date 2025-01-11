@@ -9,6 +9,7 @@ import akka.actor.{BootstrapSetup, CoordinatedShutdown}
 import cats.implicits.{catsSyntaxApplicativeError, toFlatMapOps, toFunctorOps}
 import cats.effect
 import cats.effect.kernel.Async
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef, EntityTypeKey}
 import cats.effect.{Deferred, Resource}
 import org.slf4j.LoggerFactory
 import akka.Done
@@ -92,3 +93,13 @@ object AkkaUtils:
                   .handleErrorWith(_ => Async[F].delay(logger.warn("Timed-out waiting for Akka to terminate!")))
               yield ()
             (system, cancel)
+
+  /** Retrieves the [[EntityRef]] of an Akka Cluster Sharding entity.
+    * @param entityTypeKey The type key of the entity.
+    * @param entityId The unique identifier of the entity.
+    * @param actorSystem The actor system.
+    * @tparam T the type of the entity key.
+    * @return The entity reference of the sharded entity in the cluster.
+    */
+  def refOf[T](entityTypeKey: EntityTypeKey[T], entityId: String)(using actorSystem: ActorSystem[?]): EntityRef[T] =
+    ClusterSharding(actorSystem).entityRefFor(entityTypeKey, entityId)
