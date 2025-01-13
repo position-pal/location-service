@@ -1,3 +1,21 @@
+## [2.2.0](https://github.com/position-pal/location-service/compare/2.1.0...2.2.0) (2025-01-13)
+
+### Features
+
+* adding support for akka license key ([729d7a7](https://github.com/position-pal/location-service/commit/729d7a74a3cebdc86a363551e75ff8237913e7f4))
+
+### Dependency updates
+
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.119 ([#154](https://github.com/position-pal/location-service/issues/154)) ([c6b31b1](https://github.com/position-pal/location-service/commit/c6b31b12a0f5595fd5bb631c127d03a71c25d358))
+
+### Build and continuous integration
+
+* **deps:** update actions/upload-artifact action to v4.6.0 ([#153](https://github.com/position-pal/location-service/issues/153)) ([c2225c5](https://github.com/position-pal/location-service/commit/c2225c51a6200c92e2f6fad0c23fba82355efc71))
+
+### General maintenance
+
+* do not track .kotlin folder ([7f8130d](https://github.com/position-pal/location-service/commit/7f8130d422eb8b84d61cb91347f4781a86ed28e3))
+
 ## [2.1.0](https://github.com/position-pal/location-service/compare/2.0.2...2.1.0) (2025-01-11)
 
 ### Features
