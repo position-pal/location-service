@@ -1,3 +1,13 @@
+## [2.3.0](https://github.com/position-pal/location-service/compare/2.2.0...2.3.0) (2025-01-15)
+
+### Features
+
+* **docker:** add support for multi-platform docker image ([#157](https://github.com/position-pal/location-service/issues/157)) ([a3a06b4](https://github.com/position-pal/location-service/commit/a3a06b4668208956ce15cd712e55110d26a9f4ae))
+
+### Build and continuous integration
+
+* **deps:** update docker/build-push-action digest to 67a2d40 ([#156](https://github.com/position-pal/location-service/issues/156)) ([e267cf3](https://github.com/position-pal/location-service/commit/e267cf31d0f0e5901fbaf7ff5d028b6615083720))
+
 ## [2.2.0](https://github.com/position-pal/location-service/compare/2.1.0...2.2.0) (2025-01-13)
 
 ### Features
