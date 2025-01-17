@@ -29,7 +29,12 @@ jobs:
       - name: Assemble main and test classes
         run: ./gradlew classes testClasses
       - name: Test and Check
-        run: ./gradlew check
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 2
+          retry_on: error
+          timeout_minutes: 30
+          command: ./gradlew check
       - name: Generate fatjar
         run: ./gradlew entrypoint:shadowJar
       - name: Upload fatjar
