@@ -1,12 +1,12 @@
 package io.github.positionpal.location.entrypoint
 
-import org.scalatest.flatspec.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import com.tngtech.archunit.base.DescribedPredicate
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.core.domain.JavaClass
 import com.tngtech.archunit.library.Architectures.onionArchitecture
 
-class ArchitecturalTest extends FlatSpec:
+class ArchitecturalTest extends AnyFlatSpec:
 
   "Project-wise architecture" should "adhere to ports and adapters, a.k.a onion architecture" in:
     val locationGroup = "io.github.positionpal.location"
@@ -24,7 +24,6 @@ class ArchitecturalTest extends FlatSpec:
       .ensureAllClassesAreContainedInArchitectureIgnoring(havingEntrypointAsOrigin)
       .withOptionalLayers(true)
       .check(code)
-    assert(true)
 
   private def havingEntrypointAsOrigin =
     DescribedPredicate.describe[JavaClass]("in `entrypoint` package", _.getPackage.getName.contains("entrypoint"))
