@@ -1,3 +1,14 @@
+## [2.3.1](https://github.com/position-pal/location-service/compare/2.3.0...2.3.1) (2025-01-17)
+
+### Dependency updates
+
+* **core-deps:** update dependency org.scala-lang:scala3-library_3 to v3.6.3 ([#160](https://github.com/position-pal/location-service/issues/160)) ([da0829d](https://github.com/position-pal/location-service/commit/da0829d57bf175ce4ceccfd897eccef597e82564))
+* **deps:** update akkaprojection to v1.6.6 ([#159](https://github.com/position-pal/location-service/issues/159)) ([bdb4c41](https://github.com/position-pal/location-service/commit/bdb4c4120d556d9217a5d7a5816f659338843382))
+
+### Build and continuous integration
+
+* **deps:** pin dependencies ([#158](https://github.com/position-pal/location-service/issues/158)) ([d7a9275](https://github.com/position-pal/location-service/commit/d7a92758844ebc7e980ae7ed420d6e5acca80084))
+
 ## [2.3.0](https://github.com/position-pal/location-service/compare/2.2.0...2.3.0) (2025-01-15)
 
 ### Features
