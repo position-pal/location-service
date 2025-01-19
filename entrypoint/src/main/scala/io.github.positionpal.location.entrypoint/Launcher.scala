@@ -65,7 +65,10 @@ object Launcher extends IOApp.Simple:
 
   private def configureTrackingService(maps: MapsService[IO], notifier: NotificationService[IO]) =
     for
-      actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("akka.conf"))(Behaviors.empty)
+      envs <- Resource.eval(EnvVariablesProvider[IO].configuration)
+      config = if envs.get("PRODUCTION").fold(true)(_ == "true") then "akka.conf" else "akka-local.conf"
+      _ <- Resource.eval(IO(logger.info(s"Akka configuration file: $config")))
+      actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load(config))(Behaviors.empty)
       given ActorSystem[?] = actorSystem
       trackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps))
       validatedHttpConfig <- Resource.eval(HttpService.Configuration.fromEnv[IO])
