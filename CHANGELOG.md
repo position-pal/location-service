@@ -1,3 +1,9 @@
+## [2.4.1](https://github.com/position-pal/location-service/compare/2.4.0...2.4.1) (2025-01-19)
+
+### Bug Fixes
+
+* add cassandra contact point and address for local configuration ([839e225](https://github.com/position-pal/location-service/commit/839e2259787f307ebaba9331f7591f7911a83eca))
+
 ## [2.4.0](https://github.com/position-pal/location-service/compare/2.3.1...2.4.0) (2025-01-19)
 
 ### Features
