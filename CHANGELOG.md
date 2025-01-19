@@ -1,3 +1,20 @@
+## [2.4.0](https://github.com/position-pal/location-service/compare/2.3.1...2.4.0) (2025-01-19)
+
+### Features
+
+* add local configuration ([cd8e146](https://github.com/position-pal/location-service/commit/cd8e1463ac8cdace9479faaf05a51acf45050bea))
+
+### Tests
+
+* **entrypoint:** use `AnyFlatSpec` in place of `FlatSpec` ([4628384](https://github.com/position-pal/location-service/commit/46283841b84fa814ce60c50eed0e75b76acde57f))
+
+### Build and continuous integration
+
+* **deps:** pin nick-fields/retry action to 1467290 ([#161](https://github.com/position-pal/location-service/issues/161)) ([f8fbd3b](https://github.com/position-pal/location-service/commit/f8fbd3bc18366877bc452a806c389fc25fc6f5c6))
+* retry on errors of the check step ([62fda05](https://github.com/position-pal/location-service/commit/62fda05a1748cf3e7482d66da85d00c892f69fab))
+* speed up avoiding to separate check and test tasks since in some modules test requires to bring up heavy docker containers ([a433df6](https://github.com/position-pal/location-service/commit/a433df6ff2faf6cb30a53853bc72cea7e24c9079))
+* use git hooks to only check formattings ([2d15612](https://github.com/position-pal/location-service/commit/2d15612ee1b894144aead804163922d7a82f1684))
+
 ## [2.3.1](https://github.com/position-pal/location-service/compare/2.3.0...2.3.1) (2025-01-17)
 
 ### Dependency updates
