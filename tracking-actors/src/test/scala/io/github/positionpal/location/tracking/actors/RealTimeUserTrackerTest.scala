@@ -10,7 +10,6 @@ import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import io.github.positionpal.location.application.tracking.MapsService
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.GeoUtils.*
-import io.github.positionpal.location.tracking.actors.RealTimeUserTracker.*
 import io.github.positionpal.location.domain.RoutingMode.*
 import io.github.positionpal.location.domain.UserState.*
 import cats.effect.IO
@@ -46,11 +45,11 @@ class RealTimeUserTrackerTest
     .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters))
     .anyNumberOfTimes
 
-  given ctx: Context[UserState, ObservableSession] with
+  given ctx: Context[UserState, Session] with
     def notificationService: NotificationService[IO] = notifier
     def mapsService: MapsService[IO] = maps
-    def initialStates(ins: List[UserState]): List[ObservableSession] =
-      ins.map(s => ObservableSession(Session.from(testScope, s, sampling(s), tracking(s))))
+    def initialStates(ins: List[UserState]): List[Session] =
+      ins.map(s => Session.from(testScope, s, sampling(s), tracking(s)))
 
   override def beforeEach(): Unit =
     super.beforeEach()
@@ -93,7 +92,7 @@ class RealTimeUserTrackerTest
         "track the user positions" in:
           val trace = generateTrace
           (Routing | SOS) -- trace --> (Routing | SOS) verifying: (_, s) =>
-            s shouldMatch (tracking(s.session.userState, trace.reverse), Some(trace.last))
+            s shouldMatch (tracking(s.userState, trace.reverse), Some(trace.last))
 
     "receives an SOS alert triggered event" should:
       "transition to SOS mode" in:
@@ -106,12 +105,12 @@ class RealTimeUserTrackerTest
         given Eventually.PatienceConfig = longLastingPatience
         val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
         Inactive -- sampledLocation --> Inactive verifying: (_, s) =>
-          s.session.lastSampledLocation shouldBe Some(sampledLocation)
+          s.lastSampledLocation shouldBe Some(sampledLocation)
 
-  extension (s: ObservableSession)
+  extension (s: Session)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[DrivingEvent]): Unit =
-      s.session.tracking shouldBe route
-      s.session.lastSampledLocation shouldBe lastSample
+      s.tracking shouldBe route
+      s.lastSampledLocation shouldBe lastSample
 
   private def generateTrace: List[SampledLocation] =
     SampledLocation(now, testScope, GPSLocation(44, 12))

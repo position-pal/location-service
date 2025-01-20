@@ -5,7 +5,7 @@ import io.github.positionpal.location.application.tracking.MapsService
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.Eventually.PatienceConfig
 import cats.effect.IO
-import io.github.positionpal.location.domain.Scope
+import io.github.positionpal.location.domain.{Scope, Session}
 import io.github.positionpal.entities.{GroupId, UserId}
 
 trait SystemVerifier[S, E, X](val ins: List[S], val events: List[E]):
@@ -35,17 +35,17 @@ trait RealTimeUserTrackerVerifierDSL:
   extension (us: List[UserState]) infix def |(other: UserState): List[UserState] = us :+ other
 
   extension (xs: List[UserState])
-    infix def --(events: List[DrivingEvent]): SystemVerifier[UserState, DrivingEvent, ObservableSession] =
+    infix def --(events: List[DrivingEvent]): SystemVerifier[UserState, DrivingEvent, Session] =
       RealTimeUserTrackerVerifier(xs, events)
 
   private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DrivingEvent])
-      extends SystemVerifier[UserState, DrivingEvent, ObservableSession](ins, events):
+      extends SystemVerifier[UserState, DrivingEvent, Session](ins, events):
 
     infix override def -->(outs: List[UserState])(using
-        ctx: Context[UserState, ObservableSession],
-    ): Verification[DrivingEvent, ObservableSession] = new Verification[DrivingEvent, ObservableSession]:
-      infix override def verifying(verifyLast: (DrivingEvent, ObservableSession) => Unit)(using PatienceConfig): Unit =
-        val testKit = EventSourcedBehaviorTestKit[Command, Event, ObservableSession](
+        ctx: Context[UserState, Session],
+    ): Verification[DrivingEvent, Session] = new Verification[DrivingEvent, Session]:
+      infix override def verifying(verifyLast: (DrivingEvent, Session) => Unit)(using PatienceConfig): Unit =
+        val testKit = EventSourcedBehaviorTestKit[Command, Event, Session](
           system = system,
           behavior = RealTimeUserTracker(
             scope = Scope(UserId.create("luke"), GroupId.create("astro")),
@@ -55,11 +55,11 @@ trait RealTimeUserTrackerVerifierDSL:
         ctx
           .initialStates(ins)
           .zipWithIndex
-          .foreach: (state, idx) =>
-            testKit.initialize(state)
+          .foreach: (session, idx) =>
+            testKit.initialize(session)
             events.foreach: e =>
-              testKit.runCommand(e).events should contain only StatefulDrivingEvent(state.session.userState.next(e), e)
+              testKit.runCommand(e).events should contain only StatefulDrivingEvent(session.userState.next(e), e)
             eventually:
-              val currentState = testKit.getState()
-              currentState.session.userState shouldBe outs(if outs.size == 1 then 0 else idx)
-              verifyLast(events.last, currentState)
+              val currentSession = testKit.getState()
+              currentSession.userState shouldBe outs(if outs.size == 1 then 0 else idx)
+              verifyLast(events.last, currentSession)
