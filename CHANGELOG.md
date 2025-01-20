@@ -1,3 +1,17 @@
+## [2.4.2](https://github.com/position-pal/location-service/compare/2.4.1...2.4.2) (2025-01-20)
+
+### Dependency updates
+
+* **deps:** update grpc-java monorepo to v1.69.1 ([#162](https://github.com/position-pal/location-service/issues/162)) ([b7a1626](https://github.com/position-pal/location-service/commit/b7a1626680a47112c555653432e5a6b5294c48e0))
+
+### Bug Fixes
+
+* **configuration:** move cassandra configuration out of akka block ([ec8c212](https://github.com/position-pal/location-service/commit/ec8c21235458d73b6ac153167d7520a93503319b))
+
+### Build and continuous integration
+
+* **deps:** update nick-fields/retry action to v3 ([#163](https://github.com/position-pal/location-service/issues/163)) ([4326b15](https://github.com/position-pal/location-service/commit/4326b151429a090b50b550d0f28fedabeaf21b45))
+
 ## [2.4.1](https://github.com/position-pal/location-service/compare/2.4.0...2.4.1) (2025-01-19)
 
 ### Bug Fixes
