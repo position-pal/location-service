@@ -1,3 +1,21 @@
+## [3.0.0](https://github.com/position-pal/location-service/compare/2.4.2...3.0.0) (2025-01-21)
+
+### ⚠ BREAKING CHANGES
+
+* **grpc:** return `UNDEFINED` user state in case no session found instead of default `INACTIVE` (#166)
+
+### Dependency updates
+
+* **deps:** update akkaprojection to v1.6.7 ([#164](https://github.com/position-pal/location-service/issues/164)) ([c258f6c](https://github.com/position-pal/location-service/commit/c258f6cc5b6a83745111c5769b440fe35e921574))
+
+### Bug Fixes
+
+* **tracking:** move actors side effects in `thenRun` callback to not re-execute them on state recovery ([#165](https://github.com/position-pal/location-service/issues/165)) ([0703f2f](https://github.com/position-pal/location-service/commit/0703f2f844667effe64fb4c222a5e59d90d13d5a))
+
+### Refactoring
+
+* **grpc:** return `UNDEFINED` user state in case no session found instead of default `INACTIVE` ([#166](https://github.com/position-pal/location-service/issues/166)) ([5723858](https://github.com/position-pal/location-service/commit/572385829f3dc384d392e3a2264691adef4dd389))
+
 ## [2.4.2](https://github.com/position-pal/location-service/compare/2.4.1...2.4.2) (2025-01-20)
 
 ### Dependency updates
