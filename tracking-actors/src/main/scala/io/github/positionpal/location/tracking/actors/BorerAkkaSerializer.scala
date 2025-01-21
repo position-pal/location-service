@@ -3,7 +3,7 @@ package io.github.positionpal.location.tracking.actors
 import akka.actor.typed.{ActorRef, ActorRefResolver}
 import akka.actor.ExtendedActorSystem
 import io.bullet.borer.{Codec, Decoder, Encoder}
-import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent}
+import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, Session}
 import io.github.positionpal.location.presentation.*
 import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
 import akka.actor.typed.scaladsl.adapter.*
@@ -19,8 +19,6 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
 
   given actorRefCodec[T]: Codec[ActorRef[T]] =
     Codec.bimap[String, ActorRef[T]](actorRefResolver.toSerializationFormat, actorRefResolver.resolveActorRef)
-  given observableSession: Codec[RealTimeUserTracker.ObservableSession] =
-    deriveCodec[RealTimeUserTracker.ObservableSession]
   given statefulDrivingEventCodec: Codec[RealTimeUserTracker.StatefulDrivingEvent] =
     deriveCodec[RealTimeUserTracker.StatefulDrivingEvent]
   given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
@@ -31,8 +29,8 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
   register[RealTimeUserTracker.AliveCheck.type]()
   register[RealTimeUserTracker.Ignore.type]()
   register[DrivingEvent]()
+  register[Session]()
   register[DrivenEvent]()
   register[RealTimeUserTracker.StatefulDrivingEvent]()
-  register[RealTimeUserTracker.ObservableSession]()
   register[GroupManager.Wire]()
   register[GroupManager.UnWire]()
