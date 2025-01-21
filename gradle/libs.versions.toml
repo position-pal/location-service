@@ -1,6 +1,6 @@
 [versions]
 akka = "2.10.0"
-akkaprojection = "1.6.6"
+akkaprojection = "1.6.7"
 akkamanagement = "1.6.0"
 borer = "1.15.0"
 circe = "0.14.10"
