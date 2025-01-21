@@ -27,7 +27,7 @@ class GrpcUserSessionService[F[_]: Async](
 
   override def getCurrentState(request: proto.Scope, ctx: Metadata): F[proto.UserStateResponse] =
     ofUser(request)(s => (okResponse, Some(s.state)))
-      .map((s, r) => proto.UserStateResponse(s, r.getOrElse(proto.UserState.INACTIVE)))
+      .map((s, r) => proto.UserStateResponse(s, r.getOrElse(proto.UserState.UNDEFINED)))
 
   override def getCurrentTracking(request: proto.Scope, ctx: Metadata): F[proto.TrackingResponse] =
     ofUser(request):

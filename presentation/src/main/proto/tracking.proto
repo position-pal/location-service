@@ -22,6 +22,7 @@ enum UserState {
   INACTIVE = 1;
   SOS = 2;
   ROUTING = 3;
+  UNDEFINED = 4;
 }
 
 message GPSLocation {
