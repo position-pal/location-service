@@ -1,3 +1,15 @@
+## [3.0.1](https://github.com/position-pal/location-service/compare/3.0.0...3.0.1) (2025-01-23)
+
+### Dependency updates
+
+* **deps:** update cassandra:latest docker digest to d0842d5 ([#169](https://github.com/position-pal/location-service/issues/169)) ([63b8839](https://github.com/position-pal/location-service/commit/63b8839ef0429b9d03de88bc321e2b01fab7a944))
+* **deps:** update dependency org.typelevel:cats-core_3 to v2.13.0 ([#167](https://github.com/position-pal/location-service/issues/167)) ([3acfade](https://github.com/position-pal/location-service/commit/3acfadea13ce0ae5bf0afa9b32fd81c962cc818f))
+* **deps:** update eclipse-temurin:21 docker digest to d59ca49 ([#168](https://github.com/position-pal/location-service/issues/168)) ([92275ea](https://github.com/position-pal/location-service/commit/92275eaeeb6dc7f5e4c0cc06610f983513cfdcc7))
+
+### Bug Fixes
+
+* **ws:** allow http connections from all interfaces ([f158330](https://github.com/position-pal/location-service/commit/f1583300417f9f6467b607109ac14f4c54ad00ba))
+
 ## [3.0.0](https://github.com/position-pal/location-service/compare/2.4.2...3.0.0) (2025-01-21)
 
 ### ⚠ BREAKING CHANGES
