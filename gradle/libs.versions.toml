@@ -40,7 +40,7 @@ akka-discovery-kubernetes-api = { module = "com.lightbend.akka.discovery:akka-di
 archunit = "com.tngtech.archunit:archunit:1.3.0"
 borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
 borer-derivation = { module = "io.bullet:borer-derivation_3", version.ref = "borer" }
-cats-core = "org.typelevel:cats-core_3:2.12.0"
+cats-core = "org.typelevel:cats-core_3:2.13.0"
 cats-effect = "org.typelevel:cats-effect_3:3.6-623178c"
 cats-mtl = "org.typelevel:cats-mtl_3:1.5.0"
 circe-core = { module = "io.circe:circe-core_3", version.ref = "circe" }
