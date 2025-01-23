@@ -53,6 +53,6 @@ object HttpService:
       Async[F].fromFuture:
         Async[F].delay:
           Http(actorSystem.classicSystem)
-            .newServerAt("localhost", configuration.port)
+            .newServerAt(interface = "0.0.0.0", configuration.port)
             .bind(V1Routes(V1RoutesHandler(service)).versionedRoutes),
     )(binding => Async[F].fromFuture(Async[F].delay(binding.unbind())).void)
