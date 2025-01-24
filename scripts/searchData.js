@@ -1,4 +1,4 @@
-pages = [{"l":"index.html#","e":false,"i":"","n":"location-service 3.0.1 API","t":"location-service 3.0.1 API","d":"","k":"static","x":""},
+pages = [{"l":"index.html#","e":false,"i":"","n":"location-service 3.0.2 API","t":"location-service 3.0.2 API","d":"","k":"static","x":""},
 {"l":"io/github/positionpal/location.html#","e":false,"i":"","n":"io.github.positionpal.location","t":"io.github.positionpal.location","d":"","k":"package","x":""},
 {"l":"io/github/positionpal/location/application.html#","e":false,"i":"","n":"io.github.positionpal.location.application","t":"io.github.positionpal.location.application","d":"","k":"package","x":""},
 {"l":"io/github/positionpal/location/application/groups.html#","e":false,"i":"","n":"io.github.positionpal.location.application.groups","t":"io.github.positionpal.location.application.groups","d":"","k":"package","x":""},
