@@ -22,8 +22,8 @@ object RabbitMQGroupsEventConsumer:
 
     def start(connection: Connection[F]): F[Unit] = connection.channel.use: ch =>
       for
-        _ <- ch.exchange.declare(groupsEventsExchange, ExchangeType.Headers)
-        q <- ch.queue.declare(groupsEventsQueue, autoDelete = false, durable = true, exclusive = false)
+        _ <- ch.exchange.declare(groupsEventsExchange, ExchangeType.Headers, durable = true, autoDelete = false)
+        q <- ch.queue.declare(groupsEventsQueue, durable = true)
         q <- Async[F].fromOption(q, QueueDeclarationFailed)
         _ <- ch.queue.bind(q.queue, groupsEventsExchange, ShortString.empty)
         consumer = ch.messaging

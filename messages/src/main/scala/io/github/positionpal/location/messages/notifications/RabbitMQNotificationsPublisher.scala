@@ -30,7 +30,7 @@ object RabbitMQNotificationsPublisher:
 
     def start(connection: Connection[F]): F[Unit] = connection.channel.use: ch =>
       for
-        _ <- ch.exchange.declare(notificationsCommandExchange, ExchangeType.Headers)
+        _ <- ch.exchange.declare(notificationsCommandExchange, ExchangeType.Headers, durable = true, autoDelete = false)
         publish =
           fs2.Stream
             .fromQueueUnterminated(queue)
