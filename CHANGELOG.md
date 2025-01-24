@@ -1,3 +1,22 @@
+## [3.0.2](https://github.com/position-pal/location-service/compare/3.0.1...3.0.2) (2025-01-24)
+
+### Dependency updates
+
+* **deps:** update grpc-java monorepo to v1.70.0 ([#170](https://github.com/position-pal/location-service/issues/170)) ([bf78cc9](https://github.com/position-pal/location-service/commit/bf78cc9f0b3d7db9d7470eda90c1899a42ada235))
+
+### Bug Fixes
+
+* **rabbitmq:** use durable, non-autodelete exchanges ([3feefa7](https://github.com/position-pal/location-service/commit/3feefa7b6152a34f8ed6c02ab6a15da590395f45))
+
+### Tests
+
+* **rabbitmq:** avoid re-creating exchanges in tests ([ab169b6](https://github.com/position-pal/location-service/commit/ab169b669b6ba81c143fe4d3eb367928df7d0f01))
+
+### Build and continuous integration
+
+* **deps:** update dawidd6/action-download-artifact action to v8 ([#171](https://github.com/position-pal/location-service/issues/171)) ([d3fb574](https://github.com/position-pal/location-service/commit/d3fb574a5fbd2cee85ac5353a03809d07adf469b))
+* **deps:** update docker/build-push-action digest to ca877d9 ([#172](https://github.com/position-pal/location-service/issues/172)) ([0b89b59](https://github.com/position-pal/location-service/commit/0b89b590c71ab1cd496262dbbf83025bf2ab46f5))
+
 ## [3.0.1](https://github.com/position-pal/location-service/compare/3.0.0...3.0.1) (2025-01-23)
 
 ### Dependency updates
