@@ -29,7 +29,7 @@ object CassandraUserGroupsStore:
     given ExecutionContext = actorSystem.executionContext
 
     override def addMember(groupId: GroupId, userId: UserId): F[Unit] = executeWithErrorHandling:
-      session.executeWrite(insertMemberQuery(groupId, userId)).map(_ => ())
+      session.executeWrite(insertMemberQuery(groupId, userId)).void
 
     override def groupsOf(userId: UserId): F[Set[GroupId]] = executeWithErrorHandling:
       session
@@ -42,7 +42,7 @@ object CassandraUserGroupsStore:
         .runFold(Set.empty[UserId])((acc, row) => acc + UserId.create(row.getString("UserId")))
 
     override def removeMember(groupId: GroupId, userId: UserId): F[Unit] = executeWithErrorHandling:
-      session.executeWrite(deleteMemberQuery(groupId, userId)).map(_ => ())
+      session.executeWrite(deleteMemberQuery(groupId, userId)).void
 
     object Tables:
       val userGroupsByUserId = "UserGroupsByUserId"
