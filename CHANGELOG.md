@@ -1,3 +1,19 @@
+## [3.0.3](https://github.com/position-pal/location-service/compare/3.0.2...3.0.3) (2025-01-29)
+
+### Dependency updates
+
+* **deps:** update dependency gradle to v8.12.1 ([#173](https://github.com/position-pal/location-service/issues/173)) ([8442d71](https://github.com/position-pal/location-service/commit/8442d71469e6c5dd4ada566bd2cef5bbaafcc789))
+* **deps:** update rabbitmq:4-management docker digest to f100517 ([#175](https://github.com/position-pal/location-service/issues/175)) ([e9030de](https://github.com/position-pal/location-service/commit/e9030dea787b1e9c3b51b0aaeaf63b798ddd45bc))
+
+### Bug Fixes
+
+* **storage:** do not throw an error when attempting to save a snapshot for an active user without a sampled location ([cb143cd](https://github.com/position-pal/location-service/commit/cb143cd4305dfedfcce80febd897e7ad05758279))
+
+### Build and continuous integration
+
+* **deps:** update actions/setup-java digest to 3a4f6e1 ([#176](https://github.com/position-pal/location-service/issues/176)) ([810252b](https://github.com/position-pal/location-service/commit/810252b57dc1fffc2bfbeb26e9e0385282aabd8b))
+* **deps:** update actions/setup-node action to v4.2.0 ([#174](https://github.com/position-pal/location-service/issues/174)) ([a017a51](https://github.com/position-pal/location-service/commit/a017a518f63002e6a79ad0a3c8ade2d8ef3786fb))
+
 ## [3.0.2](https://github.com/position-pal/location-service/compare/3.0.1...3.0.2) (2025-01-24)
 
 ### Dependency updates
