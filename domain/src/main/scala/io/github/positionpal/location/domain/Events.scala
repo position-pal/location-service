@@ -26,21 +26,21 @@ case class StuckAlertTriggered(timestamp: Instant, user: UserId, group: GroupId)
 
 object StuckAlertTriggered:
   def apply(timestamp: Instant, scope: Scope): StuckAlertTriggered =
-    StuckAlertTriggered(timestamp, scope.user, scope.group)
+    StuckAlertTriggered(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered when a user stops being stuck. */
 case class StuckAlertStopped(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
 
 object StuckAlertStopped:
   def apply(timestamp: Instant, scope: Scope): StuckAlertStopped =
-    StuckAlertStopped(timestamp, scope.user, scope.group)
+    StuckAlertStopped(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered when a user is late to reach a destination. */
 case class TimeoutAlertTriggered(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
 
 object TimeoutAlertTriggered:
   def apply(timestamp: Instant, scope: Scope): TimeoutAlertTriggered =
-    TimeoutAlertTriggered(timestamp, scope.user, scope.group)
+    TimeoutAlertTriggered(timestamp, scope.userId, scope.groupId)
 
 /** An event driving an application use case. */
 sealed trait DrivingEvent extends DomainEvent
@@ -50,7 +50,7 @@ case class SampledLocation(timestamp: Instant, user: UserId, group: GroupId, pos
 
 object SampledLocation:
   def apply(timestamp: Instant, scope: Scope, position: GPSLocation): SampledLocation =
-    SampledLocation(timestamp, scope.user, scope.group, position)
+    SampledLocation(timestamp, scope.userId, scope.groupId, position)
 
 /** An event triggered when a user starts routing to a destination. */
 case class RoutingStarted(
@@ -71,13 +71,13 @@ object RoutingStarted:
       mode: RoutingMode,
       destination: GPSLocation,
       expectedArrival: Instant,
-  ): RoutingStarted = this(timestamp, scope.user, scope.group, position, mode, destination, expectedArrival)
+  ): RoutingStarted = this(timestamp, scope.userId, scope.groupId, position, mode, destination, expectedArrival)
 
 /** An event triggered to stop an active route. */
 case class RoutingStopped(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
 
 object RoutingStopped:
-  def apply(timestamp: Instant, scope: Scope): RoutingStopped = RoutingStopped(timestamp, scope.user, scope.group)
+  def apply(timestamp: Instant, scope: Scope): RoutingStopped = RoutingStopped(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered by a user when needing help. */
 case class SOSAlertTriggered(
@@ -89,19 +89,19 @@ case class SOSAlertTriggered(
 
 object SOSAlertTriggered:
   def apply(timestamp: Instant, scope: Scope, position: GPSLocation): SOSAlertTriggered =
-    SOSAlertTriggered(timestamp, scope.user, scope.group, position)
+    SOSAlertTriggered(timestamp, scope.userId, scope.groupId, position)
 
 /** An event triggered by a user when stopping the SOS alert. */
 case class SOSAlertStopped(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
 
 object SOSAlertStopped:
-  def apply(timestamp: Instant, scope: Scope): SOSAlertStopped = this(timestamp, scope.user, scope.group)
+  def apply(timestamp: Instant, scope: Scope): SOSAlertStopped = this(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered when a user goes offline. */
 case class WentOffline(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
 
 object WentOffline:
-  def apply(timestamp: Instant, scope: Scope): WentOffline = this(timestamp, scope.user, scope.group)
+  def apply(timestamp: Instant, scope: Scope): WentOffline = this(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered by the system as a result of some system action. */
 sealed trait DrivenEvent extends DomainEvent
@@ -117,4 +117,4 @@ case class UserUpdate(
 
 object UserUpdate:
   def apply(timestamp: Instant, scope: Scope, position: Option[GPSLocation], status: UserState): UserUpdate =
-    UserUpdate(timestamp, scope.user, scope.group, position, status)
+    UserUpdate(timestamp, scope.userId, scope.groupId, position, status)

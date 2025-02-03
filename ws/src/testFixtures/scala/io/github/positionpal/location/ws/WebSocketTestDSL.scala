@@ -50,7 +50,7 @@ trait WebSocketTestDSL:
           clientMap(event.user).send(message)
 
     private def endpointOf(group: GroupId, userId: UserId): String =
-      s"${config.baseEndpoint}/${group.value()}/${userId.username()}"
+      s"${config.baseEndpoint}/${group.value()}/${userId.value()}"
 
     private def sink(set: mutable.Set[DrivenEvent]): Sink[Message, ?] = Sink.foreach: response =>
       val decoded = Json.decode(response.asTextMessage.getStrictText.getBytes).to[DrivenEvent].valueEither

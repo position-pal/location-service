@@ -38,10 +38,10 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
       refOf(resource) ! event
 
     override def addObserverFor(resource: Scope)(observer: OutcomeObserver): F[Unit] = Async[F].delay:
-      observer.foreach(refOf(resource.group) ! GroupManager.Wire(_))
+      observer.foreach(refOf(resource.groupId) ! GroupManager.Wire(_))
 
     override def removeObserverFor(resource: Scope)(observer: OutcomeObserver): F[Unit] = Async[F].delay:
-      observer.foreach(refOf(resource.group) ! GroupManager.UnWire(_))
+      observer.foreach(refOf(resource.groupId) ! GroupManager.UnWire(_))
 
     private def refOf(group: GroupId): EntityRef[GroupManager.Command] =
       AkkaUtils.refOf(GroupManager.key, group.value())(using actorSystem)

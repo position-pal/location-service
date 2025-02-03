@@ -41,7 +41,7 @@ class GrpcUserSessionService[F[_]: Async](
       .ofScope(scope)
       .map:
         case Some(s) => onSuccess(s)
-        case None => (notFoundResponse(s"No session found for user ${scope.getUser.username}"), None)
+        case None => (notFoundResponse(s"No session found for user ${scope.getUser.value}"), None)
       .handleError(e => (errorResponse(s"Error while fetching session related data: ${e.getMessage}"), None))
 
   override def getCurrentSession(request: proto.GroupId, ctx: Metadata): Stream[F, proto.SessionResponse] =

@@ -118,14 +118,14 @@ object RealTimeUserTracker:
       val event = WentOffline(s.lastSampledLocation.get.timestamp, s.scope)
       if s.userState == SOS || s.userState == Routing then
         val notification = NotificationMessage.create(
-          s"${event.user.username()} connection lost!",
-          s"User ${event.user.username()} went offline while in ${s.userState} mode!",
+          s"${event.user.value()} connection lost!",
+          s"User ${event.user.value()} went offline while in ${s.userState} mode!",
         )
-        notifier.sendToGroup(s.scope.group, s.scope.user, notification).unsafeRunAndForget()
+        notifier.sendToGroup(s.scope.groupId, s.scope.userId, notification).unsafeRunAndForget()
       persistAndNotify(event, s)(using ctx.system)
     else Effect.none
 
   private def persistAndNotify(event: DrivingEvent, session: Session)(using ActorSystem[?]): Effect[Event, Session] =
     Effect
       .persist(StatefulDrivingEvent.from(session, event))
-      .thenRun(s => refOf(GroupManager.key, s.scope.group.value()) ! userUpdateFrom(event, s))
+      .thenRun(s => refOf(GroupManager.key, s.scope.groupId.value()) ! userUpdateFrom(event, s))

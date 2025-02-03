@@ -26,7 +26,7 @@ object ArrivalTimeoutCheck:
         case _ => Right(Continue).pure[F]
 
   private def sendNotification[F[_]: Async](scope: Scope)(using notifier: NotificationService[F]) =
-    Async[F].start(notifier.sendToGroup(scope.group, scope.user, alertMessage(scope.user.username()))).void
+    Async[F].start(notifier.sendToGroup(scope.groupId, scope.userId, alertMessage(scope.userId.value()))).void
 
   private def alertMessage(username: String) = NotificationMessage
     .create(s"$username delay alert!", s"$username has not reached their destination as expected, yet.")

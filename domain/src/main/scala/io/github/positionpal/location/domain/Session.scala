@@ -5,10 +5,10 @@ import io.github.positionpal.entities.{GroupId, UserId}
 /** Defines the context in which a user's state is visible and relevant to a specific group.
   * A `Scope` captures the idea that a user's state can differ depending on the group
   * they are associated with, enabling group-specific visibility and tracking.
-  * @param user  The unique identifier of the user.
-  * @param group The unique identifier of the group.
+  * @param userId  The unique identifier of the user.
+  * @param groupId The unique identifier of the group.
   */
-case class Scope(user: UserId, group: GroupId)
+case class Scope(userId: UserId, groupId: GroupId)
 
 /** A facade over the user's state and tracking information. */
 trait Session:

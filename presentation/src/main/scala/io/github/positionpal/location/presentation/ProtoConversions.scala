@@ -6,15 +6,15 @@ object ProtoConversions:
   import io.github.positionpal.location.domain.*
   import scalapb.TimestampConverters.fromJavaInstant
 
-  given uidToProto: Conversion[UserId, proto.UserId] = uid => proto.UserId(uid.username())
+  given uidToProto: Conversion[UserId, proto.UserId] = uid => proto.UserId(uid.value())
 
-  given protoToUid: Conversion[proto.UserId, UserId] = uid => UserId.create(uid.username)
+  given protoToUid: Conversion[proto.UserId, UserId] = uid => UserId.create(uid.value)
 
   given protoToGid: Conversion[GroupId, proto.GroupId] = gid => proto.GroupId(gid.value)
 
   given gidToProto: Conversion[proto.GroupId, GroupId] = gid => GroupId.create(gid.value)
 
-  given scopeToProto: Conversion[Scope, proto.Scope] = s => proto.Scope(Some(s.user), Some(s.group))
+  given scopeToProto: Conversion[Scope, proto.Scope] = s => proto.Scope(Some(s.userId), Some(s.groupId))
 
   given protoToScope: Conversion[proto.Scope, Scope] = s => Scope(s.getUser, s.getGroup)
 
