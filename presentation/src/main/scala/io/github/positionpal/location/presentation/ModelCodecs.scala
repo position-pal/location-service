@@ -15,7 +15,7 @@ trait ModelCodecs:
 
   given instantsCodec: Codec[Instant] = Codec.bimap[String, Instant](_.toString, Instant.parse)
 
-  given userIdCodec: Codec[UserId] = Codec.bimap[String, UserId](_.username(), UserId.create)
+  given userIdCodec: Codec[UserId] = Codec.bimap[String, UserId](_.value(), UserId.create)
 
   given groupIdCodec: Codec[GroupId] = Codec.bimap[String, GroupId](_.value(), GroupId.create)
 

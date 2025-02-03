@@ -21,12 +21,12 @@ object ArrivalCheck:
             tracking <- session.tracking.flatMap(_.asMonitorable).get.pure[F]
             distance <- maps.distance(tracking.mode)(e.position, tracking.destination)
             isWithinProximity = distance.toMeters.value <= config.proximityToleranceMeters.meters.value
-            _ <- if isWithinProximity then sendNotification(session.scope.group, e.user) else Async[F].unit
+            _ <- if isWithinProximity then sendNotification(session.scope.groupId, e.user) else Async[F].unit
           yield if isWithinProximity then Left(RoutingStopped(e.timestamp, e.user, e.group)) else Right(Continue)
         case _ => Right(Continue).pure[F]
 
-  private def sendNotification[F[_]: Async](group: GroupId, user: UserId)(using notifier: NotificationService[F]) =
-    Async[F].start(notifier.sendToGroup(group, user, successMessage(user.username()))).void
+  private def sendNotification[F[_]: Async](group: GroupId, userId: UserId)(using notifier: NotificationService[F]) =
+    Async[F].start(notifier.sendToGroup(group, userId, successMessage(userId.value()))).void
 
   private def successMessage(username: String) = NotificationMessage
     .create(s"$username arrived!", s"$username has reached their destination on time.")

@@ -87,20 +87,20 @@ object CassandraUserSessionStore:
 
       def getUserInfoQuery(scope: Scope) = cql(
         s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE GroupId = ? AND UserId = ?",
-        scope.group.value(),
-        scope.user.username(),
+        scope.groupId.value(),
+        scope.userId.value(),
       )
 
       def getTrackingQuery(scope: Scope) = cql(
         s"SELECT Timestamp, Latitude, Longitude FROM $keyspace.$userRoutes WHERE GroupId = ? AND UserId = ? ORDER BY Timestamp",
-        scope.group.value(),
-        scope.user.username(),
+        scope.groupId.value(),
+        scope.userId.value(),
       )
 
       def insertUserInfoQuery(scope: Scope, state: UserState, position: GPSLocation, timestamp: Instant) = cql(
         s"INSERT INTO $keyspace.$userInfo(GroupId, UserId, Status, Latitude, Longitude, LastUpdated) VALUES (?, ?, ?, ?, ?, ?)",
-        scope.group.value(),
-        scope.user.username(),
+        scope.groupId.value(),
+        scope.userId.value(),
         state.toString,
         position.latitude,
         position.longitude,
@@ -110,20 +110,20 @@ object CassandraUserSessionStore:
       def updateUserInfoQuery(scope: Scope, state: UserState) = cql(
         s"UPDATE $keyspace.$userInfo SET Status = ? WHERE GroupId = ? AND UserId = ?",
         state.toString,
-        scope.group.value(),
-        scope.user.username(),
+        scope.groupId.value(),
+        scope.userId.value(),
       )
 
       def deleteUserRoutesQuery(scope: Scope) = cql(
         s"DELETE FROM $keyspace.$userRoutes WHERE GroupId = ? AND UserId = ?",
-        scope.group.value(),
-        scope.user.username(),
+        scope.groupId.value(),
+        scope.userId.value(),
       )
 
       def updateUserRoutesQuery(scope: Scope, position: GPSLocation, timestamp: Instant) = cql(
         s"INSERT INTO $keyspace.$userRoutes(GroupId, UserId, Latitude, Longitude, Timestamp) VALUES (?, ?, ?, ?, ?)",
-        scope.group.value(),
-        scope.user.username(),
+        scope.groupId.value(),
+        scope.userId.value(),
         position.latitude,
         position.longitude,
         timestamp,

@@ -1,6 +1,6 @@
 package io.github.positionpal.location.application.groups
 
-import io.github.positionpal.{AddedMemberToGroup, RemovedMemberToGroup}
+import io.github.positionpal.events.{AddedMemberToGroup, RemovedMemberToGroup}
 import io.github.positionpal.entities.{GroupId, UserId}
 
 /** A service for managing user groups.

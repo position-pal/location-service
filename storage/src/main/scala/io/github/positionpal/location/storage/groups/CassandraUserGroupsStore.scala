@@ -55,10 +55,10 @@ object CassandraUserGroupsStore:
         batch(insert(userGroupsByUserId)(groupId, userId) :: insert(userGroupsByGroupId)(groupId, userId) :: Nil)
 
       private def insert(table: String)(groupId: GroupId, userId: UserId): SimpleStatement =
-        cql(s"INSERT INTO $keyspace.$table (GroupId, UserId) VALUES (?, ?)", groupId.value(), userId.username())
+        cql(s"INSERT INTO $keyspace.$table (GroupId, UserId) VALUES (?, ?)", groupId.value(), userId.value())
 
       def getGroupsQuery(userId: UserId) =
-        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByUserId WHERE UserId = ?", userId.username())
+        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByUserId WHERE UserId = ?", userId.value())
 
       def getMembersQuery(groupId: GroupId) =
         cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByGroupId WHERE GroupId = ?", groupId.value())
@@ -67,4 +67,4 @@ object CassandraUserGroupsStore:
         batch(delete(userGroupsByUserId)(groupId, userId) :: delete(userGroupsByGroupId)(groupId, userId) :: Nil)
 
       private def delete(table: String)(groupId: GroupId, userId: UserId) =
-        cql(s"DELETE FROM $keyspace.$table WHERE GroupId = ? AND UserId = ?", groupId.value(), userId.username())
+        cql(s"DELETE FROM $keyspace.$table WHERE GroupId = ? AND UserId = ?", groupId.value(), userId.value())

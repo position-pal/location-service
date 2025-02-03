@@ -5,7 +5,7 @@ option java_package = "io.github.positionpal.location.presentation.proto";
 import "google/protobuf/timestamp.proto";
 
 message UserId {
-  string username = 1;
+  string value = 1;
 }
 
 message GroupId {

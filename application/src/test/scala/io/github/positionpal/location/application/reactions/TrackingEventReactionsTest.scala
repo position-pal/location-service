@@ -33,7 +33,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
     describe("should `Continue`"):
       it("if no check is met"):
         val session = Session.from(scope, UserState.Active, None, None)
-        val event = SampledLocation(now, scope.user, scope.group, bolognaCampus)
+        val event = SampledLocation(now, scope.userId, scope.groupId, bolognaCampus)
         doChecks(session, event).unsafeRunSync() shouldBe Right(Continue)
 
     describe("should trigger a `Notification`"):
@@ -91,7 +91,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
 
   private def expectNotification(content: String)(testBlock: => Unit): Unit =
     when(notifier.sendToGroup)
-      .expects(where((guid, uid, n) => guid == scope.group && uid == scope.user && n.body().contains(content)))
+      .expects(where((guid, uid, n) => guid == scope.groupId && uid == scope.userId && n.body().contains(content)))
       .returning(IO.unit)
       .once
     testBlock

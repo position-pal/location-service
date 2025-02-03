@@ -1,7 +1,8 @@
 package io.github.positionpal.location.messages.groups
 
+import io.github.positionpal.events.EventType
 import lepus.protocol.domains.{ExchangeType, FieldTable, ShortString}
-import io.github.positionpal.{AvroSerializer, MessageType}
+import io.github.positionpal.AvroSerializer
 import cats.implicits.{toFlatMapOps, toFunctorOps}
 import lepus.client.{Connection, ConsumeMode, Message}
 import io.github.positionpal.location.messages.RabbitMQ
@@ -40,5 +41,5 @@ object RabbitMQGroupsEventConsumer:
       case _ => Async[F].unit
 
     private object Header:
-      val memberAdded: ShortString = MessageType.MEMBER_ADDED.name().asShortOrEmpty
-      val memberRemoved: ShortString = MessageType.MEMBER_REMOVED.name().asShortOrEmpty
+      val memberAdded: ShortString = EventType.MEMBER_ADDED.name().asShortOrEmpty
+      val memberRemoved: ShortString = EventType.MEMBER_REMOVED.name().asShortOrEmpty

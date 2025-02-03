@@ -18,7 +18,7 @@ object PreCheckNotifier:
     on[F]: (session, event) =>
       event
         .notify(session)
-        .map(n => Async[F].start(notifier.sendToGroup(session.scope.group, event.user, n)))
+        .map(n => Async[F].start(notifier.sendToGroup(session.scope.groupId, event.user, n)))
         .map(_ => Left(()).pure[F])
         .getOrElse(Right(Continue).pure[F])
 
@@ -34,4 +34,4 @@ object PreCheckNotifier:
         case _: RoutingStopped => Some("journey ended", "journey completed successfully.")
         case _: SOSAlertStopped => Some("SOS alarm stopped!", "has stopped the SOS alarm.")
         case _ => None
-      notification.map((t, b) => event.user.username().let(u => NotificationMessage.create(s"$u $t", s"$u $b")))
+      notification.map((t, b) => event.user.value().let(u => NotificationMessage.create(s"$u $t", s"$u $b")))

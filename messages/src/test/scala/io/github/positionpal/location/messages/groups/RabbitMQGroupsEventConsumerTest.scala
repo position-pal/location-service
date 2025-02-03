@@ -34,15 +34,18 @@ class RabbitMQGroupsEventConsumerTest extends AnyWordSpec with Matchers with Moc
       }.unsafeRunSync()
 
   private object Utils:
-    import io.github.positionpal.{AddedMemberToGroup, AvroSerializer, MessageType, RemovedMemberToGroup, User}
-    import io.github.positionpal.MessageType.*
+    import io.github.positionpal.AvroSerializer
+    import io.github.positionpal.entities.{GroupId, User, UserId}
+    import io.github.positionpal.events.{AddedMemberToGroup, EventType, RemovedMemberToGroup}
+    import io.github.positionpal.events.EventType.*
     import lepus.client.{Connection, Message}
     import lepus.protocol.domains.ShortString
 
-    private val user = User.create("uid-test", "name-test", "surname-test", "email-test", "role-test")
+    private val user = User.create(UserId.create("uid-test"), "name-test", "surname-test", "email-test")
+    private val group = GroupId.create("guid-test-1")
     private val serializer = AvroSerializer()
-    val addedEvent: AddedMemberToGroup = AddedMemberToGroup.create("guid-test-1", user)
-    val removedEvent: RemovedMemberToGroup = RemovedMemberToGroup.create("guid-test-1", user)
+    val addedEvent: AddedMemberToGroup = AddedMemberToGroup.create(group, user)
+    val removedEvent: RemovedMemberToGroup = RemovedMemberToGroup.create(group, user)
     private val messageEvents = (addedEvent :: removedEvent :: Nil).map:
       case e: AddedMemberToGroup =>
         serializer.serializeAddedMemberToGroup(e).toMessage(Map(msgTypeKey -> MEMBER_ADDED.name().asShortOrEmpty))
