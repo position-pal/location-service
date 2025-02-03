@@ -1,3 +1,20 @@
+## [3.1.0](https://github.com/position-pal/location-service/compare/3.0.3...3.1.0) (2025-02-03)
+
+### Dependency updates
+
+* **api-deps:** update kernel to v1 (major) ([#188](https://github.com/position-pal/location-service/issues/188)) ([efaa8b5](https://github.com/position-pal/location-service/commit/efaa8b50d9ae5cabcf45bed573a122a1bb9f29ee))
+* **deps:** update akka to v2.10.1 ([#177](https://github.com/position-pal/location-service/issues/177)) ([0a5cf97](https://github.com/position-pal/location-service/commit/0a5cf97a34a4fd479e38667a25795199ecdf44f1))
+* **deps:** update akkaprojection to v1.6.8 ([#179](https://github.com/position-pal/location-service/issues/179)) ([e08aae6](https://github.com/position-pal/location-service/commit/e08aae669bd318108c2f863a0d29e5f2450e8363))
+* **deps:** update cassandra:latest docker digest to 6f8f916 ([#180](https://github.com/position-pal/location-service/issues/180)) ([9de6377](https://github.com/position-pal/location-service/commit/9de63778fb0c95636e587627ddd12cbf640b92ca))
+* **deps:** update dependency io.cucumber:cucumber-scala_3 to v8.26.0 ([#189](https://github.com/position-pal/location-service/issues/189)) ([03d5205](https://github.com/position-pal/location-service/commit/03d5205edb37285f1c7442434c4211467dd34c5e))
+* **deps:** update eclipse-temurin:21 docker digest to 5aa48ef ([9daa87b](https://github.com/position-pal/location-service/commit/9daa87bb946292b39b7b0665d109baedbaa46d6f))
+* **deps:** update kernel to v0.10.1 ([#186](https://github.com/position-pal/location-service/issues/186)) ([d128394](https://github.com/position-pal/location-service/commit/d1283947efd0a7cb4a594a1c257493b83858fed4))
+* **deps:** update plugin com.gradle.develocity to v3.19.1 ([#182](https://github.com/position-pal/location-service/issues/182)) ([47b7b59](https://github.com/position-pal/location-service/commit/47b7b590e6a9c8e8528dc657c7b56a59d652bdf9))
+* **deps:** update plugin git-sensitive-semantic-versioning to v3.1.10 ([#183](https://github.com/position-pal/location-service/issues/183)) ([246a29d](https://github.com/position-pal/location-service/commit/246a29d2287ec31f9f0abeaf224d2eb99cda524c))
+* **deps:** update plugin git-sensitive-semantic-versioning to v4 ([#185](https://github.com/position-pal/location-service/issues/185)) ([e67702b](https://github.com/position-pal/location-service/commit/e67702bfa10b127b92f952247afb4ade86cc33e5))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.20 ([#178](https://github.com/position-pal/location-service/issues/178)) ([2c6611d](https://github.com/position-pal/location-service/commit/2c6611d327682656dff32d16e9a518c2a0d9b150))
+* **deps:** update plugin scala-extras to v3.1.5 ([#184](https://github.com/position-pal/location-service/issues/184)) ([12a67de](https://github.com/position-pal/location-service/commit/12a67de535cbe6951d6d61ae5e7d81cd795428f9))
+
 ## [3.0.3](https://github.com/position-pal/location-service/compare/3.0.2...3.0.3) (2025-01-29)
 
 ### Dependency updates
