@@ -23,7 +23,7 @@ trait Session:
   def lastSampledLocation: Option[SampledLocation]
 
   /** The user tracking information. */
-  def tracking: Option[Tracking | MonitorableTracking]
+  def tracking: Option[Tracking]
 
   /** @return a new [[Session]] updated according to the given [[event]]. */
   def updateWith(event: DrivingEvent | InternalEvent): Session
@@ -79,7 +79,7 @@ object Session:
       override val scope: Scope,
       override val userState: UserState,
       override val lastSampledLocation: Option[SampledLocation],
-      override val tracking: Option[Tracking | MonitorableTracking],
+      override val tracking: Option[Tracking],
   ) extends Session:
     override def updateWith(event: DrivingEvent | InternalEvent): Session = event match
       case e: SampledLocation =>
