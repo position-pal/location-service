@@ -73,12 +73,12 @@ class RealTimeUserTrackerTest
       "reaching the destination" should:
         "transition to active mode" in:
           given Eventually.PatienceConfig = longLastingPatience
-          Routing -- SampledLocation(now, testScope, destination) --> Active verifying: (e, s) =>
+          (Routing | Warning) -- SampledLocation(now, testScope, destination) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing stopped event" should:
         "transition to active mode" in:
-          Routing -- RoutingStopped(now, testScope) --> Active verifying: (_, s) =>
+          (Routing | Warning) -- RoutingStopped(now, testScope) --> Active verifying: (_, s) =>
             s shouldMatch (None, Some(defaultContextSample))
 
     "in SOS state" when:
@@ -91,14 +91,14 @@ class RealTimeUserTrackerTest
       "receives new location samples" should:
         "track the user positions" in:
           val trace = generateTrace
-          (Routing | SOS) -- trace --> (Routing | SOS) verifying: (_, s) =>
+          (Routing | Warning | SOS) -- trace --> (Routing | Routing | SOS) verifying: (_, s) =>
             s shouldMatch (tracking(s.userState, trace.reverse), Some(trace.last))
 
     "receives an SOS alert triggered event" should:
       "transition to SOS mode" in:
         val sosAlertTriggered = SOSAlertTriggered(now, testScope, cesenaCampus)
-        (Active | Inactive | Routing) -- sosAlertTriggered --> SOS verifying: (_, s) =>
-          s shouldMatch (Some(Tracking()), Some(sosAlertTriggered: SampledLocation))
+        (Active | Inactive | Routing | Warning) -- sosAlertTriggered --> SOS verifying: (_, s) =>
+          s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
     "inactive for a while" should:
       "transition to inactive mode" in:
@@ -124,7 +124,7 @@ class RealTimeUserTrackerTest
   private def tracking(state: UserState, trace: List[SampledLocation] = Nil): Option[Tracking] =
     state match
       case SOS => Some(Tracking(trace))
-      case Routing => Some(Tracking.withMonitoring(Driving, destination, inTheFuture, trace))
+      case Routing | Warning => Some(Tracking.withMonitoring(Driving, destination, inTheFuture, trace))
       case _ => None
 
 object RealTimeUserTrackerTest:

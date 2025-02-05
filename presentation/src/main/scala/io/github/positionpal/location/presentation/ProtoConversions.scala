@@ -23,6 +23,7 @@ object ProtoConversions:
     case UserState.Inactive => proto.UserState.INACTIVE
     case UserState.SOS => proto.UserState.SOS
     case UserState.Routing => proto.UserState.ROUTING
+    case UserState.Warning => proto.UserState.WARNING
   }
 
   given locationToProto: Conversion[GPSLocation, proto.GPSLocation] = l => proto.GPSLocation(l.latitude, l.longitude)

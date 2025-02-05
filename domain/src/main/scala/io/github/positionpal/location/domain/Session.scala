@@ -26,13 +26,11 @@ trait Session:
   def tracking: Option[Tracking]
 
   /** @return a new [[Session]] updated according to the given [[event]]. */
-  def updateWith(event: DrivingEvent | InternalEvent): Session
+  def updateWith(event: DrivingEvent | InternalEvent): Either[InvalidState, Session]
 
 object Session:
 
   import io.github.positionpal.location.domain.UserState.*
-  import io.github.positionpal.location.domain.EventConversions.*
-  import io.github.positionpal.location.domain.EventConversions.given
 
   /** A snapshot of the user's state and tracking information. */
   final case class Snapshot(scope: Scope, userState: UserState, lastSampledLocation: Option[SampledLocation])
@@ -81,23 +79,23 @@ object Session:
       override val lastSampledLocation: Option[SampledLocation],
       override val tracking: Option[Tracking],
   ) extends Session:
-    override def updateWith(event: DrivingEvent | InternalEvent): Session = event match
-      case e: SampledLocation =>
-        copy(userState = userState.next(e), tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
-      case e: WentOffline =>
-        copy(userState = userState.next(e))
-      case e: RoutingStarted =>
-        copy(userState = userState.next(e), tracking = Some(e.toMonitorableTracking), lastSampledLocation = Some(e))
-      case e: SOSAlertTriggered =>
-        copy(userState = userState.next(e), tracking = Some(Tracking()), lastSampledLocation = Some(e))
-      case e: SOSAlertStopped =>
-        copy(userState = userState.next(e), tracking = None)
-      case e: RoutingStopped if userState == Routing =>
-        copy(userState = userState.next(e), tracking = None)
-      case _: StuckAlertTriggered if userState == Routing =>
-        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Stuck)))
-      case _: StuckAlertStopped if userState == Routing =>
-        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.removeAlert(Alert.Stuck)))
-      case _: TimeoutAlertTriggered if userState == Routing =>
-        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Late)))
-      case _ => this
+
+    import io.github.positionpal.location.domain.EventConversions.*
+    import io.github.positionpal.location.domain.EventConversions.given
+
+    override def updateWith(event: DrivingEvent | InternalEvent): Either[InvalidState, Session] =
+      for
+        nextState <- userState.next(event, tracking)
+        newSampledLocation = event match
+          case e: (SampledLocation | SOSAlertTriggered | RoutingStarted) => Some(e.toSampledLocation)
+          case _ => lastSampledLocation
+        nextTracking = event match
+          case e: SampledLocation => tracking.map(_ + e)
+          case _: WentOffline => tracking
+          case e: RoutingStarted => Some(e.toMonitorableTracking)
+          case e: SOSAlertTriggered => tracking.map(t => Tracking(t.route)).map(_ + e).orElse(Some(e.toTracking))
+          case _: (SOSAlertStopped | RoutingStopped) => None
+          case _: StuckAlertTriggered => tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Stuck))
+          case _: TimeoutAlertTriggered => tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Late))
+          case _: StuckAlertStopped => tracking.flatMap(_.asMonitorable).map(_.removeAlert(Alert.Stuck))
+      yield copy(userState = nextState, tracking = nextTracking, lastSampledLocation = newSampledLocation)

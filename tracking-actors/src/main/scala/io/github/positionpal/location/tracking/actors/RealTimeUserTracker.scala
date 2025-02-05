@@ -55,7 +55,7 @@ object RealTimeUserTracker:
   case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
   object StatefulDrivingEvent:
     def from(session: Session, event: DrivingEvent): StatefulDrivingEvent =
-      StatefulDrivingEvent(session.userState.next(event), event)
+      StatefulDrivingEvent(session.userState.next(event, session.tracking).getOrElse(session.userState), event)
   end StatefulDrivingEvent
 
   def apply(using NotificationService[IO], MapsService[IO]): Entity[Command, ShardingEnvelope[Command]] =
@@ -76,8 +76,8 @@ object RealTimeUserTracker:
   private def eventHandler: (Session, Event) => Session =
     (session, event) =>
       event match
-        case StatefulDrivingEvent(_, e) => session.updateWith(e)
-        case e: InternalEvent => session.updateWith(e)
+        case StatefulDrivingEvent(_, e) => session.updateWith(e).getOrElse(session)
+        case e: InternalEvent => session.updateWith(e).getOrElse(session)
 
   private def commandHandler(timer: TimerScheduler[Command])(using
       ActorContext[Command],
