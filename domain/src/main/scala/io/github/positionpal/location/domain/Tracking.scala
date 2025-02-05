@@ -33,6 +33,11 @@ enum Alert:
     */
   case Late
 
+  /** Indicates that the user went offline on their current route, possibly
+    * indicating a dangerous or unexpected situation.
+    */
+  case Offline
+
 /** A [[Tracking]] with additional information to monitor the user's route. */
 trait MonitorableTracking extends Tracking:
 
@@ -108,7 +113,7 @@ object Tracking:
       case _ => None
 
   extension (t: Option[Tracking])
-    /** @return a [[Some]] with the [[MonitorableTracking]] instance if the Option is non-empty and
+    /** @return a [[Some]] with the [[MonitorableTracking]] instance if the `Option` is non-empty and
       *         the tracking is monitorable (i.e., is an instance of [[MonitorableTracking]]), [[None]] otherwise.
       */
     def asMonitorable: Option[MonitorableTracking] = t.flatMap(_.asMonitorable)

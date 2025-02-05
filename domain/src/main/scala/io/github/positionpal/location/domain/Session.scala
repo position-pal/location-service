@@ -82,6 +82,7 @@ object Session:
 
     import io.github.positionpal.location.domain.EventConversions.*
     import io.github.positionpal.location.domain.EventConversions.given
+    import io.github.positionpal.location.commons.ScopeFunctions.also
 
     override def updateWith(event: DrivingEvent | InternalEvent): Either[InvalidState, Session] =
       for
@@ -90,12 +91,16 @@ object Session:
           case e: (SampledLocation | SOSAlertTriggered | RoutingStarted) => Some(e.toSampledLocation)
           case _ => lastSampledLocation
         nextTracking = event match
-          case e: SampledLocation => tracking.map(_ + e)
-          case _: WentOffline => tracking
           case e: RoutingStarted => Some(e.toMonitorableTracking)
           case e: SOSAlertTriggered => tracking.map(t => Tracking(t.route)).map(_ + e).orElse(Some(e.toTracking))
           case _: (SOSAlertStopped | RoutingStopped) => None
-          case _: StuckAlertTriggered => tracking.asMonitorable.map(_.addAlert(Alert.Stuck))
-          case _: TimeoutAlertTriggered => tracking.asMonitorable.map(_.addAlert(Alert.Late))
-          case _: StuckAlertStopped => tracking.asMonitorable.map(_.removeAlert(Alert.Stuck))
+          case e: SampledLocation => tracking.map(_ + e).also(t => (t withRemoved Alert.Offline).orElse(t))
+          case _: WentOffline => tracking withAdded Alert.Offline
+          case _: StuckAlertTriggered => tracking withAdded Alert.Stuck
+          case _: TimeoutAlertTriggered => tracking withAdded Alert.Late
+          case _: StuckAlertStopped => tracking withRemoved Alert.Stuck
       yield copy(userState = nextState, tracking = nextTracking, lastSampledLocation = newSampledLocation)
+
+    extension (t: Option[Tracking])
+      infix private def withAdded(a: Alert) = t.asMonitorable.map(_.addAlert(a))
+      infix private def withRemoved(a: Alert) = t.asMonitorable.map(_.removeAlert(a))

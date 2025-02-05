@@ -92,7 +92,10 @@ class RealTimeUserTrackerTest
           given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
           val routingStarted = RoutingStarted(now, testScope, bolognaCampus, Driving, cesenaCampus, inTheFuture)
           Inactive -- routingStarted --> Warning verifying: (_, s) =>
-            s shouldMatch (Some(routingStarted.toMonitorableTracking), Some(routingStarted: SampledLocation))
+            s shouldMatch (
+              Some(routingStarted.toMonitorableTracking.addAlert(Alert.Offline)),
+              Some(routingStarted.toSampledLocation),
+            )
 
     "in SOS state" when:
       "receives a SOS stopped event" should:
