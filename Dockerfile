@@ -10,7 +10,7 @@ EXPOSE 8080
 # GRPC
 EXPOSE 5052
 
-# Management
+# Akka Management
 EXPOSE 8558
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
