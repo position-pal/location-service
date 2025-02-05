@@ -1,6 +1,10 @@
+import org.gradle.api.provider.Provider
 import org.gradle.internal.cc.base.logger
+import org.gradle.plugin.use.PluginDependency
 
 object Utils {
+
+    fun Provider<PluginDependency>.id(): String = this.get().pluginId
 
     val inCI: Boolean
         get() = System.getenv("CI") == true.toString()

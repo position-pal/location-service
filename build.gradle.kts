@@ -1,3 +1,4 @@
+import Utils.id
 import DotenvUtils.dotenv
 import DotenvUtils.injectInto
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
@@ -10,7 +11,6 @@ plugins {
     alias(libs.plugins.scala.extras)
     alias(libs.plugins.gradle.docker.compose)
     alias(libs.plugins.git.sensitive.semantic.versioning)
-    alias(libs.plugins.shadowJar)
 }
 
 allprojects {
@@ -20,9 +20,8 @@ allprojects {
         apply(plugin = "java-library")
         apply(plugin = "java-test-fixtures")
         apply(plugin = "scala")
-        apply(plugin = scala.extras.get().pluginId)
-        apply(plugin = gradle.docker.compose.get().pluginId)
-        apply(plugin = shadowJar.get().pluginId)
+        apply(plugin = scala.extras.id())
+        apply(plugin = gradle.docker.compose.id())
     }
 
     repositories {

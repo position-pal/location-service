@@ -3,6 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransfor
 
 plugins {
     application
+    alias(libs.plugins.shadowJar)
 }
 
 dependencies {

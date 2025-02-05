@@ -47,7 +47,6 @@ circe-core = { module = "io.circe:circe-core_3", version.ref = "circe" }
 circe-generic = { module = "io.circe:circe-generic_3", version.ref = "circe" }
 circe-parser = { module = "io.circe:circe-parser_3", version.ref = "circe" }
 circe-named-codec = "dev.hnaderi:named-codec-circe_3:0.3.0"
-cucumber = "io.cucumber:cucumber-scala_3:8.26.0"
 fs2-core = { module = "co.fs2:fs2-core_3", version.ref = "fs2" }
 fs2-io = { module = "co.fs2:fs2-io_3", version.ref = "fs2" }
 fs2-grpc-runtime = { module = "org.typelevel:fs2-grpc-runtime_3", version.ref = "fs2-grpc" }
@@ -98,7 +97,6 @@ clusterman = [
 scala-testing = [
     "scalatest",
     "scalatestplus-junit5",
-    "cucumber",
     "junit-platform-engine",
     "junit-platform-launcher",
     "scalamock",
