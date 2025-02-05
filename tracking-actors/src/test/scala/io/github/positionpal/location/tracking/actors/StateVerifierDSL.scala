@@ -58,8 +58,9 @@ trait RealTimeUserTrackerVerifierDSL:
           .foreach: (session, idx) =>
             testKit.initialize(session)
             events.foreach: e =>
-              testKit.runCommand(e).events should contain only
-                StatefulDrivingEvent(session.userState.next(e, session.tracking).getOrElse(fail()), e)
+              testKit.runCommand(e).events should contain(
+                StatefulDrivingEvent(session.userState.next(e, session.tracking).getOrElse(fail()), e),
+              )
             eventually:
               val currentSession = testKit.getState()
               currentSession.userState shouldBe outs(if outs.size == 1 then 0 else idx)
