@@ -34,8 +34,6 @@ class RealTimeUserTrackerTest
 
   import RealTimeUserTrackerTest.*
 
-  private val longLastingPatience = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
-
   private val notifier = mock[NotificationService[IO]]
   private val maps = mock[MapsService[IO]]
 
@@ -57,6 +55,14 @@ class RealTimeUserTrackerTest
     ClusterSharding(system).init(GroupManager())
 
   "RealTimeUserTracker" when:
+    "in active state" when:
+      "no events are received for a while" should:
+        "transition to inactive state" in:
+          given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
+          val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
+          Inactive -- sampledLocation --> Inactive verifying: (_, s) =>
+            s.lastSampledLocation shouldBe Some(sampledLocation)
+
     "in inactive or active state" when:
       "receives a new location sample" should:
         "update the last known location" in:
@@ -64,30 +70,37 @@ class RealTimeUserTrackerTest
             s shouldMatch (None, Some(e))
 
       "receives a routing started event" should:
-        "transition to routing mode" in:
+        "transition to routing state" in:
           val routingStarted = RoutingStarted(now, testScope, bolognaCampus, Driving, cesenaCampus, inTheFuture)
           (Active | Inactive) -- routingStarted --> Routing verifying: (_, s) =>
             s shouldMatch (Some(routingStarted.toMonitorableTracking), Some(routingStarted: SampledLocation))
 
-    "in routing state" when:
+    "in routing or warning state" when:
       "reaching the destination" should:
-        "transition to active mode" in:
-          given Eventually.PatienceConfig = longLastingPatience
+        "transition to active state" in:
+          given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(10, Seconds), Span(1, Seconds))
           (Routing | Warning) -- SampledLocation(now, testScope, destination) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing stopped event" should:
-        "transition to active mode" in:
+        "transition to active state" in:
           (Routing | Warning) -- RoutingStopped(now, testScope) --> Active verifying: (_, s) =>
             s shouldMatch (None, Some(defaultContextSample))
 
+      "no events are received for a while" should:
+        "transition to warning state" in:
+          given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
+          val routingStarted = RoutingStarted(now, testScope, bolognaCampus, Driving, cesenaCampus, inTheFuture)
+          Inactive -- routingStarted --> Warning verifying: (_, s) =>
+            s shouldMatch (Some(routingStarted.toMonitorableTracking), Some(routingStarted: SampledLocation))
+
     "in SOS state" when:
       "receives a SOS stopped event" should:
-        "transition to active mode" in:
+        "transition to active state" in:
           SOS -- SOSAlertStopped(now, testScope) --> Active verifying: (_, s) =>
             s shouldMatch (None, Some(defaultContextSample))
 
-    "in routing or SOS state" when:
+    "in routing, warning or SOS state" when:
       "receives new location samples" should:
         "track the user positions" in:
           val trace = generateTrace
@@ -95,20 +108,14 @@ class RealTimeUserTrackerTest
             s shouldMatch (tracking(s.userState, trace.reverse), Some(trace.last))
 
     "receives an SOS alert triggered event" should:
-      "transition to SOS mode" in:
+      "transition to SOS state" in:
         val sosAlertTriggered = SOSAlertTriggered(now, testScope, cesenaCampus)
         (Active | Inactive | Routing | Warning) -- sosAlertTriggered --> SOS verifying: (_, s) =>
           s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
-    "inactive for a while" should:
-      "transition to inactive mode" in:
-        given Eventually.PatienceConfig = longLastingPatience
-        val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
-        Inactive -- sampledLocation --> Inactive verifying: (_, s) =>
-          s.lastSampledLocation shouldBe Some(sampledLocation)
-
   extension (s: Session)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[DrivingEvent]): Unit =
+      val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
       s.tracking shouldBe route
       s.lastSampledLocation shouldBe lastSample
 
