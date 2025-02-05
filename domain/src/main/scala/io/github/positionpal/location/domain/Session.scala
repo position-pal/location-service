@@ -43,7 +43,7 @@ object Session:
     * @param s The [[Session]] instance to deconstruct.
     * @return an [[Option]]al tuple with the [[Scope]], [[UserState]], [[SampledLocation]] and [[Tracking]] information.
     */
-  def unapply(s: Session): Option[(Scope, UserState, Option[SampledLocation], Option[Tracking | MonitorableTracking])] =
+  def unapply(s: Session): Option[(Scope, UserState, Option[SampledLocation], Option[Tracking])] =
     Some((s.scope, s.userState, s.lastSampledLocation, s.tracking))
 
   /** Creates a new [[Session]] for the given [[groupId]] - [[userId]] initially in the [[Inactive]] state
@@ -95,7 +95,7 @@ object Session:
           case e: RoutingStarted => Some(e.toMonitorableTracking)
           case e: SOSAlertTriggered => tracking.map(t => Tracking(t.route)).map(_ + e).orElse(Some(e.toTracking))
           case _: (SOSAlertStopped | RoutingStopped) => None
-          case _: StuckAlertTriggered => tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Stuck))
-          case _: TimeoutAlertTriggered => tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Late))
-          case _: StuckAlertStopped => tracking.flatMap(_.asMonitorable).map(_.removeAlert(Alert.Stuck))
+          case _: StuckAlertTriggered => tracking.asMonitorable.map(_.addAlert(Alert.Stuck))
+          case _: TimeoutAlertTriggered => tracking.asMonitorable.map(_.addAlert(Alert.Late))
+          case _: StuckAlertStopped => tracking.asMonitorable.map(_.removeAlert(Alert.Stuck))
       yield copy(userState = nextState, tracking = nextTracking, lastSampledLocation = newSampledLocation)

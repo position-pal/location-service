@@ -88,7 +88,7 @@ trait ModelCodecs:
         .writeString("lastSampledLocation")
         .write(session.lastSampledLocation)
       if session.tracking.exists(_.isMonitorable) then
-        writer.writeString("monitorableTracking").write(session.tracking.flatMap(_.asMonitorable))
+        writer.writeString("monitorableTracking").write(session.tracking.asMonitorable)
       else writer.writeString("tracking").write(session.tracking)
       writer.writeMapClose()
     ,
@@ -99,7 +99,7 @@ trait ModelCodecs:
           empty[Scope],
           empty[UserState],
           empty[Option[SampledLocation]],
-          empty[Option[Tracking | MonitorableTracking]],
+          empty[Option[Tracking]],
         ),
       ): (d, _) =>
         reader.readString() match

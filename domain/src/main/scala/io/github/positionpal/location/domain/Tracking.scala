@@ -87,23 +87,28 @@ object Tracking:
       override val expectedArrival: Instant,
       private val alerts: Set[Alert] = Set(),
   ) extends MonitorableTracking:
-    override def addSample(sample: SampledLocation): MonitorableTracking =
-      MonitorableTrackingImpl(sample :: route, mode, destination, expectedArrival)
+    override def addSample(sample: SampledLocation): MonitorableTracking = copy(route = sample :: route)
     override def removeAlert(alert: Alert): MonitorableTracking = copy(alerts = alerts - alert)
     override def addAlert(alert: Alert): MonitorableTracking = copy(alerts = alerts + alert)
     override def has(alert: Alert): Boolean = alerts.contains(alert)
 
-  extension (t: Tracking | MonitorableTracking)
+  extension (t: Tracking)
     /** @return `true` if the tracking is monitorable (i.e., is an instance
-      *     of [[MonitorableTracking]]), `false` otherwise.
+      *         of [[MonitorableTracking]]), `false` otherwise.
       */
     def isMonitorable: Boolean = t match
       case _: MonitorableTracking => true
       case _ => false
 
     /** @return a [[Some]] with the [[MonitorableTracking]] instance if the tracking is
-      *     monitorable (i.e., is an instance of [[MonitorableTracking]]), [[None]] otherwise.
+      *         monitorable (i.e., is an instance of [[MonitorableTracking]]), [[None]] otherwise.
       */
     def asMonitorable: Option[MonitorableTracking] = t match
       case m: MonitorableTracking => Some(m)
       case _ => None
+
+  extension (t: Option[Tracking])
+    /** @return a [[Some]] with the [[MonitorableTracking]] instance if the Option is non-empty and
+      *         the tracking is monitorable (i.e., is an instance of [[MonitorableTracking]]), [[None]] otherwise.
+      */
+    def asMonitorable: Option[MonitorableTracking] = t.flatMap(_.asMonitorable)
