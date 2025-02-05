@@ -48,7 +48,6 @@ object RealTimeUserTracker:
   /** A [[SelfMessage]] triggered regularly by a timer to check whether the user went offline. */
   case object AliveCheck extends SelfMessage
 
-  type Observer = ActorRef[DrivenEvent]
   type Command = DrivingEvent | InternalEvent | SelfMessage
   type Event = StatefulDrivingEvent | InternalEvent
 
