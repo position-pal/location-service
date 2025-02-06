@@ -22,5 +22,5 @@ object EventConversions:
     def toTracking: Tracking = Tracking(ev :: Nil)
 
   /** @return a [[UserUpdate]] built from the given [[ClientDrivingEvent]] and [[Session]]. */
-  def userUpdateFrom(event: ClientDrivingEvent, session: Session): UserUpdate =
+  def userUpdateFrom(event: DrivingEvent, session: Session): UserUpdate =
     UserUpdate(event.timestamp, event.user, event.group, session.lastSampledLocation.map(_.position), session.userState)

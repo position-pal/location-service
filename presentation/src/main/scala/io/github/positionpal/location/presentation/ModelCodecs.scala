@@ -33,9 +33,11 @@ trait ModelCodecs:
 
   given sampledLocationCodec: Codec[SampledLocation] = deriveCodec[SampledLocation]
 
-  given internalEventCodec: Codec[InternalEvent] = deriveAllCodecs[InternalEvent]
+  given internalDrivingEventCodec: Codec[InternalEvent] = deriveAllCodecs[InternalEvent]
 
-  given drivingEventCodec: Codec[ClientDrivingEvent] = deriveAllCodecs[ClientDrivingEvent]
+  given clientDrivingEventCodec: Codec[ClientDrivingEvent] = deriveAllCodecs[ClientDrivingEvent]
+
+  given drivingEventCodec: Codec[DrivingEvent] = deriveCodec[DrivingEvent]
 
   given drivenEventCodec: Codec[DrivenEvent] = deriveAllCodecs[DrivenEvent]
 
