@@ -9,5 +9,5 @@ object TrackingEventReaction extends BinaryShortCircuitReaction with FilterableO
   case object Continue
   override type Environment = Session
   override type Event = ClientDrivingEvent
-  override type LeftOutcome = Unit | ClientDrivingEvent | InternalEvent
+  override type LeftOutcome = Unit | DrivingEvent
   override type RightOutcome = Continue.type

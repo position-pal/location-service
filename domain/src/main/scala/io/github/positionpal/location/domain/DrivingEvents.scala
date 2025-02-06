@@ -4,8 +4,11 @@ import java.time.Instant
 
 import io.github.positionpal.entities.{GroupId, UserId}
 
+/** An event driving an application use case. */
+sealed trait DrivingEvent extends DomainEvent
+
 /** An event driving a use case triggered by the system itself. */
-sealed trait InternalEvent extends DomainEvent
+sealed trait InternalEvent extends DrivingEvent
 
 /** An event triggered when a user is stuck in the same position for a suspicious amount of time. */
 case class StuckAlertTriggered(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
@@ -25,8 +28,8 @@ case class TimeoutAlertTriggered(timestamp: Instant, user: UserId, group: GroupI
 object TimeoutAlertTriggered:
   def apply(timestamp: Instant, scope: Scope): TimeoutAlertTriggered = this(timestamp, scope.userId, scope.groupId)
 
-/** An event driving an application use case. */
-sealed trait ClientDrivingEvent extends DomainEvent
+/** An event driving an application use case triggered by a client. */
+sealed trait ClientDrivingEvent extends DrivingEvent
 
 /** An event triggered regularly on behalf of a user, tracking its position. */
 case class SampledLocation(timestamp: Instant, user: UserId, group: GroupId, position: GPSLocation)

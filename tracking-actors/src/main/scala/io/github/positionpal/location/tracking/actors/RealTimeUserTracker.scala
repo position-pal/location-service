@@ -48,7 +48,7 @@ object RealTimeUserTracker:
   /** A [[SelfMessage]] triggered regularly by a timer to check whether the user went offline. */
   case object AliveCheck extends SelfMessage
 
-  type Command = ClientDrivingEvent | InternalEvent | SelfMessage
+  type Command = DrivingEvent | SelfMessage
   type Event = StatefulDrivingEvent | InternalEvent
 
   case class StatefulDrivingEvent(state: UserState, event: ClientDrivingEvent) extends AkkaSerializable
@@ -102,7 +102,7 @@ object RealTimeUserTracker:
     ctx.pipeToSelf(reaction.unsafeToFuture()):
       case Success(result) =>
         result match
-          case Left(e: (ClientDrivingEvent | InternalEvent)) => e
+          case Left(e: DrivingEvent) => e
           case _ => Ignore
       case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
     persistAndNotify(e, s)(using ctx.system)
