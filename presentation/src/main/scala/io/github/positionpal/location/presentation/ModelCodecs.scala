@@ -33,9 +33,11 @@ trait ModelCodecs:
 
   given sampledLocationCodec: Codec[SampledLocation] = deriveCodec[SampledLocation]
 
-  given internalEventCodec: Codec[InternalEvent] = deriveAllCodecs[InternalEvent]
+  given internalDrivingEventCodec: Codec[InternalEvent] = deriveAllCodecs[InternalEvent]
 
-  given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
+  given clientDrivingEventCodec: Codec[ClientDrivingEvent] = deriveAllCodecs[ClientDrivingEvent]
+
+  given drivingEventCodec: Codec[DrivingEvent] = deriveCodec[DrivingEvent]
 
   given drivenEventCodec: Codec[DrivenEvent] = deriveAllCodecs[DrivenEvent]
 
@@ -88,7 +90,7 @@ trait ModelCodecs:
         .writeString("lastSampledLocation")
         .write(session.lastSampledLocation)
       if session.tracking.exists(_.isMonitorable) then
-        writer.writeString("monitorableTracking").write(session.tracking.flatMap(_.asMonitorable))
+        writer.writeString("monitorableTracking").write(session.tracking.asMonitorable)
       else writer.writeString("tracking").write(session.tracking)
       writer.writeMapClose()
     ,
@@ -99,7 +101,7 @@ trait ModelCodecs:
           empty[Scope],
           empty[UserState],
           empty[Option[SampledLocation]],
-          empty[Option[Tracking | MonitorableTracking]],
+          empty[Option[Tracking]],
         ),
       ): (d, _) =>
         reader.readString() match

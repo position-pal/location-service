@@ -22,7 +22,7 @@ object PreCheckNotifier:
         .map(_ => Left(()).pure[F])
         .getOrElse(Right(Continue).pure[F])
 
-  extension (event: DrivingEvent)
+  extension (event: ClientDrivingEvent)
     private def notify(s: Session) =
       val notification = event match
         case RoutingStarted(_, _, _, _, mode, destination, eta) =>

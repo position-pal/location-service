@@ -26,13 +26,11 @@ trait Session:
   def tracking: Option[Tracking]
 
   /** @return a new [[Session]] updated according to the given [[event]]. */
-  def updateWith(event: DrivingEvent | InternalEvent): Session
+  def updateWith(event: DrivingEvent): Either[InvalidState, Session]
 
 object Session:
 
   import io.github.positionpal.location.domain.UserState.*
-  import io.github.positionpal.location.domain.EventConversions.*
-  import io.github.positionpal.location.domain.EventConversions.given
 
   /** A snapshot of the user's state and tracking information. */
   final case class Snapshot(scope: Scope, userState: UserState, lastSampledLocation: Option[SampledLocation])
@@ -45,7 +43,7 @@ object Session:
     * @param s The [[Session]] instance to deconstruct.
     * @return an [[Option]]al tuple with the [[Scope]], [[UserState]], [[SampledLocation]] and [[Tracking]] information.
     */
-  def unapply(s: Session): Option[(Scope, UserState, Option[SampledLocation], Option[Tracking | MonitorableTracking])] =
+  def unapply(s: Session): Option[(Scope, UserState, Option[SampledLocation], Option[Tracking])] =
     Some((s.scope, s.userState, s.lastSampledLocation, s.tracking))
 
   /** Creates a new [[Session]] for the given [[groupId]] - [[userId]] initially in the [[Inactive]] state
@@ -81,23 +79,28 @@ object Session:
       override val lastSampledLocation: Option[SampledLocation],
       override val tracking: Option[Tracking],
   ) extends Session:
-    override def updateWith(event: DrivingEvent | InternalEvent): Session = event match
-      case e: SampledLocation =>
-        copy(userState = userState.next(e), tracking = tracking.map(_ + e), lastSampledLocation = Some(e))
-      case e: WentOffline =>
-        copy(userState = userState.next(e))
-      case e: RoutingStarted =>
-        copy(userState = userState.next(e), tracking = Some(e.toMonitorableTracking), lastSampledLocation = Some(e))
-      case e: SOSAlertTriggered =>
-        copy(userState = userState.next(e), tracking = Some(Tracking()), lastSampledLocation = Some(e))
-      case e: SOSAlertStopped =>
-        copy(userState = userState.next(e), tracking = None)
-      case e: RoutingStopped if userState == Routing =>
-        copy(userState = userState.next(e), tracking = None)
-      case _: StuckAlertTriggered if userState == Routing =>
-        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Stuck)))
-      case _: StuckAlertStopped if userState == Routing =>
-        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.removeAlert(Alert.Stuck)))
-      case _: TimeoutAlertTriggered if userState == Routing =>
-        copy(tracking = tracking.flatMap(_.asMonitorable).map(_.addAlert(Alert.Late)))
-      case _ => this
+
+    import io.github.positionpal.location.domain.EventConversions.*
+    import io.github.positionpal.location.domain.EventConversions.given
+    import io.github.positionpal.location.commons.ScopeFunctions.also
+
+    override def updateWith(event: DrivingEvent): Either[InvalidState, Session] =
+      for
+        nextState <- userState.next(event, tracking)
+        newSampledLocation = event match
+          case e: (SampledLocation | SOSAlertTriggered | RoutingStarted) => Some(e.toSampledLocation)
+          case _ => lastSampledLocation
+        nextTracking = event match
+          case e: RoutingStarted => Some(e.toMonitorableTracking)
+          case e: SOSAlertTriggered => tracking.map(t => Tracking(t.route)).map(_ + e).orElse(Some(e.toTracking))
+          case _: (SOSAlertStopped | RoutingStopped) => None
+          case e: SampledLocation => tracking.map(_ + e).also(t => t withRemoved Alert.Offline orElse t)
+          case _: WentOffline => tracking withAdded Alert.Offline
+          case _: StuckAlertTriggered => tracking withAdded Alert.Stuck
+          case _: TimeoutAlertTriggered => tracking withAdded Alert.Late
+          case _: StuckAlertStopped => tracking withRemoved Alert.Stuck
+      yield copy(userState = nextState, tracking = nextTracking, lastSampledLocation = newSampledLocation)
+
+    extension (t: Option[Tracking])
+      infix private def withAdded(a: Alert) = t.asMonitorable.map(_.addAlert(a))
+      infix private def withRemoved(a: Alert) = t.asMonitorable.map(_.removeAlert(a))

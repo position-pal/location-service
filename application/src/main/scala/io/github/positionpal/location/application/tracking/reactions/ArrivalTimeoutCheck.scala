@@ -19,7 +19,7 @@ object ArrivalTimeoutCheck:
     on[F]: (session, event) =>
       event match
         case e: SampledLocation if session.tracking.exists(_.isMonitorable) =>
-          val tracking = session.tracking.flatMap(_.asMonitorable).get
+          val tracking = session.tracking.asMonitorable.get
           if e.timestamp.isAfter(tracking.expectedArrival) && !(tracking has Late) then
             sendNotification(session.scope).map(_ => Left(TimeoutAlertTriggered(e.timestamp, e.scope)))
           else Right(Continue).pure[F]

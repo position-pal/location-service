@@ -10,11 +10,11 @@ class EventReactionsTest extends AnyFunSpec with Matchers with MockFactory:
   import cats.effect.unsafe.implicits.global
   import scala.util.Right
 
-  private val event = mock[DrivingEvent]
+  private val event = mock[ClientDrivingEvent]
 
   object TestableEventReaction extends BinaryShortCircuitReaction with FilterableOps:
     override type Environment = Unit
-    override type Event = DrivingEvent
+    override type Event = ClientDrivingEvent
     override type LeftOutcome = String
     override type RightOutcome = Int
 

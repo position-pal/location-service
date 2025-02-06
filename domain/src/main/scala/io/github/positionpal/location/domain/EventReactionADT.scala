@@ -10,7 +10,7 @@ trait EventReactionADT:
   type Environment
 
   /** The type of the event triggering the reaction. */
-  type Event <: DrivingEvent
+  type Event <: ClientDrivingEvent
 
   /** The outcome of the reaction application, i.e., the result of the reaction. */
   type Outcome

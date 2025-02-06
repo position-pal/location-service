@@ -73,6 +73,5 @@ class UserSessionProjectionHandler[T](
           case e: SampledLocation => storage.update(Snapshot(e.scope, state, Some(e)))
           case e: RoutingStarted => storage.update(Snapshot(e.scope, state, Some(e)))
           case e: SOSAlertTriggered => storage.update(Snapshot(e.scope, state, Some(e)))
-          case e: (SOSAlertStopped | WentOffline | RoutingStopped) => storage.update(Snapshot(e.scope, state, None))
+          case e @ _ => storage.update(Snapshot(e.scope, state, None))
         operation.map(_ => Done).unsafeToFuture()
-      case _ => Future.successful(Done)

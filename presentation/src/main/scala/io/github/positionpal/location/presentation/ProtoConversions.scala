@@ -23,6 +23,7 @@ object ProtoConversions:
     case UserState.Inactive => proto.UserState.INACTIVE
     case UserState.SOS => proto.UserState.SOS
     case UserState.Routing => proto.UserState.ROUTING
+    case UserState.Warning => proto.UserState.WARNING
   }
 
   given locationToProto: Conversion[GPSLocation, proto.GPSLocation] = l => proto.GPSLocation(l.latitude, l.longitude)
@@ -34,7 +35,7 @@ object ProtoConversions:
 
   given routeToProto: Conversion[Route, proto.Route] = r => proto.Route(r.map(identity))
 
-  given trackingToProto: Conversion[Tracking | MonitorableTracking, proto.Tracking] = {
+  given trackingToProto: Conversion[Tracking, proto.Tracking] = {
     case t: MonitorableTracking => proto.Tracking(Some(t.route), Some(t.destination), Some(t.expectedArrival))
     case t: Tracking => proto.Tracking(Some(t.route))
   }

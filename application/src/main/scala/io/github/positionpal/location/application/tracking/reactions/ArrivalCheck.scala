@@ -18,7 +18,7 @@ object ArrivalCheck:
         case e: SampledLocation if session.tracking.exists(_.isMonitorable) =>
           for
             config <- ReactionsConfiguration.get
-            tracking <- session.tracking.flatMap(_.asMonitorable).get.pure[F]
+            tracking <- session.tracking.asMonitorable.get.pure[F]
             distance <- maps.distance(tracking.mode)(e.position, tracking.destination)
             isWithinProximity = distance.toMeters.value <= config.proximityToleranceMeters.meters.value
             _ <- if isWithinProximity then sendNotification(session.scope.groupId, e.user) else Async[F].unit

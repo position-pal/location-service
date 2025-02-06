@@ -23,7 +23,7 @@ object StationaryCheck:
         case e: SampledLocation if session.tracking.exists(_.isMonitorable) =>
           for
             config <- ReactionsConfiguration.get
-            tracking <- session.tracking.flatMap(_.asMonitorable).get.pure[F]
+            tracking <- session.tracking.asMonitorable.get.pure[F]
             samples = tracking.route.take(config.stationarySamples)
             distances <- samples.traverse(s => maps.distance(tracking.mode)(s.position, e.position))
             isStationary = distances.size >= config.stationarySamples &&
