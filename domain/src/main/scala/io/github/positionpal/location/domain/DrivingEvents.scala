@@ -4,20 +4,6 @@ import java.time.Instant
 
 import io.github.positionpal.entities.{GroupId, UserId}
 
-/** A generic domain event, representing a valuable change in the system. */
-trait DomainEvent:
-  /** The timestamp when the event occurred. */
-  def timestamp: Instant
-
-  /** The user who triggered the event. */
-  def user: UserId
-
-  /** The group the user belongs to and the event is related to. */
-  def group: GroupId
-
-  /** The [[Scope]] of the event, i.e., an aggregation of the user and group this event is related to. */
-  def scope: Scope = Scope(user, group)
-
 /** An event driving a use case triggered by the system itself. */
 sealed trait InternalEvent extends DomainEvent
 
@@ -25,22 +11,19 @@ sealed trait InternalEvent extends DomainEvent
 case class StuckAlertTriggered(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
 
 object StuckAlertTriggered:
-  def apply(timestamp: Instant, scope: Scope): StuckAlertTriggered =
-    StuckAlertTriggered(timestamp, scope.userId, scope.groupId)
+  def apply(timestamp: Instant, scope: Scope): StuckAlertTriggered = this(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered when a user stops being stuck. */
 case class StuckAlertStopped(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
 
 object StuckAlertStopped:
-  def apply(timestamp: Instant, scope: Scope): StuckAlertStopped =
-    StuckAlertStopped(timestamp, scope.userId, scope.groupId)
+  def apply(timestamp: Instant, scope: Scope): StuckAlertStopped = this(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered when a user is late to reach a destination. */
 case class TimeoutAlertTriggered(timestamp: Instant, user: UserId, group: GroupId) extends InternalEvent
 
 object TimeoutAlertTriggered:
-  def apply(timestamp: Instant, scope: Scope): TimeoutAlertTriggered =
-    TimeoutAlertTriggered(timestamp, scope.userId, scope.groupId)
+  def apply(timestamp: Instant, scope: Scope): TimeoutAlertTriggered = this(timestamp, scope.userId, scope.groupId)
 
 /** An event driving an application use case. */
 sealed trait DrivingEvent extends DomainEvent
@@ -50,7 +33,7 @@ case class SampledLocation(timestamp: Instant, user: UserId, group: GroupId, pos
 
 object SampledLocation:
   def apply(timestamp: Instant, scope: Scope, position: GPSLocation): SampledLocation =
-    SampledLocation(timestamp, scope.userId, scope.groupId, position)
+    this(timestamp, scope.userId, scope.groupId, position)
 
 /** An event triggered when a user starts routing to a destination. */
 case class RoutingStarted(
@@ -77,7 +60,7 @@ object RoutingStarted:
 case class RoutingStopped(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
 
 object RoutingStopped:
-  def apply(timestamp: Instant, scope: Scope): RoutingStopped = RoutingStopped(timestamp, scope.userId, scope.groupId)
+  def apply(timestamp: Instant, scope: Scope): RoutingStopped = this(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered by a user when needing help. */
 case class SOSAlertTriggered(
@@ -89,7 +72,7 @@ case class SOSAlertTriggered(
 
 object SOSAlertTriggered:
   def apply(timestamp: Instant, scope: Scope, position: GPSLocation): SOSAlertTriggered =
-    SOSAlertTriggered(timestamp, scope.userId, scope.groupId, position)
+    this(timestamp, scope.userId, scope.groupId, position)
 
 /** An event triggered by a user when stopping the SOS alert. */
 case class SOSAlertStopped(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
@@ -102,19 +85,3 @@ case class WentOffline(timestamp: Instant, user: UserId, group: GroupId) extends
 
 object WentOffline:
   def apply(timestamp: Instant, scope: Scope): WentOffline = this(timestamp, scope.userId, scope.groupId)
-
-/** An event triggered by the system as a result of some system action. */
-sealed trait DrivenEvent extends DomainEvent
-
-/** A user update event. */
-case class UserUpdate(
-    timestamp: Instant,
-    user: UserId,
-    group: GroupId,
-    position: Option[GPSLocation],
-    status: UserState,
-) extends DrivenEvent
-
-object UserUpdate:
-  def apply(timestamp: Instant, scope: Scope, position: Option[GPSLocation], status: UserState): UserUpdate =
-    UserUpdate(timestamp, scope.userId, scope.groupId, position, status)
