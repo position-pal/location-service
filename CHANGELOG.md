@@ -1,3 +1,38 @@
+## [4.0.0](https://github.com/position-pal/location-service/compare/3.1.0...4.0.0) (2025-02-06)
+
+### ⚠ BREAKING CHANGES
+
+* add warning user state (#201)
+
+### Dependency updates
+
+* **deps:** update cassandra:latest docker digest to 1905e8a ([#198](https://github.com/position-pal/location-service/issues/198)) ([8571af1](https://github.com/position-pal/location-service/commit/8571af1f563f0c727aa706626a47840a6f362bf7))
+* **deps:** update cassandra:latest docker digest to 70b40a2 ([#200](https://github.com/position-pal/location-service/issues/200)) ([01d9224](https://github.com/position-pal/location-service/commit/01d9224fdc159fc2a38d3a5d6c0316956d5120cb))
+* **deps:** update cassandra:latest docker digest to 9945daf ([#190](https://github.com/position-pal/location-service/issues/190)) ([b74623b](https://github.com/position-pal/location-service/commit/b74623bcd0b18461a613a637d19ec3a8adff0e9b))
+* **deps:** update cassandra:latest docker digest to d727300 ([#196](https://github.com/position-pal/location-service/issues/196)) ([88adf9c](https://github.com/position-pal/location-service/commit/88adf9cb4ab187c84ef43e0362a99b56baab1748))
+* **deps:** update cassandra:latest docker digest to f93bae3 ([#199](https://github.com/position-pal/location-service/issues/199)) ([34de51b](https://github.com/position-pal/location-service/commit/34de51b2c8a9747009e6787644f2330f84445c1e))
+* **deps:** update eclipse-temurin:21 docker digest to 4e8ddd3 ([#191](https://github.com/position-pal/location-service/issues/191)) ([1b50974](https://github.com/position-pal/location-service/commit/1b50974cf279836d6ceb8d639a02540442c9adf3))
+* **deps:** update eclipse-temurin:21 docker digest to 4f53cf2 ([#193](https://github.com/position-pal/location-service/issues/193)) ([7c0bd32](https://github.com/position-pal/location-service/commit/7c0bd3214d354982ea0b29dbc5a11499795b5495))
+* **deps:** update rabbitmq:4-management docker digest to 1848f46 ([#194](https://github.com/position-pal/location-service/issues/194)) ([ebec40b](https://github.com/position-pal/location-service/commit/ebec40b1034dae71db924f9e327aa2285c29cfe9))
+* **deps:** update rabbitmq:4-management docker digest to a5409e7 ([#195](https://github.com/position-pal/location-service/issues/195)) ([163c32d](https://github.com/position-pal/location-service/commit/163c32dc8d7e61d762057bcf7c610ab60d80ad2e))
+* **deps:** update rabbitmq:4-management docker digest to cc4c4f7 ([#192](https://github.com/position-pal/location-service/issues/192)) ([91fe220](https://github.com/position-pal/location-service/commit/91fe220588c2098ae47a149cb7dea471a44d0248))
+* **deps:** update rabbitmq:4-management docker digest to f8e04e1 ([#197](https://github.com/position-pal/location-service/issues/197)) ([9ed90e4](https://github.com/position-pal/location-service/commit/9ed90e492c6e66b33b349f86da7abb6436074963))
+
+### Build and continuous integration
+
+* **deps:** update docker/setup-buildx-action digest to f7ce87c ([#202](https://github.com/position-pal/location-service/issues/202)) ([30475e7](https://github.com/position-pal/location-service/commit/30475e74d2529cbb492581b04f8efda30f3b275d))
+* **deps:** update docker/setup-qemu-action digest to 4574d27 ([#203](https://github.com/position-pal/location-service/issues/203)) ([f051e29](https://github.com/position-pal/location-service/commit/f051e29f9ca5587def303ad0d16d1473a0cc90e4))
+* use simpler id plugin extension method alias and drop unused cucumber dependency ([cb07892](https://github.com/position-pal/location-service/commit/cb07892f489e3a29ba4c08b7f0ba239f7ce9bb0b))
+
+### General maintenance
+
+* improve dockerfile env variable comment ([300c359](https://github.com/position-pal/location-service/commit/300c359b5eadc9b64b87a2ece95813d79fb40259))
+
+### Refactoring
+
+* add warning user state ([#201](https://github.com/position-pal/location-service/issues/201)) ([fa7d02f](https://github.com/position-pal/location-service/commit/fa7d02f6a0eb55458208b5e63ccd0215e3488c16))
+* **domain:** remove useless tracking union type ([08451cd](https://github.com/position-pal/location-service/commit/08451cdd2ec0ed61b12da1bdb7bd280da3ecc853))
+
 ## [3.1.0](https://github.com/position-pal/location-service/compare/3.0.3...3.1.0) (2025-02-03)
 
 ### Dependency updates
