@@ -37,6 +37,7 @@ class RealTimeUserTrackerTest
   private val notifier = mock[NotificationService[IO]]
   private val maps = mock[MapsService[IO]]
 
+  when(notifier.sendToOwnGroup).expects(*, *).returns(IO.unit).anyNumberOfTimes
   when(notifier.sendToGroup).expects(*, *, *).returns(IO.unit).anyNumberOfTimes
   when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation))
     .expects(*, *, *)

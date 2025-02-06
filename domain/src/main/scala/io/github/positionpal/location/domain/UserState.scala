@@ -26,6 +26,10 @@ case class InvalidState(reason: String)
 
 object UserState:
 
+  extension (event: DrivingEvent)
+    /** @return whether the [[event]] can be applied to the [[current]] [[Session]]. */
+    infix def canBeAppliedTo(current: Session): Boolean = current.userState.next(event, current.tracking).isRight
+
   extension (current: UserState)
     /** @return the next state of a user given the [[event]] that occurred. */
     def next(event: DrivingEvent, tracking: Option[Tracking]): Either[InvalidState, UserState] =

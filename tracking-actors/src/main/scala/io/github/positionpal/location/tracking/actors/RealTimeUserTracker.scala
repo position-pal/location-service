@@ -10,7 +10,6 @@ import akka.cluster.Cluster
 import io.github.positionpal.location.application.notifications.NotificationService
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.actor.typed.*
-import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
 import io.github.positionpal.location.tracking.utils.AkkaUtils.refOf
 import io.github.positionpal.location.application.tracking.reactions.*
 import io.github.positionpal.location.application.tracking.MapsService
@@ -52,10 +51,6 @@ object RealTimeUserTracker:
   type Event = StatefulDrivingEvent
 
   case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
-  object StatefulDrivingEvent:
-    def from(session: Session, event: DrivingEvent): StatefulDrivingEvent =
-      StatefulDrivingEvent(session.userState.next(event, session.tracking).getOrElse(session.userState), event)
-  end StatefulDrivingEvent
 
   def apply(using NotificationService[IO], MapsService[IO]): Entity[Command, ShardingEnvelope[Command]] =
     Entity(key)(ctx => this(ctx.entityId.splitted, tags(math.abs(ctx.entityId.hashCode % tags.size))))
@@ -76,18 +71,20 @@ object RealTimeUserTracker:
     currentSession.updateWith(statefulEvent.event).getOrElse(currentSession)
 
   private def commandHandler(timer: TimerScheduler[Command])(using
-      ActorContext[Command],
-      NotificationService[IO],
-      MapsService[IO],
+      ctx: ActorContext[Command],
+      notifier: NotificationService[IO],
+      maps: MapsService[IO],
   ): (Session, Command) => Effect[Event, Session] = (session, command) =>
     command match
-      case e: ClientDrivingEvent =>
-        if session.userState == Inactive then timer.startTimerAtFixedRate(msg = AliveCheck, interval = 20.seconds)
-        trackingHandler(session, e)
-        persistAndNotify(e, session)
-      case e: InternalEvent => persistAndNotify(e, session)
+      case e: DrivingEvent if e canBeAppliedTo session =>
+        e match
+          case event: ClientDrivingEvent =>
+            if session.userState == Inactive then timer.startTimerAtFixedRate(msg = AliveCheck, interval = 20.seconds)
+            trackingHandler(session, event)
+          case _ => ()
+        persistAndNotify(session.userState.next(e, session.tracking).toOption.get, e)
       case e: AliveCheck.type => aliveCheckHandler(timer)(session, e)
-      case _ => Effect.none
+      case e => ctx.log.info("Ignoring {}", e); Effect.none
 
   import cats.effect.unsafe.implicits.global
 
@@ -107,21 +104,20 @@ object RealTimeUserTracker:
   private def aliveCheckHandler(timer: TimerScheduler[Command])(using
       ctx: ActorContext[Command],
       notifier: NotificationService[IO],
-  ): (Session, AliveCheck.type) => Effect[Event, Session] = (s, _) =>
-    if s.userState != Inactive && s.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(60))
-    then
+  ): (Session, AliveCheck.type) => Effect[Event, Session] = (session, _) =>
+    val event = WentOffline(now(), session.scope)
+    if (event canBeAppliedTo session) && session.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(60)) then
       timer.cancelAll()
-      val event = WentOffline(s.lastSampledLocation.get.timestamp, s.scope)
-      if s.userState == SOS || s.userState == Routing then
+      if session.userState != Active then
         val notification = NotificationMessage.create(
           s"${event.user.value()} connection lost!",
-          s"User ${event.user.value()} went offline while in ${s.userState} mode!",
+          s"User ${event.user.value()} went offline while in ${session.userState} mode!",
         )
-        notifier.sendToGroup(s.scope.groupId, s.scope.userId, notification).unsafeRunAndForget()
-      persistAndNotify(event, s)
+        notifier.sendToOwnGroup(session.scope, notification).unsafeRunAndForget()
+      persistAndNotify(session.userState.next(event, session.tracking).toOption.get, event)
     else Effect.none
 
-  private def persistAndNotify(event: DrivingEvent, session: Session)(using ctx: ActorContext[Command]) =
+  private def persistAndNotify(state: UserState, event: DrivingEvent)(using ctx: ActorContext[Command]) =
     Effect
-      .persist[Event, Session](StatefulDrivingEvent.from(session, event))
+      .persist[Event, Session](StatefulDrivingEvent(state, event))
       .thenRun(s => refOf(GroupManager.key, s.scope.groupId.value())(using ctx.system) ! userUpdateFrom(event, s))
