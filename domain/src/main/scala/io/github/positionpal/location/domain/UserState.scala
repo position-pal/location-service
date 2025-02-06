@@ -39,7 +39,7 @@ object UserState:
         case _: SampledLocation =>
           current match
             case Inactive => current ~> Active
-            case Warning if !(tracking flatMap (_.asMonitorable) exists (_ has Late)) => current ~> Routing
+            case Warning if !(tracking.asMonitorable.get has Late) => current ~> Routing
             case _ => stay
         case _: WentOffline =>
           current match
