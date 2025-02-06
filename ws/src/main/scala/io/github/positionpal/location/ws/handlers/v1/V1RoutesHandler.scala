@@ -34,7 +34,7 @@ class V1RoutesHandler(service: ActorBasedRealTimeTracking.Service[IO, Scope])(us
   private def routeToGroupActor(scope: Scope): Sink[Message, Unit] =
     Flow[Message]
       .map:
-        case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[DrivingEvent].valueEither
+        case TextMessage.Strict(msg) => Json.decode(msg.getBytes).to[ClientDrivingEvent].valueEither
         case t => Left(s"Unsupported message type $t")
       .log("Websocket message from client to tracker")
       .withAttributes(attributes)

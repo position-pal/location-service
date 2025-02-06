@@ -25,26 +25,26 @@ trait RealTimeUserTrackerVerifierDSL:
   context: ActorTestKitBase & Matchers =>
 
   import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
-  import io.github.positionpal.location.domain.{DrivingEvent, UserState}
+  import io.github.positionpal.location.domain.{ClientDrivingEvent, UserState}
   import io.github.positionpal.location.tracking.actors.RealTimeUserTracker.*
   import org.scalatest.concurrent.Eventually.eventually
 
   given Conversion[UserState, List[UserState]] = _ :: Nil
-  given Conversion[DrivingEvent, List[DrivingEvent]] = _ :: Nil
+  given Conversion[ClientDrivingEvent, List[ClientDrivingEvent]] = _ :: Nil
   extension (u: UserState) infix def |(other: UserState): List[UserState] = u :: other :: Nil
   extension (us: List[UserState]) infix def |(other: UserState): List[UserState] = us :+ other
 
   extension (xs: List[UserState])
-    infix def --(events: List[DrivingEvent]): SystemVerifier[UserState, DrivingEvent, Session] =
+    infix def --(events: List[ClientDrivingEvent]): SystemVerifier[UserState, ClientDrivingEvent, Session] =
       RealTimeUserTrackerVerifier(xs, events)
 
-  private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[DrivingEvent])
-      extends SystemVerifier[UserState, DrivingEvent, Session](ins, events):
+  private class RealTimeUserTrackerVerifier(ins: List[UserState], events: List[ClientDrivingEvent])
+      extends SystemVerifier[UserState, ClientDrivingEvent, Session](ins, events):
 
     infix override def -->(outs: List[UserState])(using
         ctx: Context[UserState, Session],
-    ): Verification[DrivingEvent, Session] = new Verification[DrivingEvent, Session]:
-      infix override def verifying(verifyLast: (DrivingEvent, Session) => Unit)(using PatienceConfig): Unit =
+    ): Verification[ClientDrivingEvent, Session] = new Verification[ClientDrivingEvent, Session]:
+      infix override def verifying(verifyLast: (ClientDrivingEvent, Session) => Unit)(using PatienceConfig): Unit =
         val testKit = EventSourcedBehaviorTestKit[Command, Event, Session](
           system = system,
           behavior = RealTimeUserTracker(

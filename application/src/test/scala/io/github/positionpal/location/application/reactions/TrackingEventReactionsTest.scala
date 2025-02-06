@@ -86,7 +86,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
         expectNotification("luke has reached their destination on time"):
           doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: RoutingStopped) => }
 
-  private def doChecks(session: Session, event: DrivingEvent): IO[Outcome] =
+  private def doChecks(session: Session, event: ClientDrivingEvent): IO[Outcome] =
     (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(session, event)
 
   private def expectNotification(content: String)(testBlock: => Unit): Unit =

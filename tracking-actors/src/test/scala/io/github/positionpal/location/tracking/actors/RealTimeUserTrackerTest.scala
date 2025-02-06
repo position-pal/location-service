@@ -117,7 +117,7 @@ class RealTimeUserTrackerTest
           s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
   extension (s: Session)
-    infix def shouldMatch(route: Option[Tracking], lastSample: Option[DrivingEvent]): Unit =
+    infix def shouldMatch(route: Option[Tracking], lastSample: Option[ClientDrivingEvent]): Unit =
       val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
       s.tracking shouldBe route
       s.lastSampledLocation shouldBe lastSample

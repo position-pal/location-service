@@ -3,7 +3,7 @@ package io.github.positionpal.location.tracking.actors
 import akka.actor.typed.{ActorRef, ActorRefResolver}
 import akka.actor.ExtendedActorSystem
 import io.bullet.borer.{Codec, Decoder, Encoder}
-import io.github.positionpal.location.domain.{DrivenEvent, DrivingEvent, Session}
+import io.github.positionpal.location.domain.{ClientDrivingEvent, DrivenEvent, Session}
 import io.github.positionpal.location.presentation.*
 import io.bullet.borer.derivation.ArrayBasedCodecs.deriveCodec
 import akka.actor.typed.scaladsl.adapter.*
@@ -28,7 +28,7 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
 
   register[RealTimeUserTracker.AliveCheck.type]()
   register[RealTimeUserTracker.Ignore.type]()
-  register[DrivingEvent]()
+  register[ClientDrivingEvent]()
   register[Session]()
   register[DrivenEvent]()
   register[RealTimeUserTracker.StatefulDrivingEvent]()

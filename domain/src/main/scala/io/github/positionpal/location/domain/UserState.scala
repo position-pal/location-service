@@ -28,7 +28,7 @@ object UserState:
 
   extension (current: UserState)
     /** @return the next state of a user given the [[event]] that occurred. */
-    def next(event: DrivingEvent | InternalEvent, tracking: Option[Tracking]): Either[InvalidState, UserState] =
+    def next(event: ClientDrivingEvent | InternalEvent, tracking: Option[Tracking]): Either[InvalidState, UserState] =
       event match
         case _: SOSAlertTriggered => current ~> SOS unlessIsIn SOS
         case _: SOSAlertStopped => current ~> Active onlyIfIn SOS

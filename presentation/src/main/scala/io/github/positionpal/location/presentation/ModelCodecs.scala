@@ -35,7 +35,7 @@ trait ModelCodecs:
 
   given internalEventCodec: Codec[InternalEvent] = deriveAllCodecs[InternalEvent]
 
-  given drivingEventCodec: Codec[DrivingEvent] = deriveAllCodecs[DrivingEvent]
+  given drivingEventCodec: Codec[ClientDrivingEvent] = deriveAllCodecs[ClientDrivingEvent]
 
   given drivenEventCodec: Codec[DrivenEvent] = deriveAllCodecs[DrivenEvent]
 

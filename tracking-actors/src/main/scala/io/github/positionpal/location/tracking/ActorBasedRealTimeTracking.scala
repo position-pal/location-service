@@ -34,7 +34,7 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
       yield ServiceImpl(actorSystem)
 
   private class ServiceImpl[F[_]: Async](actorSystem: ActorSystem[?]) extends Service[F, Scope]:
-    override def handle(resource: Scope)(event: DrivingEvent): F[Unit] = Async[F].delay:
+    override def handle(resource: Scope)(event: ClientDrivingEvent): F[Unit] = Async[F].delay:
       refOf(resource) ! event
 
     override def addObserverFor(resource: Scope)(observer: OutcomeObserver): F[Unit] = Async[F].delay:

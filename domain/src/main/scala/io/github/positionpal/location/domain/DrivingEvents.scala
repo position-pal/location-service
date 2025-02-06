@@ -26,10 +26,11 @@ object TimeoutAlertTriggered:
   def apply(timestamp: Instant, scope: Scope): TimeoutAlertTriggered = this(timestamp, scope.userId, scope.groupId)
 
 /** An event driving an application use case. */
-sealed trait DrivingEvent extends DomainEvent
+sealed trait ClientDrivingEvent extends DomainEvent
 
 /** An event triggered regularly on behalf of a user, tracking its position. */
-case class SampledLocation(timestamp: Instant, user: UserId, group: GroupId, position: GPSLocation) extends DrivingEvent
+case class SampledLocation(timestamp: Instant, user: UserId, group: GroupId, position: GPSLocation)
+    extends ClientDrivingEvent
 
 object SampledLocation:
   def apply(timestamp: Instant, scope: Scope, position: GPSLocation): SampledLocation =
@@ -44,7 +45,7 @@ case class RoutingStarted(
     mode: RoutingMode,
     destination: GPSLocation,
     expectedArrival: Instant,
-) extends DrivingEvent
+) extends ClientDrivingEvent
 
 object RoutingStarted:
   def apply(
@@ -57,7 +58,7 @@ object RoutingStarted:
   ): RoutingStarted = this(timestamp, scope.userId, scope.groupId, position, mode, destination, expectedArrival)
 
 /** An event triggered to stop an active route. */
-case class RoutingStopped(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
+case class RoutingStopped(timestamp: Instant, user: UserId, group: GroupId) extends ClientDrivingEvent
 
 object RoutingStopped:
   def apply(timestamp: Instant, scope: Scope): RoutingStopped = this(timestamp, scope.userId, scope.groupId)
@@ -68,20 +69,20 @@ case class SOSAlertTriggered(
     user: UserId,
     group: GroupId,
     position: GPSLocation,
-) extends DrivingEvent
+) extends ClientDrivingEvent
 
 object SOSAlertTriggered:
   def apply(timestamp: Instant, scope: Scope, position: GPSLocation): SOSAlertTriggered =
     this(timestamp, scope.userId, scope.groupId, position)
 
 /** An event triggered by a user when stopping the SOS alert. */
-case class SOSAlertStopped(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
+case class SOSAlertStopped(timestamp: Instant, user: UserId, group: GroupId) extends ClientDrivingEvent
 
 object SOSAlertStopped:
   def apply(timestamp: Instant, scope: Scope): SOSAlertStopped = this(timestamp, scope.userId, scope.groupId)
 
 /** An event triggered when a user goes offline. */
-case class WentOffline(timestamp: Instant, user: UserId, group: GroupId) extends DrivingEvent
+case class WentOffline(timestamp: Instant, user: UserId, group: GroupId) extends ClientDrivingEvent
 
 object WentOffline:
   def apply(timestamp: Instant, scope: Scope): WentOffline = this(timestamp, scope.userId, scope.groupId)

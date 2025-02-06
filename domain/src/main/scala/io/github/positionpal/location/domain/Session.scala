@@ -26,7 +26,7 @@ trait Session:
   def tracking: Option[Tracking]
 
   /** @return a new [[Session]] updated according to the given [[event]]. */
-  def updateWith(event: DrivingEvent | InternalEvent): Either[InvalidState, Session]
+  def updateWith(event: ClientDrivingEvent | InternalEvent): Either[InvalidState, Session]
 
 object Session:
 
@@ -84,7 +84,7 @@ object Session:
     import io.github.positionpal.location.domain.EventConversions.given
     import io.github.positionpal.location.commons.ScopeFunctions.also
 
-    override def updateWith(event: DrivingEvent | InternalEvent): Either[InvalidState, Session] =
+    override def updateWith(event: ClientDrivingEvent | InternalEvent): Either[InvalidState, Session] =
       for
         nextState <- userState.next(event, tracking)
         newSampledLocation = event match
