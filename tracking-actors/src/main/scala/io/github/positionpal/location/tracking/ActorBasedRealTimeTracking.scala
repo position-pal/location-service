@@ -13,7 +13,7 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
   import io.github.positionpal.entities.GroupId
   import io.github.positionpal.location.domain.*
   import io.github.positionpal.location.tracking.actors.{GroupManager, RealTimeUserTracker}
-  import io.github.positionpal.location.presentation.ScopeUtils.concatenated
+  import io.github.positionpal.location.presentation.ScopeCodec.encode
   import io.github.positionpal.location.application.notifications.NotificationService
 
   override type Outcome = DrivenEvent
@@ -47,4 +47,4 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
       AkkaUtils.refOf(GroupManager.key, group.value())(using actorSystem)
 
     private def refOf(scope: Scope): EntityRef[RealTimeUserTracker.Command] =
-      AkkaUtils.refOf(RealTimeUserTracker.key, scope.concatenated)(using actorSystem)
+      AkkaUtils.refOf(RealTimeUserTracker.key, scope.encode)(using actorSystem)

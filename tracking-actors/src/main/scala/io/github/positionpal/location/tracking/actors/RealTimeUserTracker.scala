@@ -13,6 +13,8 @@ import akka.actor.typed.*
 import io.github.positionpal.location.tracking.utils.AkkaUtils.refOf
 import io.github.positionpal.location.application.tracking.reactions.*
 import io.github.positionpal.location.application.tracking.MapsService
+import io.github.positionpal.location.presentation.ScopeCodec.*
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import akka.actor.typed.SupervisorStrategy.restartWithBackoff
 import io.github.positionpal.location.domain.UserState.*
 import akka.cluster.sharding.typed.scaladsl.*
@@ -22,8 +24,6 @@ import akka.persistence.typed.PersistenceId
 import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.NotificationMessage
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
-import io.github.positionpal.location.presentation.ScopeUtils.*
 
 /** The actor in charge of tracking the real-time location of users, reacting to
   * their movements and status changes. This actor is managed by Akka Cluster Sharding.
@@ -53,14 +53,14 @@ object RealTimeUserTracker:
   case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
 
   def apply(using NotificationService[IO], MapsService[IO]): Entity[Command, ShardingEnvelope[Command]] =
-    Entity(key)(ctx => this(ctx.entityId.splitted, tags(math.abs(ctx.entityId.hashCode % tags.size))))
+    Entity(key)(ctx => this(ctx.entityId.decode, tags(math.abs(ctx.entityId.hashCode % tags.size))))
 
   def apply(scope: Scope, tag: String)(using NotificationService[IO], MapsService[IO]): Behavior[Command] =
     Behaviors.setup: ctx =>
       given ActorContext[Command] = ctx
       Behaviors.withTimers: timer =>
         ctx.log.debug("Starting RealTimeUserTracker::{}@{}", scope, Cluster(ctx.system).selfMember.address)
-        val persistenceId = PersistenceId(key.name, scope.concatenated)
+        val persistenceId = PersistenceId(key.name, scope.encode)
         EventSourcedBehavior(persistenceId, Session.of(scope), commandHandler(timer), eventHandler)
           .withTagger(_ => Set(tag))
           .snapshotWhen((_, event, _) => event == RoutingStopped, deleteEventsOnSnapshot = true)
