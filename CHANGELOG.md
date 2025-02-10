@@ -1,3 +1,15 @@
+## [4.0.1](https://github.com/position-pal/location-service/compare/4.0.0...4.0.1) (2025-02-10)
+
+### Dependency updates
+
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.120 ([#204](https://github.com/position-pal/location-service/issues/204)) ([24858a7](https://github.com/position-pal/location-service/commit/24858a7cc53baf3be658bc554b26252be6203917))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.122 ([#205](https://github.com/position-pal/location-service/issues/205)) ([c7fe35a](https://github.com/position-pal/location-service/commit/c7fe35a143b43c89c5fffc89edf88ccd617431f8))
+* **deps:** update rabbitmq:4-management docker digest to 697da87 ([#206](https://github.com/position-pal/location-service/issues/206)) ([8caadeb](https://github.com/position-pal/location-service/commit/8caadeb6545e1353d981702ad26cdcd948d0a1ac))
+
+### Bug Fixes
+
+* use `_` instead of `-` as scope codec separators since guid and uui contains multiple `-` char ([2fb7d52](https://github.com/position-pal/location-service/commit/2fb7d5246aa88d833528a464b86c9842a36193d2))
+
 ## [4.0.0](https://github.com/position-pal/location-service/compare/3.1.0...4.0.0) (2025-02-06)
 
 ### ⚠ BREAKING CHANGES
