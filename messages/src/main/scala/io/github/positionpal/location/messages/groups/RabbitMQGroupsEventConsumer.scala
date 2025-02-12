@@ -1,9 +1,11 @@
 package io.github.positionpal.location.messages.groups
 
+import io.github.positionpal.location.commons.ScopeFunctions.withContext
 import io.github.positionpal.events.EventType
 import lepus.protocol.domains.{ExchangeType, FieldTable, ShortString}
+import org.slf4j.LoggerFactory
 import io.github.positionpal.AvroSerializer
-import cats.implicits.{toFlatMapOps, toFunctorOps}
+import cats.implicits.{catsSyntaxApplicativeError, toFlatMapOps, toFunctorOps}
 import lepus.client.{Connection, ConsumeMode, Message}
 import io.github.positionpal.location.messages.RabbitMQ
 import cats.effect.Async
@@ -19,7 +21,7 @@ object RabbitMQGroupsEventConsumer:
 
   class RabbitMQGroupsEventConsumerImpl[F[_]: Async](userGroupsService: UserGroupsService[F]) extends RabbitMQ.Utils:
 
-    private val serializer = AvroSerializer()
+    private val logger = LoggerFactory.getLogger(getClass)
 
     def start(connection: Connection[F]): F[Unit] = connection.channel.use: ch =>
       for
@@ -29,16 +31,17 @@ object RabbitMQGroupsEventConsumer:
         _ <- ch.queue.bind(q.queue, groupsEventsExchange, ShortString.empty)
         consumer = ch.messaging
           .consume[Array[Byte]](q.queue, mode = ConsumeMode.RaiseOnError(true))
-          .evalMap(e => handleGroupEvent(e.message))
+          .evalMap(e => handleGroupEvent(e.message).handleErrorWith(e => Async[F].delay(logger.error(e.getMessage))))
         _ <- consumer.compile.drain
       yield ()
 
-    private def handleGroupEvent(event: Message[Array[Byte]]): F[Unit] = event.properties.headers match
-      case Some(headers) if Header.memberAdded in headers =>
-        userGroupsService.addedMember(serializer.deserializeAddedMemberToGroup(event.payload))
-      case Some(headers) if Header.memberRemoved in headers =>
-        userGroupsService.removeMember(serializer.deserializeRemovedMemberToGroup(event.payload))
-      case _ => Async[F].unit
+    private def handleGroupEvent(event: Message[Array[Byte]]): F[Unit] = withContext(AvroSerializer()): s =>
+      event.properties.headers match
+        case Some(headers) if Header.memberAdded in headers =>
+          userGroupsService.addedMember(s.deserializeAddedMemberToGroup(event.payload))
+        case Some(headers) if Header.memberRemoved in headers =>
+          userGroupsService.removeMember(s.deserializeRemovedMemberToGroup(event.payload))
+        case _ => Async[F].unit
 
     private object Header:
       val memberAdded: ShortString = EventType.MEMBER_ADDED.name().asShortOrEmpty
