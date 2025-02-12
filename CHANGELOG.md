@@ -1,3 +1,13 @@
+## [4.0.2](https://github.com/position-pal/location-service/compare/4.0.1...4.0.2) (2025-02-12)
+
+### Dependency updates
+
+* **deps:** update dependency com.tngtech.archunit:archunit to v1.4.0 ([#207](https://github.com/position-pal/location-service/issues/207)) ([7c394aa](https://github.com/position-pal/location-service/commit/7c394aa60e5dab06ecfccfbc207e38901d991c8d))
+
+### Bug Fixes
+
+* log rabbitmq consumer errors without stopping it ([9440d9b](https://github.com/position-pal/location-service/commit/9440d9bb93a411d4dde9fff535f95636d22368dc))
+
 ## [4.0.1](https://github.com/position-pal/location-service/compare/4.0.0...4.0.1) (2025-02-10)
 
 ### Dependency updates
