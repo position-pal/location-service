@@ -7,7 +7,7 @@ import cats.implicits.{catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps}
 import io.github.positionpal.location.application.tracking.MapsService
 import cats.effect.Async
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.entities.{GroupId, NotificationMessage, UserId}
+import io.github.positionpal.entities.NotificationMessage
 
 /** A [[TrackingEventReaction]] checking if the position curried by the event is near the arrival position. */
 object ArrivalCheck:
@@ -21,12 +21,12 @@ object ArrivalCheck:
             tracking <- session.tracking.asMonitorable.get.pure[F]
             distance <- maps.distance(tracking.mode)(e.position, tracking.destination)
             isWithinProximity = distance.toMeters.value <= config.proximityToleranceMeters.meters.value
-            _ <- if isWithinProximity then sendNotification(session.scope.groupId, e.user) else Async[F].unit
+            _ <- if isWithinProximity then sendNotification(session.scope) else Async[F].unit
           yield if isWithinProximity then Left(RoutingStopped(e.timestamp, e.user, e.group)) else Right(Continue)
         case _ => Right(Continue).pure[F]
 
-  private def sendNotification[F[_]: Async](group: GroupId, userId: UserId)(using notifier: NotificationService[F]) =
-    Async[F].start(notifier.sendToGroup(group, userId, successMessage(userId.value()))).void
+  private def sendNotification[F[_]: Async](scope: Scope)(using notifier: NotificationService[F]) =
+    Async[F].start(notifier.sendToOwnGroup(scope, successMessage(scope.userId.value()))).void
 
   private def successMessage(username: String) = NotificationMessage
     .create(s"$username arrived!", s"$username has reached their destination on time.")

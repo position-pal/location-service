@@ -3,7 +3,7 @@ package io.github.positionpal.location.application.tracking.reactions
 import io.github.positionpal.location.commons.ScopeFunctions.let
 import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
-import cats.implicits.catsSyntaxApplicativeId
+import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps}
 import io.github.positionpal.location.domain.UserState.*
 import cats.effect.Async
 import io.github.positionpal.location.domain.*
@@ -16,11 +16,9 @@ object PreCheckNotifier:
 
   def apply[F[_]: Async](using notifier: NotificationService[F]): EventReaction[F] =
     on[F]: (session, event) =>
-      event
-        .notify(session)
-        .map(n => Async[F].start(notifier.sendToGroup(session.scope.groupId, event.user, n)))
-        .map(_ => Left(()).pure[F])
-        .getOrElse(Right(Continue).pure[F])
+      event.notify(session) match
+        case Some(n) => Async[F].start(notifier.sendToOwnGroup(session.scope, n)).as(Left(()))
+        case None => Right(Continue).pure[F]
 
   extension (event: ClientDrivingEvent)
     private def notify(s: Session) =

@@ -38,7 +38,7 @@ object StationaryCheck:
         case _ => Right(Continue).pure[F]
 
   private def sendNotification[F[_]: Async](scope: Scope)(using notifier: NotificationService[F]) =
-    Async[F].start(notifier.sendToGroup(scope.groupId, scope.userId, alertMessage(scope.userId.value()))).void
+    Async[F].start(notifier.sendToOwnGroup(scope, alertMessage(scope.userId.value()))).void
 
   private def alertMessage(username: String) = NotificationMessage
     .create(s"$username() stationary alert!", s"$username has been stuck in the same position for a while.")

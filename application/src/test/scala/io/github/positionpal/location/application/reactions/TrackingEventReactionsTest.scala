@@ -90,8 +90,10 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
     (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(session, event)
 
   private def expectNotification(content: String)(testBlock: => Unit): Unit =
-    when(notifier.sendToGroup)
-      .expects(where((guid, uid, n) => guid == scope.groupId && uid == scope.userId && n.body().contains(content)))
+    when(notifier.sendToOwnGroup)
+      .expects:
+        where: (scope, n) =>
+          scope.groupId == scope.groupId && scope.userId == scope.userId && n.body().contains(content)
       .returning(IO.unit)
       .once
     testBlock
