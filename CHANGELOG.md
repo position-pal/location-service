@@ -1,3 +1,18 @@
+## [4.0.3](https://github.com/position-pal/location-service/compare/4.0.2...4.0.3) (2025-02-14)
+
+### Dependency updates
+
+* **deps:** update akkaprojection to v1.6.9 ([#212](https://github.com/position-pal/location-service/issues/212)) ([108c856](https://github.com/position-pal/location-service/commit/108c85611d60733bfb4d1e97c73d77cc74138503))
+* **deps:** update eclipse-temurin:21 docker digest to 0b31d93 ([#211](https://github.com/position-pal/location-service/issues/211)) ([9b49e84](https://github.com/position-pal/location-service/commit/9b49e8403382ebe6b256b7daf4e6f86831581dbf))
+* **deps:** update eclipse-temurin:21 docker digest to 99c7f17 ([#209](https://github.com/position-pal/location-service/issues/209)) ([c073245](https://github.com/position-pal/location-service/commit/c073245213c795aff4018d1a65bf10eee71fd3ee))
+* **deps:** update node.js to 22.14 ([#213](https://github.com/position-pal/location-service/issues/213)) ([4b8adef](https://github.com/position-pal/location-service/commit/4b8adefaaa0b7d9365e497ee5547ac3a8abe35a0))
+* **deps:** update rabbitmq:4-management docker digest to 6d1ded7 ([#208](https://github.com/position-pal/location-service/issues/208)) ([a621132](https://github.com/position-pal/location-service/commit/a621132f254c945f79c97092f98764df7c5e25be))
+* **deps:** update rabbitmq:4-management docker digest to c2f5153 ([#210](https://github.com/position-pal/location-service/issues/210)) ([8878d05](https://github.com/position-pal/location-service/commit/8878d0528b396000af71a42132c8461b7d0a1d0d))
+
+### Bug Fixes
+
+* **application:** trigger correctly a notification in pre-checks ([9608bc4](https://github.com/position-pal/location-service/commit/9608bc4c6f9a7d7239a1b7307eca3e5c967187c6))
+
 ## [4.0.2](https://github.com/position-pal/location-service/compare/4.0.1...4.0.2) (2025-02-12)
 
 ### Dependency updates
