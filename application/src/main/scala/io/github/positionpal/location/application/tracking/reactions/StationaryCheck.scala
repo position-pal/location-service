@@ -41,4 +41,4 @@ object StationaryCheck:
     Async[F].start(notifier.sendToOwnGroup(scope, alertMessage(scope.userId.value()))).void
 
   private def alertMessage(username: String) = NotificationMessage
-    .create(s"$username() stationary alert!", s"$username has been stuck in the same position for a while.")
+    .create(s"$username stationary alert!", s"$username has been stuck in the same position for a while.")
