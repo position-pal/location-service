@@ -1,3 +1,14 @@
+## [4.0.4](https://github.com/position-pal/location-service/compare/4.0.3...4.0.4) (2025-02-15)
+
+### Bug Fixes
+
+* **storage:** support storing missing warning state ([6328da5](https://github.com/position-pal/location-service/commit/6328da579665d7449cbd8b9ea3fdd345f36fd003))
+
+### Refactoring
+
+* **application:** remove typo in notification stuck message ([7230f5c](https://github.com/position-pal/location-service/commit/7230f5c02c05a81f09b7d05383fd9c1e8f92ead4))
+* use fewer updates for offline threshold ([b9f6cc0](https://github.com/position-pal/location-service/commit/b9f6cc090fae96b835f432ac8a9d8de693271357))
+
 ## [4.0.3](https://github.com/position-pal/location-service/compare/4.0.2...4.0.3) (2025-02-14)
 
 ### Dependency updates
