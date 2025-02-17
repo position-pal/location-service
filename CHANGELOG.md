@@ -1,3 +1,9 @@
+## [4.0.6](https://github.com/position-pal/location-service/compare/4.0.5...4.0.6) (2025-02-17)
+
+### Bug Fixes
+
+* **ci:** use new async api cli action ([1582794](https://github.com/position-pal/location-service/commit/1582794df20ae6d0a272bf936965caeb26973442))
+
 ## [4.0.5](https://github.com/position-pal/location-service/compare/4.0.4...4.0.5) (2025-02-17)
 
 ### Dependency updates
