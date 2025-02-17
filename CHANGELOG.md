@@ -1,3 +1,15 @@
+## [4.0.5](https://github.com/position-pal/location-service/compare/4.0.4...4.0.5) (2025-02-17)
+
+### Dependency updates
+
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.123 ([#214](https://github.com/position-pal/location-service/issues/214)) ([e1c2e23](https://github.com/position-pal/location-service/commit/e1c2e237f7c77a1210fdaf656bf06edeaa5b3ca1))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.124 ([#215](https://github.com/position-pal/location-service/issues/215)) ([33cec58](https://github.com/position-pal/location-service/commit/33cec5806cad1dc5fa94b1411bf76317fb2fe119))
+* **deps:** update plugin scala-extras to v3.2.0 ([#217](https://github.com/position-pal/location-service/issues/217)) ([67c72a4](https://github.com/position-pal/location-service/commit/67c72a4a8dcde3c8a817c6c7a5766e4c369ce60d))
+
+### Documentation
+
+* add async api ([#216](https://github.com/position-pal/location-service/issues/216)) ([64263cd](https://github.com/position-pal/location-service/commit/64263cd2c07e35c5b12ca6162d0d9fe3dc230986))
+
 ## [4.0.4](https://github.com/position-pal/location-service/compare/4.0.3...4.0.4) (2025-02-15)
 
 ### Bug Fixes
