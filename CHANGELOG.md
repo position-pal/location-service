@@ -1,3 +1,9 @@
+## [4.0.7](https://github.com/position-pal/location-service/compare/4.0.6...4.0.7) (2025-02-17)
+
+### Bug Fixes
+
+* **ci:** use new generator for async doc ([902f6e6](https://github.com/position-pal/location-service/commit/902f6e64c003a9bc98dd6a4eeb3e124fa80a30b3))
+
 ## [4.0.6](https://github.com/position-pal/location-service/compare/4.0.5...4.0.6) (2025-02-17)
 
 ### Bug Fixes
