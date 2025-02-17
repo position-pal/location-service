@@ -46,6 +46,8 @@ The necessary CQL scripts for creating these tables can be found here:
 
 ## Documentation
 
-The scaladoc can be found [here](https://position-pal.github.io/location-service/).
+The scaladoc can be found [here](https://position-pal.github.io/location-service/aggregated-scaladoc).
+
+The Async API documentation can be found [here](https://position-pal.github.io/location-service/asyncapi).
 
 Refer to the [project documentation](https://position-pal.github.io/docs/design/location-service/) for more details on the service implementation.
