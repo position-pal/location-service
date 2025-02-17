@@ -1,0 +1,304 @@
+asyncapi: 3.0.0
+info:
+  title: Location Events API
+  version: 1.0.0
+  description: |
+    API for publishing location-based tracking events in the PositionPal system.
+    This WebSocket API allows real-time communication for location tracking, routing, and SOS alerts.
+    Clients can send various events and receive user updates from the server.
+#  license:
+#    name: Apache 2.0
+#    url: 'https://www.apache.org/licenses/LICENSE-2.0'
+  contact:
+    email: positionpal@gmail.com
+    url: https://position-pal.github.io
+  tags:
+    - name: real-time
+    - name: location
+    - name: tracking
+
+servers:
+  production:
+    host: api.positionpal.com
+    protocol: ws
+    protocolVersion: "1.0"
+    bindings:
+      ws:
+        bindingVersion: '1.0.0'
+        method: GET
+
+channels:
+  'group/{groupId}/{userId}':
+    description: |
+      Main WebSocket channel for all location-based events.
+      Clients can send location updates, routing events, and SOS alerts.
+      The server will send user status updates through this channel.
+    parameters:
+      groupId:
+        $ref: '#/components/parameters/groupId'
+      userId:
+        $ref: '#/components/parameters/userId'
+    messages:
+      SampledLocation:
+        title: Sampled Location Update
+        summary: Regular location update from a user
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/SampledLocation'
+      RoutingStarted:
+        title: Routing Started Event
+        summary: Event when a user starts navigation
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/RoutingStarted'
+      RoutingStopped:
+        title: Routing Stopped Event
+        summary: Event when a user stops navigation
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/RoutingStopped'
+      SOSAlertTriggered:
+        title: SOS Alert Triggered
+        summary: Emergency alert triggered by user
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/SOSAlertTriggered'
+      SOSAlertStopped:
+        title: SOS Alert Stopped
+        summary: Emergency alert cancelled by user
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/SOSAlertStopped'
+      UserUpdate:
+        title: User Status Update
+        summary: Server-sent update about a user's status
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/UserUpdate'
+
+operations:
+  onSampledLocation:
+    action: send
+    channel:
+      $ref: '#/channels/group~1{groupId}~1{userId}'
+    summary: Send sampled location updates to the server.
+    messages:
+      - $ref: '#/channels/group~1{groupId}~1{userId}/messages/SampledLocation'
+
+  onRoutingStarted:
+    action: send
+    channel:
+      $ref: '#/channels/group~1{groupId}~1{userId}'
+    summary: Send routing start events to the server.
+    messages:
+      - $ref: '#/channels/group~1{groupId}~1{userId}/messages/RoutingStarted'
+
+  onRoutingStopped:
+    action: send
+    channel:
+      $ref: '#/channels/group~1{groupId}~1{userId}'
+    summary: Send routing stop events to the server.
+    messages:
+      - $ref: '#/channels/group~1{groupId}~1{userId}/messages/RoutingStopped'
+
+  onSOSAlertTriggered:
+    action: send
+    channel:
+      $ref: '#/channels/group~1{groupId}~1{userId}'
+    summary: Send SOS alerts to the server.
+    messages:
+      - $ref: '#/channels/group~1{groupId}~1{userId}/messages/SOSAlertTriggered'
+
+  onSOSAlertStopped:
+    action: send
+    channel:
+      $ref: '#/channels/group~1{groupId}~1{userId}'
+    summary: Send SOS alert stops to the server.
+    messages:
+      - $ref: '#/channels/group~1{groupId}~1{userId}/messages/SOSAlertStopped'
+
+  onUserUpdate:
+    action: receive
+    channel:
+      $ref: '#/channels/group~1{groupId}~1{userId}'
+    summary: Receive user update events from the server.
+    messages:
+      - $ref: '#/channels/group~1{groupId}~1{userId}/messages/UserUpdate'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    userId:
+      description: the id of the user
+    groupId:
+      description: the id of the group
+
+  schemas:
+    UserId:
+      type: string
+      description: Unique identifier for a user.
+    GroupId:
+      type: string
+      description: Unique identifier for a group.
+    GPSLocation:
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+    RoutingMode:
+      type: string
+      enum:
+        - WALKING
+        - DRIVING
+        - CYCLING
+    UserState:
+      description: The current state of a user in the system
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - ROUTING
+        - WARNING
+        - SOS
+    SampledLocation:
+      type: object
+      properties:
+        SampledLocation:
+          type: object
+          required:
+            - timestamp
+            - user
+            - group
+            - position
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            user:
+              $ref: '#/components/schemas/UserId'
+            group:
+              $ref: '#/components/schemas/GroupId'
+            position:
+              $ref: '#/components/schemas/GPSLocation'
+    RoutingStarted:
+      type: object
+      properties:
+        RoutingStarted:
+          type: object
+          required:
+            - timestamp
+            - user
+            - group
+            - position
+            - mode
+            - destination
+            - expectedArrival
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            user:
+              $ref: '#/components/schemas/UserId'
+            group:
+              $ref: '#/components/schemas/GroupId'
+            position:
+              $ref: '#/components/schemas/GPSLocation'
+            mode:
+              $ref: '#/components/schemas/RoutingMode'
+            destination:
+              $ref: '#/components/schemas/GPSLocation'
+            expectedArrival:
+              type: string
+              format: date-time
+    RoutingStopped:
+      type: object
+      properties:
+        RoutingStopped:
+          type: object
+          required:
+            - timestamp
+            - user
+            - group
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            user:
+              $ref: '#/components/schemas/UserId'
+            group:
+              $ref: '#/components/schemas/GroupId'
+    SOSAlertTriggered:
+      type: object
+      properties:
+        SOSAlertTriggered:
+          type: object
+          required:
+            - timestamp
+            - user
+            - group
+            - position
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            user:
+              $ref: '#/components/schemas/UserId'
+            group:
+              $ref: '#/components/schemas/GroupId'
+            position:
+              $ref: '#/components/schemas/GPSLocation'
+    SOSAlertStopped:
+      type: object
+      properties:
+        SOSAlertStopped:
+          type: object
+          required:
+            - timestamp
+            - user
+            - group
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            user:
+              $ref: '#/components/schemas/UserId'
+            group:
+              $ref: '#/components/schemas/GroupId'
+    UserUpdate:
+      type: object
+      properties:
+        UserUpdate:
+          type: object
+          required:
+            - timestamp
+            - user
+            - group
+            - position
+            - status
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            user:
+              $ref: '#/components/schemas/UserId'
+            group:
+              $ref: '#/components/schemas/GroupId'
+            position:
+              $ref: '#/components/schemas/GPSLocation'
+            status:
+              $ref: '#/components/schemas/UserState'
