@@ -156,11 +156,13 @@ jobs:
           fetch-tags: true
       - name: Generate scaladoc
         run: ./gradlew :aggregateScaladoc
-      - name: Generate AsyncAPI HTML documentation
-        uses: asyncapi/github-action-for-cli@v3.1.1
+      - name: Generating HTML from AsyncAPI document
+        uses: asyncapi/cli@v2.16.4
         with:
+          command: generate
+          template: '@asyncapi/html-template@3.1.0'
           filepath: docs/asyncapi.yml
-          output: build/docs/generated-html
+          output: build/docs/
       - name: Publish on Github pages
         uses: JamesIves/github-pages-deploy-action@15de0f09300eea763baee31dff6c6184995c5f6a # v4
         with:
