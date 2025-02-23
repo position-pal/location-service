@@ -5,7 +5,7 @@ import io.github.positionpal.events.EventType
 import lepus.protocol.domains.{ExchangeType, FieldTable, ShortString}
 import org.slf4j.LoggerFactory
 import io.github.positionpal.AvroSerializer
-import cats.implicits.{catsSyntaxApplicativeError, toFlatMapOps, toFunctorOps}
+import cats.implicits.*
 import lepus.client.{Connection, ConsumeMode, Message}
 import io.github.positionpal.location.messages.RabbitMQ
 import cats.effect.Async
@@ -30,8 +30,12 @@ object RabbitMQGroupsEventConsumer:
         q <- Async[F].fromOption(q, QueueDeclarationFailed)
         _ <- ch.queue.bind(q.queue, groupsEventsExchange, ShortString.empty)
         consumer = ch.messaging
-          .consume[Array[Byte]](q.queue, mode = ConsumeMode.RaiseOnError(true))
-          .evalMap(e => handleGroupEvent(e.message).handleErrorWith(e => Async[F].delay(logger.error(e.getMessage))))
+          .consume[Array[Byte]](q.queue, ConsumeMode.RaiseOnError(true))
+          .evalMap: e =>
+            handleGroupEvent(e.message).attempt
+              .flatMap:
+                case Right(_) => ch.messaging.ack(e.deliveryTag)
+                case Left(err) => ch.messaging.nack(e.deliveryTag) *> Async[F].delay(logger.error(err.getMessage))
         _ <- consumer.compile.drain
       yield ()
 
