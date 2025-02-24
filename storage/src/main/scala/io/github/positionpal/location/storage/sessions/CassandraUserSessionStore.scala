@@ -61,7 +61,7 @@ object CassandraUserSessionStore:
               case Active => session.executeWrite(deleteUserRoutesQuery(uid))
               case _ => session.executeWrite(updateUserRoutesQuery(uid, e.position, e.timestamp))
           yield ()
-        case Snapshot(uid, state @ (Active | Inactive | Warning), None) =>
+        case Snapshot(uid, state @ (Active | Inactive | Warning | SOS), None) =>
           session.executeWrite(updateUserInfoQuery(uid, state)).void
         case _ => Future.failed(InvalidSessionVariation(s"The given variation $variation is invalid"))
 
