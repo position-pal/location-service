@@ -1,3 +1,28 @@
+## [4.0.8](https://github.com/position-pal/location-service/compare/4.0.7...4.0.8) (2025-02-24)
+
+### Dependency updates
+
+* **deps:** update akka to v2.10.2 ([#220](https://github.com/position-pal/location-service/issues/220)) ([53f2914](https://github.com/position-pal/location-service/commit/53f291495320b9f7438ffcab0a12489037ff4aa5))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.125 ([#226](https://github.com/position-pal/location-service/issues/226)) ([6d72284](https://github.com/position-pal/location-service/commit/6d72284af7f50b24f6659c680ff1ea796a70bac0))
+* **deps:** update junit5 monorepo to v1.12.0 ([#225](https://github.com/position-pal/location-service/issues/225)) ([58feb4c](https://github.com/position-pal/location-service/commit/58feb4c019373e4cf64bedddb61c2c00626e255e))
+* **deps:** update plugin com.gradle.develocity to v3.19.2 ([#222](https://github.com/position-pal/location-service/issues/222)) ([d49edb7](https://github.com/position-pal/location-service/commit/d49edb798e19fd206d59b3f6c7cf7a71c31395a6))
+* **deps:** update plugin scala-extras to v3.3.0 ([#228](https://github.com/position-pal/location-service/issues/228)) ([c15f2c9](https://github.com/position-pal/location-service/commit/c15f2c98642c37b63305e8a40df43bc1740e2996))
+
+### Bug Fixes
+
+* **domain:** correctly switch to routing mode on StuckAlertStopped is received unless already late ([8a414ac](https://github.com/position-pal/location-service/commit/8a414acacaf5e5a27d5e21293aea30590f294cd3))
+* **rabbitmq:** correctly (un)ack correctly handled messages ([#229](https://github.com/position-pal/location-service/issues/229)) ([4ddf5c5](https://github.com/position-pal/location-service/commit/4ddf5c51d6044b440c327c657068fa15ab935102))
+* **storage:** allow to persist a snapshot for SOS with a none last sampled location ([062eeb6](https://github.com/position-pal/location-service/commit/062eeb6d472c6fb5b521691f08f73a0c2a2f067d))
+
+### Build and continuous integration
+
+* deploy async api on `asyncapi` ([42f3ce9](https://github.com/position-pal/location-service/commit/42f3ce9c4227587fd0c15ad87ac6d36aefaff045))
+* **deps:** pin asyncapi/cli action to 693a7f3 ([#218](https://github.com/position-pal/location-service/issues/218)) ([aa1932d](https://github.com/position-pal/location-service/commit/aa1932d956542ef14b4d6757ea0b7fe6eb58ec9f))
+* **deps:** update actions/upload-artifact action to v4.6.1 ([#227](https://github.com/position-pal/location-service/issues/227)) ([cc99bf1](https://github.com/position-pal/location-service/commit/cc99bf1eec26539c56a6105b7e8db0193c643f0d))
+* **deps:** update asyncapi/cli action to v2.16.5 ([#221](https://github.com/position-pal/location-service/issues/221)) ([7a64a67](https://github.com/position-pal/location-service/commit/7a64a67db683fc0e49c742a927cfdc98f2ab1e99))
+* **deps:** update docker/build-push-action digest to 0adf995 ([#223](https://github.com/position-pal/location-service/issues/223)) ([30843ab](https://github.com/position-pal/location-service/commit/30843ab6e2850589bfc364249568a70001a562ff))
+* **deps:** update jamesives/github-pages-deploy-action digest to 6c2d9db ([#224](https://github.com/position-pal/location-service/issues/224)) ([6932997](https://github.com/position-pal/location-service/commit/69329975865ec4a8d3dfecd7467f3afe39fa648e))
+
 ## [4.0.7](https://github.com/position-pal/location-service/compare/4.0.6...4.0.7) (2025-02-17)
 
 ### Bug Fixes
