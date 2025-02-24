@@ -39,7 +39,10 @@ object UserState:
         case _: RoutingStarted => current ~> Routing onlyIfIn (Active, Inactive)
         case _: RoutingStopped => current ~> Active onlyIfIn (Routing, Warning)
         case _: (TimeoutAlertTriggered | StuckAlertTriggered) => current ~> Warning onlyIfIn (Routing, Warning)
-        case _: StuckAlertStopped => current ~> Routing onlyIfIn Warning
+        case _: StuckAlertStopped =>
+          current match
+            case Warning if !(tracking.asMonitorable.get has Late) => current ~> Routing
+            case _ => stay onlyIfIn Warning
         case _: SampledLocation =>
           current match
             case Inactive => current ~> Active
