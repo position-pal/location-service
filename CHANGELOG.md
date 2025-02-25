@@ -1,3 +1,14 @@
+## [4.0.9](https://github.com/position-pal/location-service/compare/4.0.8...4.0.9) (2025-02-25)
+
+### Dependency updates
+
+* **deps:** update dependency gradle to v8.13 ([#232](https://github.com/position-pal/location-service/issues/232)) ([720b1d4](https://github.com/position-pal/location-service/commit/720b1d471fe046d47a6a5a953c0809e91cbfc451))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.21 ([#231](https://github.com/position-pal/location-service/issues/231)) ([b7460a2](https://github.com/position-pal/location-service/commit/b7460a27b371031ae2d9df9089bef3bb48438cb0))
+
+### Bug Fixes
+
+* **presentation:** register missing group manager actor state codec ([#233](https://github.com/position-pal/location-service/issues/233)) ([609dc48](https://github.com/position-pal/location-service/commit/609dc48997be30d132911d4cdbaf4a93cba304f0))
+
 ## [4.0.8](https://github.com/position-pal/location-service/compare/4.0.7...4.0.8) (2025-02-24)
 
 ### Dependency updates
