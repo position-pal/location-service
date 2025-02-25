@@ -19,12 +19,12 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
 
   given actorRefCodec[T]: Codec[ActorRef[T]] =
     Codec.bimap[String, ActorRef[T]](actorRefResolver.toSerializationFormat, actorRefResolver.resolveActorRef)
-  given statefulDrivingEventCodec: Codec[RealTimeUserTracker.StatefulDrivingEvent] =
-    deriveCodec[RealTimeUserTracker.StatefulDrivingEvent]
-  given ignoreCoded: Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
-  given aliveCheckCodec: Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]
-  given wireCodec: Codec[GroupManager.Wire] = deriveCodec[GroupManager.Wire]
-  given unWireCodec: Codec[GroupManager.UnWire] = deriveCodec[GroupManager.UnWire]
+  given Codec[RealTimeUserTracker.StatefulDrivingEvent] = deriveCodec[RealTimeUserTracker.StatefulDrivingEvent]
+  given Codec[RealTimeUserTracker.Ignore.type] = deriveCodec[RealTimeUserTracker.Ignore.type]
+  given Codec[RealTimeUserTracker.AliveCheck.type] = deriveCodec[RealTimeUserTracker.AliveCheck.type]
+  given Codec[GroupManager.Wire] = deriveCodec[GroupManager.Wire]
+  given Codec[GroupManager.UnWire] = deriveCodec[GroupManager.UnWire]
+  given Codec[GroupManager.State] = deriveCodec[GroupManager.State]
 
   register[RealTimeUserTracker.AliveCheck.type]()
   register[RealTimeUserTracker.Ignore.type]()
@@ -34,3 +34,4 @@ class BorerAkkaSerializer(system: ExtendedActorSystem) extends BorerCborAkkaSeri
   register[RealTimeUserTracker.StatefulDrivingEvent]()
   register[GroupManager.Wire]()
   register[GroupManager.UnWire]()
+  register[GroupManager.State]()
