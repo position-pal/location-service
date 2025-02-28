@@ -38,6 +38,9 @@ object RealTimeUserTracker:
     */
   val tags: Seq[String] = Vector.tabulate(5)(i => s"${getClass.getSimpleName}-$i")
 
+  /** The key used to identify the timer that checks whether the user went offline. */
+  private val timerKey: String = "alive-check-timer"
+
   /** A message sent by the actor to itself in response to an async operation or to initiate an action proactively. */
   sealed trait SelfMessage
 
@@ -70,7 +73,7 @@ object RealTimeUserTracker:
   private def eventHandler: (Session, Event) => Session = (currentSession, statefulEvent) =>
     currentSession.updateWith(statefulEvent.event).getOrElse(currentSession)
 
-  private def commandHandler(timer: TimerScheduler[Command])(using
+  private def commandHandler(timerScheduler: TimerScheduler[Command])(using
       ctx: ActorContext[Command],
       notifier: NotificationService[IO],
       maps: MapsService[IO],
@@ -79,11 +82,12 @@ object RealTimeUserTracker:
       case e: DrivingEvent if e canBeAppliedTo session =>
         e match
           case event: ClientDrivingEvent =>
-            if session.userState == Inactive then timer.startTimerAtFixedRate(msg = AliveCheck, interval = 20.seconds)
+            if !timerScheduler.isTimerActive(timerKey) then
+              timerScheduler.startTimerAtFixedRate(key = timerKey, msg = AliveCheck, interval = 20.seconds)
             trackingHandler(session, event)
           case _ => ()
         persistAndNotify(session.userState.next(e, session.tracking).toOption.get, e)
-      case e: AliveCheck.type => aliveCheckHandler(timer)(session, e)
+      case e: AliveCheck.type => aliveCheckHandler(timerScheduler)(session, e)
       case e => ctx.log.info("Ignoring {}", e); Effect.none
 
   import cats.effect.unsafe.implicits.global
@@ -101,13 +105,13 @@ object RealTimeUserTracker:
           case _ => Ignore
       case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
 
-  private def aliveCheckHandler(timer: TimerScheduler[Command])(using
+  private def aliveCheckHandler(timerScheduler: TimerScheduler[Command])(using
       ctx: ActorContext[Command],
       notifier: NotificationService[IO],
   ): (Session, AliveCheck.type) => Effect[Event, Session] = (session, _) =>
     val event = WentOffline(now(), session.scope)
     if (event canBeAppliedTo session) && session.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(60)) then
-      timer.cancelAll()
+      timerScheduler.cancel(timerKey)
       if session.userState != Active then
         val notification = NotificationMessage.create(
           s"${event.user.value()} connection lost!",
