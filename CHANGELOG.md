@@ -1,3 +1,26 @@
+## [4.0.10](https://github.com/position-pal/location-service/compare/4.0.9...4.0.10) (2025-02-28)
+
+### Dependency updates
+
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.17 ([#235](https://github.com/position-pal/location-service/issues/235)) ([1921de3](https://github.com/position-pal/location-service/commit/1921de3d04e8e71309b54cd70d47d0992b5899d3))
+* **deps:** update eclipse-temurin:21 docker digest to 6e59a56 ([#244](https://github.com/position-pal/location-service/issues/244)) ([2271451](https://github.com/position-pal/location-service/commit/2271451a13168a8a980f09e7d1b9a53b2607fd91))
+* **deps:** update eclipse-temurin:21 docker digest to b37f705 ([#245](https://github.com/position-pal/location-service/issues/245)) ([39190f0](https://github.com/position-pal/location-service/commit/39190f0aaf2e11ea7cb3a83e56d105c6a2bea937))
+* **deps:** update plugin scala-extras to v3.3.1 ([#236](https://github.com/position-pal/location-service/issues/236)) ([57a720e](https://github.com/position-pal/location-service/commit/57a720e845e4f99091772834a28cf77ccf1db693))
+* **deps:** update rabbitmq:4-management docker digest to 5389746 ([#241](https://github.com/position-pal/location-service/issues/241)) ([b518b63](https://github.com/position-pal/location-service/commit/b518b63d9c1cb6b63ef82248f1f1a32ff164d4c9))
+* **deps:** update rabbitmq:4-management docker digest to d928a16 ([#240](https://github.com/position-pal/location-service/issues/240)) ([ad46e2f](https://github.com/position-pal/location-service/commit/ad46e2f40e59d6168e1f1b87aa9263e8241b52c9))
+
+### Bug Fixes
+
+* **tracking:** start a new timer whenever a new update is received and no tracking is already active ([#243](https://github.com/position-pal/location-service/issues/243)) ([6510ae7](https://github.com/position-pal/location-service/commit/6510ae703b9b4f951b1ab1ba54132f987ee1eb17))
+
+### Build and continuous integration
+
+* **deps:** update dawidd6/action-download-artifact action to v9 ([#242](https://github.com/position-pal/location-service/issues/242)) ([63e6d84](https://github.com/position-pal/location-service/commit/63e6d842b923badcac70d94a924f2598528e58ec))
+* **deps:** update docker/build-push-action digest to 471d1dc ([#237](https://github.com/position-pal/location-service/issues/237)) ([d1ba388](https://github.com/position-pal/location-service/commit/d1ba38893eb8c2ee1aba3306336cabc152801c4c))
+* **deps:** update docker/setup-buildx-action digest to b5ca514 ([#238](https://github.com/position-pal/location-service/issues/238)) ([14217c1](https://github.com/position-pal/location-service/commit/14217c1edb2fbc2a1248424ad4a5a2df6622be80))
+* **deps:** update docker/setup-qemu-action digest to 5964de0 ([#239](https://github.com/position-pal/location-service/issues/239)) ([3b0ca90](https://github.com/position-pal/location-service/commit/3b0ca90dae0b95f0c99f983a00bd7c16c3485b5e))
+* **deps:** update nick-fields/retry digest to ce71cc2 ([#234](https://github.com/position-pal/location-service/issues/234)) ([5ca5f72](https://github.com/position-pal/location-service/commit/5ca5f724297fb498c6f7a707e4f7f9787f61665b))
+
 ## [4.0.9](https://github.com/position-pal/location-service/compare/4.0.8...4.0.9) (2025-02-25)
 
 ### Dependency updates
