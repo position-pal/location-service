@@ -4,15 +4,17 @@ import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.domain.Distance.*
 import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.location.domain.TimeUtils.*
-import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.tracking.reactions.*
 import io.github.positionpal.location.application.tracking.MapsService
-import org.scalatest.matchers.should.Matchers
 import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.RoutingMode.*
 import cats.effect.IO
 import io.github.positionpal.location.application.groups.UserGroupsService
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Seconds, Span}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.{GroupId, User, UserId}
 import org.scalatest.funspec.AnyFunSpec
@@ -97,11 +99,12 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
   private def doChecks(session: Session, event: ClientDrivingEvent): IO[Outcome] =
     (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(session, event)
 
-  private def expectNotification(content: String)(testBlock: => Unit): Unit = eventually:
-    when(notifier.sendToOwnGroup)
+  private def expectNotification(content: String)(testBlock: => Unit): Unit =
+    val notifierMock = when(notifier.sendToOwnGroup)
       .expects:
         where: (scope, n) =>
           scope.groupId == scope.groupId && scope.userId == scope.userId && n.body().contains(content)
       .returning(IO.unit)
-      .once
     testBlock
+    eventually(Timeout(Span(1, Seconds))):
+      notifierMock.once
