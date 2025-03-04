@@ -32,10 +32,13 @@ class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWord
       val storageSessionWriter = MockedUserSessionWriter()
       val handler = UserSessionProjectionHandler(system, storageSessionWriter)
       val scope = Scope(UserId.create("luke"), GroupId.create("astro"))
-      val events = StatefulDrivingEvent(Active, SampledLocation(now, scope, bolognaCampus))
-        :: StatefulDrivingEvent(Routing, RoutingStarted(now, scope, imolaCampus, Driving, cesenaCampus, inTheFuture))
-        :: StatefulDrivingEvent(Routing, SampledLocation(now, scope, forliCampus))
-        :: StatefulDrivingEvent(Routing, SampledLocation(now, scope, cesenaCampus))
+      val events = StatefulDrivingEvent(Active, SampledLocation(now, scope, bolognaCampus.location))
+        :: StatefulDrivingEvent(
+          Routing,
+          RoutingStarted(now, scope, imolaCampus.location, Driving, cesenaCampus, inTheFuture),
+        )
+        :: StatefulDrivingEvent(Routing, SampledLocation(now, scope, forliCampus.location))
+        :: StatefulDrivingEvent(Routing, SampledLocation(now, scope, cesenaCampus.location))
         :: Nil
       val sourceEvents = Source(events.zipWithIndex.map(createEnvelope(_, _)))
       val projectId = ProjectionId("user-session", "tracker-0")

@@ -75,7 +75,8 @@ class WebSocketsTest
               val scenario = test.Scenario(
                 group = group,
                 clients = test.Client(luke) :: test.Client(eve) :: Nil,
-                events = sample(Scope(luke, group), cesenaCampus) :: sample(Scope(eve, group), bolognaCampus) :: Nil,
+                events = sample(Scope(luke, group), cesenaCampus.location) ::
+                  sample(Scope(eve, group), bolognaCampus.location) :: Nil,
               )
               val expectedEvents = scenario.events.map(_.toUserUpdate)
               val result = test.runTest(scenario)

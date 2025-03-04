@@ -22,11 +22,17 @@ CREATE TABLE ScopedUserRoutes (
 CREATE TABLE UserGroupsByUserId (
     UserId TEXT,
     GroupId TEXT,
+    Name TEXT,
+    Surname TEXT,
+    Email TEXT,
     PRIMARY KEY (UserId, GroupId)
 );
 
 CREATE TABLE UserGroupsByGroupId (
     GroupId TEXT,
     UserId TEXT,
+    Name TEXT,
+    Surname TEXT,
+    Email TEXT,
     PRIMARY KEY (GroupId, UserId)
 );

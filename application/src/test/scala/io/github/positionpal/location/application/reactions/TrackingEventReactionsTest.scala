@@ -33,14 +33,14 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
     describe("should `Continue`"):
       it("if no check is met"):
         val session = Session.from(scope, UserState.Active, None, None)
-        val event = SampledLocation(now, scope.userId, scope.groupId, bolognaCampus)
+        val event = SampledLocation(now, scope.userId, scope.groupId, bolognaCampus.location)
         doChecks(session, event).unsafeRunSync() shouldBe Right(Continue)
 
     describe("should trigger a `Notification`"):
       it("if the user has started a journey and if the journey has ended"):
         val session = Session.from(scope, UserState.Active, None, None)
         expectNotification("luke is on their way to"):
-          val event = RoutingStarted(now, scope, bolognaCampus, Driving, cesenaCampus, inTheFuture)
+          val event = RoutingStarted(now, scope, bolognaCampus.location, Driving, cesenaCampus, inTheFuture)
           doChecks(session, event).unsafeRunSync() shouldBe Left(())
         expectNotification("luke journey completed successfully"):
           val event = RoutingStopped(now, scope)
@@ -49,7 +49,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
       it("if the user has triggered an SOS and if the SOS has been stopped"):
         val session = Session.from(scope, UserState.Active, None, None)
         expectNotification("luke has triggered an SOS help request"):
-          val sosAlertTriggeredEvent = SOSAlertTriggered(now, scope, bolognaCampus)
+          val sosAlertTriggeredEvent = SOSAlertTriggered(now, scope, bolognaCampus.location)
           doChecks(session, sosAlertTriggeredEvent).unsafeRunSync() shouldBe Left(())
         expectNotification("luke has stopped the SOS alarm"):
           val sosAlertStoppedEvent = SOSAlertStopped(now, scope)
@@ -62,11 +62,11 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
           doChecks(session, wentOfflineEvent).unsafeRunSync() shouldBe Left(())
 
       it("if the user is stuck in the same position for too long"):
-        val event = SampledLocation(now, scope, bolognaCampus)
+        val event = SampledLocation(now, scope, bolognaCampus.location)
         val tracking = List
           .fill(50)(event)
           .foldLeft(
-            Tracking.withMonitoring(RoutingMode.Driving, arrivalLocation = cesenaCampus, estimatedArrival = inTheFuture),
+            Tracking.withMonitoring(RoutingMode.Driving, destination = cesenaCampus, estimatedArrival = inTheFuture),
           )(_ + _)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
         expectNotification("luke has been stuck in the same position"):
@@ -74,14 +74,14 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
 
       it("if the user has not reached the destination within the expected time"):
         val tracking = Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, inThePast)
-        val event = SampledLocation(now, scope, bolognaCampus)
+        val event = SampledLocation(now, scope, bolognaCampus.location)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
         expectNotification("luke has not reached their destination as expected"):
           doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: TimeoutAlertTriggered) => }
 
       it("if the user has arrived to the expected destination in time"):
         val tracking = Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, inTheFuture)
-        val event = SampledLocation(now, scope, cesenaCampus)
+        val event = SampledLocation(now, scope, cesenaCampus.location)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
         expectNotification("luke has reached their destination on time"):
           doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: RoutingStopped) => }

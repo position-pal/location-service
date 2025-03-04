@@ -19,7 +19,7 @@ class BasicUsersSessionService[F[_]](
   override def ofGroup(groupId: GroupId): Stream[F, Session] = Stream
     .eval(userGroupsService.membersOf(groupId))
     .flatMap(members => Stream.emits(members.toSeq))
-    .evalMap(userId => userSessionStore.sessionOf(Scope(userId, groupId)))
+    .evalMap(user => userSessionStore.sessionOf(Scope(user.id(), groupId)))
     .collect { case Some(s) => s }
 
   override def ofScope(scope: Scope): F[Option[Session]] =

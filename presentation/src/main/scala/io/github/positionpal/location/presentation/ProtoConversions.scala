@@ -35,6 +35,8 @@ object ProtoConversions:
 
   given routeToProto: Conversion[Route, proto.Route] = r => proto.Route(r.map(identity))
 
+  given addressToProto: Conversion[Address, proto.Address] = a => proto.Address(a.name, Some(a.location))
+
   given trackingToProto: Conversion[Tracking, proto.Tracking] = {
     case t: MonitorableTracking => proto.Tracking(Some(t.route), Some(t.destination), Some(t.expectedArrival))
     case t: Tracking => proto.Tracking(Some(t.route))

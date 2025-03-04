@@ -52,7 +52,7 @@ class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFact
     val lukeScope = Scope(UserId.create("luke"), testGroup)
     val sessions: (GroupId, List[Session]) = (
       testGroup,
-      eveScope.let(s => Session.from(s, Active, Some(SampledLocation(now(), s, bolognaCampus)), None))
+      eveScope.let(s => Session.from(s, Active, Some(SampledLocation(now(), s, bolognaCampus.location)), None))
         :: lukeScope.let(s => Session.from(s, Inactive, None, None))
         :: Nil,
     )

@@ -31,8 +31,8 @@ class ModelCodecsTest extends AnyFlatSpec with Matchers with ModelCodecs:
 private object ModelCodecsTest:
   val user: UserId = UserId.create("luke")
   val group: GroupId = GroupId.create("astro")
-  val route: Route = SampledLocation(Instant.now(), user, group, bolognaCampus) ::
-    SampledLocation(Instant.now(), user, group, forliCampus) :: Nil
+  val route: Route = SampledLocation(Instant.now(), user, group, bolognaCampus.location) ::
+    SampledLocation(Instant.now(), user, group, forliCampus.location) :: Nil
   val tracking: Tracking = Tracking(route)
   val monitorableTracking: MonitorableTracking =
     Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, Instant.now(), route)

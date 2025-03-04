@@ -23,6 +23,8 @@ trait ModelCodecs:
 
   given userStateCodec: Codec[UserState] = deriveCodec[UserState]
 
+  given address: Codec[Address] = deriveCodec[Address]
+
   given gpsLocationCodec: Codec[GPSLocation] = deriveCodec[GPSLocation]
 
   given routingModeCodec: Codec[RoutingMode] = deriveCodec[RoutingMode]
@@ -67,14 +69,13 @@ trait ModelCodecs:
         .writeMapClose(),
     Decoder[MonitorableTracking]: reader =>
       val unbounded = reader.readMapOpen(4)
-      val fields = (0 until 4).foldLeft((empty[RoutingMode], empty[GPSLocation], empty[Instant], empty[Route])):
-        (d, _) =>
-          reader.readString() match
-            case "mode" => d.copy(_1 = Some(reader.read[RoutingMode]()))
-            case "destination" => d.copy(_2 = Some(reader.read[GPSLocation]()))
-            case "expectedArrival" => d.copy(_3 = Some(reader.read[Instant]()))
-            case "route" => d.copy(_4 = Some(reader.read[Route]()))
-            case _ => reader.unexpectedDataItem(expected = "`route`, `mode`, `destination` or `expectedArrival`")
+      val fields = (0 until 4).foldLeft((empty[RoutingMode], empty[Address], empty[Instant], empty[Route])): (d, _) =>
+        reader.readString() match
+          case "mode" => d.copy(_1 = Some(reader.read[RoutingMode]()))
+          case "destination" => d.copy(_2 = Some(reader.read[Address]()))
+          case "expectedArrival" => d.copy(_3 = Some(reader.read[Instant]()))
+          case "route" => d.copy(_4 = Some(reader.read[Route]()))
+          case _ => reader.unexpectedDataItem(expected = "`route`, `mode`, `destination` or `expectedArrival`")
       val res = fields.mapN(Tracking.withMonitoring).getOrElse(reader.validationFailure("Missing required fields"))
       reader.readMapClose(unbounded, res),
   )

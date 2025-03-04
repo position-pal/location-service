@@ -19,7 +19,7 @@ object ArrivalCheck:
           for
             config <- ReactionsConfiguration.get
             tracking <- session.tracking.asMonitorable.get.pure[F]
-            distance <- maps.distance(tracking.mode)(e.position, tracking.destination)
+            distance <- maps.distance(tracking.mode)(e.position, tracking.destination.location)
             isWithinProximity = distance.toMeters.value <= config.proximityToleranceMeters.meters.value
             _ <- if isWithinProximity then sendNotification(session.scope) else Async[F].unit
           yield if isWithinProximity then Left(RoutingStopped(e.timestamp, e.user, e.group)) else Right(Continue)
