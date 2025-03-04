@@ -10,12 +10,13 @@ import io.github.positionpal.location.application.tracking.reactions.*
 import io.github.positionpal.location.application.tracking.MapsService
 import org.scalatest.matchers.should.Matchers
 import io.github.positionpal.location.domain.GeoUtils.*
-import org.scalatest.funspec.AnyFunSpec
 import io.github.positionpal.location.domain.RoutingMode.*
 import cats.effect.IO
 import io.github.positionpal.location.application.groups.UserGroupsService
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.{GroupId, User, UserId}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.concurrent.Eventually.eventually
 
 class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFactory:
 
@@ -96,7 +97,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
   private def doChecks(session: Session, event: ClientDrivingEvent): IO[Outcome] =
     (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(session, event)
 
-  private def expectNotification(content: String)(testBlock: => Unit): Unit =
+  private def expectNotification(content: String)(testBlock: => Unit): Unit = eventually:
     when(notifier.sendToOwnGroup)
       .expects:
         where: (scope, n) =>
