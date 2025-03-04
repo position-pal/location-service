@@ -36,12 +36,10 @@ object Launcher extends IOApp.Simple:
   override def run: IO[Unit] = app.use(_ => IO.never)
 
   private val app: Resource[IO, Unit] = for
+    actorSystem <- configureActorSystem()
+    given ActorSystem[?] = actorSystem
     mapsService <- configureMapsService()
     notificationService <- Resource.eval(RabbitMQNotificationsPublisher[IO]())
-    actorSystem <- configureTrackingService(mapsService, notificationService)
-    given ActorSystem[?] = actorSystem
-    _ <- Resource.eval(IO.fromFuture(IO(AkkaManagement(actorSystem).start())))
-    _ <- Resource.eval(IO(ClusterBootstrap(actorSystem).start()))
     cassandraConnection <- Resource.pure(CassandraConnectionFactory[IO](actorSystem).get)
     userGroupsStore <- Resource.eval(CassandraUserGroupsStore[IO](cassandraConnection))
     userSessionsStore <- Resource.eval(CassandraUserSessionStore[IO](cassandraConnection))
@@ -49,6 +47,9 @@ object Launcher extends IOApp.Simple:
     groupsEventService <- Resource.eval(RabbitMQGroupsEventConsumer[IO](userGroupsService))
     sessionService <- Resource
       .eval(IO(GrpcUserSessionService[IO](BasicUsersSessionService[IO](userGroupsService, userSessionsStore))))
+    _ <- configureTrackingService(mapsService, notificationService, userGroupsService)
+    _ <- Resource.eval(IO.fromFuture(IO(AkkaManagement(actorSystem).start())))
+    _ <- Resource.eval(IO(ClusterBootstrap(actorSystem).start()))
     _ <- Resource.eval(IO(UserSessionProjection.init(actorSystem, userSessionsStore)))
     _ <- configureGrpcServices(sessionService)
     _ <- configureQueueServices(groupsEventService, notificationService)
@@ -63,18 +64,25 @@ object Launcher extends IOApp.Simple:
       maps <- Resource.eval(MapboxService[IO](mapsConfig))
     yield maps
 
-  private def configureTrackingService(maps: MapsService[IO], notifier: NotificationService[IO]) =
+  private def configureActorSystem() =
     for
       envs <- Resource.eval(EnvVariablesProvider[IO].configuration)
       config = if envs.get("PRODUCTION").fold(true)(_ == "true") then "akka.conf" else "akka-local.conf"
       _ <- Resource.eval(IO(logger.info(s"Akka configuration file: $config")))
       actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load(config))(Behaviors.empty)
-      given ActorSystem[?] = actorSystem
-      trackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps))
+    yield actorSystem
+
+  private def configureTrackingService(
+      maps: MapsService[IO],
+      notifier: NotificationService[IO],
+      groups: BasicUserGroupsService[IO],
+  )(using actorSystem: ActorSystem[?]) =
+    for
+      trackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps, groups))
       validatedHttpConfig <- Resource.eval(HttpService.Configuration.fromEnv[IO])
       httpConfig <- Resource.eval(validatedHttpConfig.get)
       _ <- HttpService.start[IO](httpConfig)(trackingService)
-    yield actorSystem
+    yield ()
 
   private def configureQueueServices(
       groupsEventConsumer: RabbitMQGroupsEventConsumerImpl[IO],

@@ -8,11 +8,11 @@ import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.TimeUtils.*
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import io.github.positionpal.location.application.tracking.MapsService
-import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.RoutingMode.*
 import io.github.positionpal.location.domain.UserState.*
 import cats.effect.IO
+import io.github.positionpal.location.application.groups.UserGroupsService
 import akka.cluster.Cluster
 import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.domain.Distance.meters
@@ -21,6 +21,8 @@ import io.github.positionpal.location.application.notifications.NotificationServ
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import org.scalatest.{BeforeAndAfterEach, OneInstancePerTest}
 import org.scalatest.time.{Seconds, Span}
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.User
 import org.scalatest.wordspec.AnyWordSpecLike
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 
@@ -36,9 +38,11 @@ class RealTimeUserTrackerTest
 
   private val notifier = mock[NotificationService[IO]]
   private val maps = mock[MapsService[IO]]
+  private val groups = mock[UserGroupsService[IO]]
 
   when(notifier.sendToOwnGroup).expects(*, *).returns(IO.unit).anyNumberOfTimes
   when(notifier.sendToGroup).expects(*, *, *).returns(IO.unit).anyNumberOfTimes
+  when(groups.of).expects(testScope).returns(IO.pure(Some(testUser))).anyNumberOfTimes
   when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation))
     .expects(*, *, *)
     .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters))
@@ -47,6 +51,7 @@ class RealTimeUserTrackerTest
   given ctx: Context[UserState, Session] with
     def notificationService: NotificationService[IO] = notifier
     def mapsService: MapsService[IO] = maps
+    def userGroupsService: UserGroupsService[IO] = ???
     def initialStates(ins: List[UserState]): List[Session] =
       ins.map(s => Session.from(testScope, s, sampling(s), tracking(s)))
 
@@ -146,8 +151,8 @@ object RealTimeUserTrackerTest:
     .parseFile(File(ClassLoader.getSystemResource("testable-akka-config.conf").toURI))
     .withFallback(EventSourcedBehaviorTestKit.config)
     .resolve()
-  val testUser: UserId = UserId.create("luke")
+  val testUser: User = User.create(UserId.create("luke"), "Luke", "Skywalker", "luke.skywalker@gmail.com")
   val testGroup: GroupId = GroupId.create("astro")
-  val testScope: Scope = Scope(testUser, testGroup)
+  val testScope: Scope = Scope(testUser.id(), testGroup)
   val defaultContextSample: SampledLocation = SampledLocation(now, testScope, bolognaCampus.location)
   val destination: Address = cesenaCampus

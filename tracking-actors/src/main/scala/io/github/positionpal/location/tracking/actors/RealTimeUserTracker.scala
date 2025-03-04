@@ -19,11 +19,12 @@ import akka.actor.typed.SupervisorStrategy.restartWithBackoff
 import io.github.positionpal.location.domain.UserState.*
 import akka.cluster.sharding.typed.scaladsl.*
 import cats.effect.IO
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 import akka.persistence.typed.PersistenceId
 import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.NotificationMessage
+import io.github.positionpal.location.application.groups.UserGroupsService
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 
 /** The actor in charge of tracking the real-time location of users, reacting to
   * their movements and status changes. This actor is managed by Akka Cluster Sharding.
@@ -55,10 +56,18 @@ object RealTimeUserTracker:
 
   case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
 
-  def apply(using NotificationService[IO], MapsService[IO]): Entity[Command, ShardingEnvelope[Command]] =
+  def apply(using
+      NotificationService[IO],
+      MapsService[IO],
+      UserGroupsService[IO],
+  ): Entity[Command, ShardingEnvelope[Command]] =
     Entity(key)(ctx => this(ctx.entityId.decode, tags(math.abs(ctx.entityId.hashCode % tags.size))))
 
-  def apply(scope: Scope, tag: String)(using NotificationService[IO], MapsService[IO]): Behavior[Command] =
+  def apply(scope: Scope, tag: String)(using
+      NotificationService[IO],
+      MapsService[IO],
+      UserGroupsService[IO],
+  ): Behavior[Command] =
     Behaviors.setup: ctx =>
       given ActorContext[Command] = ctx
       Behaviors.withTimers: timer =>
@@ -77,6 +86,7 @@ object RealTimeUserTracker:
       ctx: ActorContext[Command],
       notifier: NotificationService[IO],
       maps: MapsService[IO],
+      userGroupsService: UserGroupsService[IO],
   ): (Session, Command) => Effect[Event, Session] = (session, command) =>
     command match
       case e: DrivingEvent if e canBeAppliedTo session =>
@@ -96,6 +106,7 @@ object RealTimeUserTracker:
       ctx: ActorContext[Command],
       notifier: NotificationService[IO],
       maps: MapsService[IO],
+      userGroupsService: UserGroupsService[IO],
   ): (Session, ClientDrivingEvent) => Unit = (s, e) =>
     val reaction = (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(s, e)
     ctx.pipeToSelf(reaction.unsafeToFuture()):

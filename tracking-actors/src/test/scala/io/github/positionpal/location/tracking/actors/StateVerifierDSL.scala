@@ -5,6 +5,7 @@ import io.github.positionpal.location.application.tracking.MapsService
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.Eventually.PatienceConfig
 import cats.effect.IO
+import io.github.positionpal.location.application.groups.UserGroupsService
 import io.github.positionpal.location.domain.{Scope, Session}
 import io.github.positionpal.entities.{GroupId, UserId}
 
@@ -18,6 +19,7 @@ trait Context[S, X]:
   def initialStates(ins: List[S]): List[X]
   def notificationService: NotificationService[IO]
   def mapsService: MapsService[IO]
+  def userGroupsService: UserGroupsService[IO]
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKitBase
 
@@ -50,7 +52,7 @@ trait RealTimeUserTrackerVerifierDSL:
           behavior = RealTimeUserTracker(
             scope = Scope(UserId.create("luke"), GroupId.create("astro")),
             tag = "rtut-0",
-          )(using ctx.notificationService, ctx.mapsService),
+          )(using ctx.notificationService, ctx.mapsService, ctx.userGroupsService),
         )
         ctx
           .initialStates(ins)

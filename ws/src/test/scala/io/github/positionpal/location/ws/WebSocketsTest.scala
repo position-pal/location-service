@@ -18,13 +18,14 @@ import cats.effect.kernel.Resource
 import io.github.positionpal.location.domain.UserState.*
 import org.scalatest.wordspec.AnyWordSpecLike
 import cats.effect.IO
-import akka.actor.typed.scaladsl.Behaviors
 import io.github.positionpal.location.tracking.ActorBasedRealTimeTracking
 import eu.monniot.scala3mock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Milliseconds, Seconds, Span}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.{GroupId, UserId}
+import io.github.positionpal.location.application.groups.UserGroupsService
+import akka.actor.typed.scaladsl.Behaviors
 
 class WebSocketsTest
     extends AnyWordSpecLike
@@ -36,6 +37,7 @@ class WebSocketsTest
 
   private val maps: MapsService[IO] = mock[MapsService[IO]]
   private val notifier: NotificationService[IO] = mock[NotificationService[IO]]
+  private val groups: UserGroupsService[IO] = mock[UserGroupsService[IO]]
   private val timeout = Timeout(Span(5, Seconds))
   private val interval = Interval(Span(100, Milliseconds))
   private val testConfig =
@@ -43,7 +45,9 @@ class WebSocketsTest
   private val systemResource: Resource[IO, Unit] = for
     actorSystem <- AkkaUtils.startup[IO, Any](ConfigFactory.load("testable-akka-config.conf"))(Behaviors.empty)
     given ActorSystem[Any] = actorSystem
-    realTimeTrackingService <- Resource.eval(ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps))
+    realTimeTrackingService <- Resource.eval(
+      ActorBasedRealTimeTracking.Service[IO](actorSystem, notifier, maps, groups),
+    )
     httpServiceConfig <- Resource.eval(HttpService.Configuration[IO](8080))
     _ <- httpServiceConfig match
       case Valid(config) => HttpService.start[IO](config)(realTimeTrackingService)

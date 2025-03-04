@@ -1,6 +1,7 @@
 package io.github.positionpal.location.tracking
 
 import io.github.positionpal.location.application.tracking.{MapsService, RealTimeTracking}
+import io.github.positionpal.location.application.groups.UserGroupsService
 
 object ActorBasedRealTimeTracking extends RealTimeTracking:
 
@@ -25,12 +26,13 @@ object ActorBasedRealTimeTracking extends RealTimeTracking:
         actorSystem: ActorSystem[?],
         notificationService: NotificationService[IO],
         mapsService: MapsService[IO],
+        userGroupsService: UserGroupsService[IO],
     ): F[Service[F, Scope]] =
       for
         sharding <- Async[F].delay(ClusterSharding(actorSystem))
         _ <- Async[F].delay:
           sharding.init(GroupManager())
-          sharding.init(RealTimeUserTracker(using notificationService, mapsService))
+          sharding.init(RealTimeUserTracker(using notificationService, mapsService, userGroupsService))
       yield ServiceImpl(actorSystem)
 
   private class ServiceImpl[F[_]: Async](actorSystem: ActorSystem[?]) extends Service[F, Scope]:

@@ -13,21 +13,28 @@ import io.github.positionpal.location.domain.GeoUtils.*
 import org.scalatest.funspec.AnyFunSpec
 import io.github.positionpal.location.domain.RoutingMode.*
 import cats.effect.IO
+import io.github.positionpal.location.application.groups.UserGroupsService
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.entities.{GroupId, UserId}
+import io.github.positionpal.entities.{GroupId, User, UserId}
 
 class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFactory:
 
-  private val scope = Scope(UserId.create("luke"), GroupId.create("astro"))
+  private val scope = Scope(UserId.create("f789612f-4154-40b8-bdae-c86803a4dcfd"), GroupId.create("astro"))
   private val maps = mock[MapsService[IO]]
   when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation))
     .expects(*, *, *)
     .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters))
     .anyNumberOfTimes
+  private val groups = mock[UserGroupsService[IO]]
+  when(groups.of)
+    .expects(scope)
+    .returning(IO.pure(Some(User.create(scope.userId, "Luke", "Skywalker", "luke@gmail.com"))))
+    .anyNumberOfTimes
   private val notifier = mock[NotificationService[IO]]
 
   given MapsService[IO] = maps
   given NotificationService[IO] = notifier
+  given UserGroupsService[IO] = groups
 
   describe("TrackingEventReactions"):
     describe("should `Continue`"):
@@ -39,26 +46,26 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
     describe("should trigger a `Notification`"):
       it("if the user has started a journey and if the journey has ended"):
         val session = Session.from(scope, UserState.Active, None, None)
-        expectNotification("luke is on their way to"):
+        expectNotification("Luke Skywalker is on their way to"):
           val event = RoutingStarted(now, scope, bolognaCampus.location, Driving, cesenaCampus, inTheFuture)
           doChecks(session, event).unsafeRunSync() shouldBe Left(())
-        expectNotification("luke journey completed successfully"):
+        expectNotification("Luke Skywalker's journey has completed successfully"):
           val event = RoutingStopped(now, scope)
           doChecks(session, event).unsafeRunSync() shouldBe Left(())
 
       it("if the user has triggered an SOS and if the SOS has been stopped"):
         val session = Session.from(scope, UserState.Active, None, None)
-        expectNotification("luke has triggered an SOS help request"):
+        expectNotification("Luke Skywalker has triggered an SOS help request"):
           val sosAlertTriggeredEvent = SOSAlertTriggered(now, scope, bolognaCampus.location)
           doChecks(session, sosAlertTriggeredEvent).unsafeRunSync() shouldBe Left(())
-        expectNotification("luke has stopped the SOS alarm"):
+        expectNotification("Luke Skywalker has stopped the SOS alarm"):
           val sosAlertStoppedEvent = SOSAlertStopped(now, scope)
           doChecks(session, sosAlertStoppedEvent).unsafeRunSync() shouldBe Left(())
 
       it("if the user goes offline and is in routing mode"):
         val session = Session.from(scope, UserState.Routing, None, None)
         val wentOfflineEvent = WentOffline(now, scope)
-        expectNotification("luke went offline while on a journey"):
+        expectNotification("Luke Skywalker went offline while on a journey"):
           doChecks(session, wentOfflineEvent).unsafeRunSync() shouldBe Left(())
 
       it("if the user is stuck in the same position for too long"):
@@ -69,21 +76,21 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
             Tracking.withMonitoring(RoutingMode.Driving, destination = cesenaCampus, estimatedArrival = inTheFuture),
           )(_ + _)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
-        expectNotification("luke has been stuck in the same position"):
+        expectNotification("Luke Skywalker has been stuck in the same position"):
           doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: StuckAlertTriggered) => }
 
       it("if the user has not reached the destination within the expected time"):
         val tracking = Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, inThePast)
         val event = SampledLocation(now, scope, bolognaCampus.location)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
-        expectNotification("luke has not reached their destination as expected"):
+        expectNotification("Luke Skywalker has not reached their destination as expected"):
           doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: TimeoutAlertTriggered) => }
 
       it("if the user has arrived to the expected destination in time"):
         val tracking = Tracking.withMonitoring(RoutingMode.Driving, cesenaCampus, inTheFuture)
         val event = SampledLocation(now, scope, cesenaCampus.location)
         val session = Session.from(scope, UserState.Routing, Some(event), Some(tracking))
-        expectNotification("luke has reached their destination on time"):
+        expectNotification("Luke Skywalker has reached their destination on time"):
           doChecks(session, event).unsafeRunSync() should matchPattern { case Left(_: RoutingStopped) => }
 
   private def doChecks(session: Session, event: ClientDrivingEvent): IO[Outcome] =
