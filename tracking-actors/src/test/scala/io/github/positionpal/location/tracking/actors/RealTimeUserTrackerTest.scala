@@ -51,7 +51,7 @@ class RealTimeUserTrackerTest
   given ctx: Context[UserState, Session] with
     def notificationService: NotificationService[IO] = notifier
     def mapsService: MapsService[IO] = maps
-    def userGroupsService: UserGroupsService[IO] = ???
+    def userGroupsService: UserGroupsService[IO] = groups
     def initialStates(ins: List[UserState]): List[Session] =
       ins.map(s => Session.from(testScope, s, sampling(s), tracking(s)))
 
