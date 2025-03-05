@@ -68,7 +68,7 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
       it("if the user goes offline and is in routing mode"):
         val session = Session.from(scope, UserState.Routing, None, None)
         val wentOfflineEvent = WentOffline(now, scope)
-        expectNotification("Luke Skywalker went offline while on a journey"):
+        expectNotification("Luke Skywalker went offline"):
           doChecks(session, wentOfflineEvent).unsafeRunSync() shouldBe Left(())
 
       it("if the user is stuck in the same position for too long"):
