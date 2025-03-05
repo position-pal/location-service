@@ -23,8 +23,8 @@ object PreCheckNotifier:
   private def createFrom(event: ClientDrivingEvent, session: Session): Option[NotificationMessage] =
     val notificationMessage = event match
       case RoutingStarted(_, _, _, _, mode, destination, eta) =>
-        Some(" started a journey", s" is on their way to $destination ($mode). ETA: ${eta.format}.")
-      case SOSAlertTriggered(_, _, _, position) =>
+        Some(" started a journey", s" is on their way to ${destination.name} ($mode). ETA: ${eta.format}.")
+      case _: SOSAlertTriggered =>
         Some(" triggered an SOS alert!", " has triggered an SOS help request. Check their real-time location now!")
       case _: WentOffline if session.userState == SOS || session.userState == Routing =>
         Some(" went offline!", " went offline. Please check on their real-time location and status!")
