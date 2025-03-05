@@ -25,9 +25,9 @@ object PreCheckNotifier:
       case RoutingStarted(_, _, _, _, mode, destination, eta) =>
         Some(" started a journey", s" is on their way to $destination ($mode). ETA: ${eta.format}.")
       case SOSAlertTriggered(_, _, _, position) =>
-        Some(" triggered an SOS alert!", " has triggered an SOS help request. Check their location now to help!")
+        Some(" triggered an SOS alert!", " has triggered an SOS help request. Check their real-time location now!")
       case _: WentOffline if session.userState == SOS || session.userState == Routing =>
-        Some(" went offline!", " went offline while on a journey. Please check on them.")
+        Some(" went offline!", " went offline. Please check on their real-time location and status!")
       case _: RoutingStopped => Some("'s journey ended", "'s journey has completed successfully.")
       case _: SOSAlertStopped => Some(" SOS alarm stopped!", " has stopped the SOS alarm.")
       case _ => None
