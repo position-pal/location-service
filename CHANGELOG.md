@@ -1,3 +1,9 @@
+## [5.0.1](https://github.com/position-pal/location-service/compare/5.0.0...5.0.1) (2025-03-05)
+
+### Bug Fixes
+
+* **application:** fix async execution of sendToOwnGroup notification ([75ef5ac](https://github.com/position-pal/location-service/commit/75ef5aca611a328f63f155b1a32f34468325b9e4))
+
 ## [5.0.0](https://github.com/position-pal/location-service/compare/4.0.10...5.0.0) (2025-03-05)
 
 ### ⚠ BREAKING CHANGES
