@@ -70,11 +70,13 @@
                   "user": {
                     "type": "string",
                     "description": "Unique identifier for a user.",
+                    "example": "0cf7a1de-d7f7-43c5-8bd2-2b70b5f86d1f",
                     "x-parser-schema-id": "UserId"
                   },
                   "group": {
                     "type": "string",
                     "description": "Unique identifier for a group.",
+                    "example": "9a4763d0-b06e-49bc-9e0f-c4a051744e9f",
                     "x-parser-schema-id": "GroupId"
                   },
                   "position": {
@@ -98,6 +100,10 @@
                         "maximum": 180,
                         "x-parser-schema-id": "<anonymous-schema-6>"
                       }
+                    },
+                    "example": {
+                      "latitude": 44.147843982335836,
+                      "longitude": 12.23510261898422
                     },
                     "x-parser-schema-id": "GPSLocation"
                   }
@@ -146,11 +152,32 @@
                     ],
                     "x-parser-schema-id": "RoutingMode"
                   },
-                  "destination": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.position",
+                  "destination": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "position"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "x-parser-schema-id": "<anonymous-schema-9>"
+                      },
+                      "position": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.position"
+                    },
+                    "example": {
+                      "name": "Via Dell'Università 50, Cesena, Italy",
+                      "position": {
+                        "latitude": 44.147843982335836,
+                        "longitude": 12.23510261898422
+                      }
+                    },
+                    "x-parser-schema-id": "Address"
+                  },
                   "expectedArrival": {
                     "type": "string",
                     "format": "date-time",
-                    "x-parser-schema-id": "<anonymous-schema-9>"
+                    "x-parser-schema-id": "<anonymous-schema-10>"
                   }
                 },
                 "x-parser-schema-id": "<anonymous-schema-7>"
@@ -179,12 +206,12 @@
                   "timestamp": {
                     "type": "string",
                     "format": "date-time",
-                    "x-parser-schema-id": "<anonymous-schema-11>"
+                    "x-parser-schema-id": "<anonymous-schema-12>"
                   },
                   "user": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.user",
                   "group": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.group"
                 },
-                "x-parser-schema-id": "<anonymous-schema-10>"
+                "x-parser-schema-id": "<anonymous-schema-11>"
               }
             },
             "x-parser-schema-id": "RoutingStopped"
@@ -211,13 +238,13 @@
                   "timestamp": {
                     "type": "string",
                     "format": "date-time",
-                    "x-parser-schema-id": "<anonymous-schema-13>"
+                    "x-parser-schema-id": "<anonymous-schema-14>"
                   },
                   "user": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.user",
                   "group": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.group",
                   "position": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.position"
                 },
-                "x-parser-schema-id": "<anonymous-schema-12>"
+                "x-parser-schema-id": "<anonymous-schema-13>"
               }
             },
             "x-parser-schema-id": "SOSAlertTriggered"
@@ -243,12 +270,12 @@
                   "timestamp": {
                     "type": "string",
                     "format": "date-time",
-                    "x-parser-schema-id": "<anonymous-schema-15>"
+                    "x-parser-schema-id": "<anonymous-schema-16>"
                   },
                   "user": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.user",
                   "group": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.group"
                 },
-                "x-parser-schema-id": "<anonymous-schema-14>"
+                "x-parser-schema-id": "<anonymous-schema-15>"
               }
             },
             "x-parser-schema-id": "SOSAlertStopped"
@@ -276,7 +303,7 @@
                   "timestamp": {
                     "type": "string",
                     "format": "date-time",
-                    "x-parser-schema-id": "<anonymous-schema-17>"
+                    "x-parser-schema-id": "<anonymous-schema-18>"
                   },
                   "user": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.user",
                   "group": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.group",
@@ -293,7 +320,7 @@
                     "x-parser-schema-id": "UserState"
                   }
                 },
-                "x-parser-schema-id": "<anonymous-schema-16>"
+                "x-parser-schema-id": "<anonymous-schema-17>"
               }
             },
             "x-parser-schema-id": "UserUpdate"
@@ -376,6 +403,7 @@
     "schemas": {
       "UserId": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.user",
       "GroupId": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.group",
+      "Address": "$ref:$.channels.group/{groupId}/{userId}.messages.RoutingStarted.payload.properties.RoutingStarted.properties.destination",
       "GPSLocation": "$ref:$.channels.group/{groupId}/{userId}.messages.SampledLocation.payload.properties.SampledLocation.properties.position",
       "RoutingMode": "$ref:$.channels.group/{groupId}/{userId}.messages.RoutingStarted.payload.properties.RoutingStarted.properties.mode",
       "UserState": "$ref:$.channels.group/{groupId}/{userId}.messages.UserUpdate.payload.properties.UserUpdate.properties.status",
