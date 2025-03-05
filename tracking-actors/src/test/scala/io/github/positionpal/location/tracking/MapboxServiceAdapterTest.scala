@@ -23,7 +23,7 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
     it("should calculate the distance between two locations"):
       val distance = (for
         mapService <- mapServiceAdapter
-        dist <- mapService.distance(Driving)(cesenaCampus, bolognaCampus)
+        dist <- mapService.distance(Driving)(cesenaCampus.position, bolognaCampus.position)
       yield dist).unsafeRunSync()
       // distance depends on the route (selected depending on the traffic)!
       distance.value should (be >= 80_000.0 and be <= 100_000.0)
@@ -32,6 +32,6 @@ class MapboxServiceAdapterTest extends AnyFunSpec with Matchers:
     it("should calculate the arrival time between two locations"):
       val arrivalTime = (for
         mapService <- mapServiceAdapter
-        time <- mapService.duration(Driving)(cesenaCampus, bolognaCampus)
+        time <- mapService.duration(Driving)(cesenaCampus.position, bolognaCampus.position)
       yield time).unsafeRunSync()
       arrivalTime.toMinutes should be >= 60L // arrival time depends on the traffic!

@@ -14,7 +14,7 @@ import akka.Done
 import akka.persistence.query.Offset
 import akka.projection.scaladsl.{AtLeastOnceProjection, Handler}
 import akka.projection.eventsourced.EventEnvelope
-import io.github.positionpal.location.application.sessions.UserSessionWriter
+import io.github.positionpal.location.application.sessions.UserSessionsWriter
 import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 import akka.projection.cassandra.scaladsl.CassandraProjection
 import akka.cluster.sharding.typed.scaladsl.ShardedDaemonProcess
@@ -25,9 +25,9 @@ import akka.cluster.sharding.typed.scaladsl.ShardedDaemonProcess
 object UserSessionProjection:
 
   /** Initializes the projection for the sharded event sourced [[RealTimeUserTracker]] actor
-    * deployed on the given [[system]] using as storage the provided [[UserSessionWriter]].
+    * deployed on the given [[system]] using as storage the provided [[UserSessionsWriter]].
     */
-  def init[T](system: ActorSystem[?], storage: UserSessionWriter[IO, T]): Unit =
+  def init[T](system: ActorSystem[?], storage: UserSessionsWriter[IO, T]): Unit =
     ShardedDaemonProcess(system).init(
       name = getClass.getSimpleName,
       RealTimeUserTracker.tags.size,
@@ -38,7 +38,7 @@ object UserSessionProjection:
 
   private def createProjectionFor[T](
       system: ActorSystem[?],
-      storage: UserSessionWriter[IO, T],
+      storage: UserSessionsWriter[IO, T],
       index: Int,
   ): AtLeastOnceProjection[Offset, EventEnvelope[RealTimeUserTracker.Event]] =
     val tag = RealTimeUserTracker.tags(index)
@@ -58,7 +58,7 @@ object UserSessionProjection:
   */
 class UserSessionProjectionHandler[T](
     system: ActorSystem[?],
-    val storage: UserSessionWriter[IO, T],
+    val storage: UserSessionsWriter[IO, T],
 ) extends Handler[EventEnvelope[RealTimeUserTracker.Event]]:
 
   import cats.effect.unsafe.implicits.global

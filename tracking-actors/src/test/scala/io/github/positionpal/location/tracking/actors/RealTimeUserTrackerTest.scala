@@ -8,11 +8,11 @@ import io.github.positionpal.location.domain.EventConversions.{*, given}
 import io.github.positionpal.location.domain.TimeUtils.*
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import io.github.positionpal.location.application.tracking.MapsService
-import io.github.positionpal.location.domain.*
 import io.github.positionpal.location.domain.GeoUtils.*
 import io.github.positionpal.location.domain.RoutingMode.*
 import io.github.positionpal.location.domain.UserState.*
 import cats.effect.IO
+import io.github.positionpal.location.application.groups.UserGroupsService
 import akka.cluster.Cluster
 import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.domain.Distance.meters
@@ -21,6 +21,8 @@ import io.github.positionpal.location.application.notifications.NotificationServ
 import akka.persistence.testkit.scaladsl.EventSourcedBehaviorTestKit
 import org.scalatest.{BeforeAndAfterEach, OneInstancePerTest}
 import org.scalatest.time.{Seconds, Span}
+import io.github.positionpal.location.domain.*
+import io.github.positionpal.entities.User
 import org.scalatest.wordspec.AnyWordSpecLike
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 
@@ -36,9 +38,11 @@ class RealTimeUserTrackerTest
 
   private val notifier = mock[NotificationService[IO]]
   private val maps = mock[MapsService[IO]]
+  private val groups = mock[UserGroupsService[IO]]
 
   when(notifier.sendToOwnGroup).expects(*, *).returns(IO.unit).anyNumberOfTimes
   when(notifier.sendToGroup).expects(*, *, *).returns(IO.unit).anyNumberOfTimes
+  when(groups.of).expects(testScope).returns(IO.pure(Some(testUser))).anyNumberOfTimes
   when(maps.distance(_: RoutingMode)(_: GPSLocation, _: GPSLocation))
     .expects(*, *, *)
     .onCall((_, o, d) => if o == d then IO.pure(0.meters) else IO.pure(Double.MaxValue.meters))
@@ -47,6 +51,7 @@ class RealTimeUserTrackerTest
   given ctx: Context[UserState, Session] with
     def notificationService: NotificationService[IO] = notifier
     def mapsService: MapsService[IO] = maps
+    def userGroupsService: UserGroupsService[IO] = groups
     def initialStates(ins: List[UserState]): List[Session] =
       ins.map(s => Session.from(testScope, s, sampling(s), tracking(s)))
 
@@ -60,19 +65,19 @@ class RealTimeUserTrackerTest
       "no events are received for a while" should:
         "transition to inactive state" in:
           given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
-          val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
+          val sampledLocation = SampledLocation(now, testScope, cesenaCampus.position)
           Inactive -- sampledLocation --> Inactive verifying: (_, s) =>
             s.lastSampledLocation shouldBe Some(sampledLocation)
 
     "in inactive or active state" when:
       "receives a new location sample" should:
         "update the last known location" in:
-          (Active | Inactive) -- SampledLocation(now, testScope, cesenaCampus) --> Active verifying: (e, s) =>
+          (Active | Inactive) -- SampledLocation(now, testScope, cesenaCampus.position) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing started event" should:
         "transition to routing state" in:
-          val routingStarted = RoutingStarted(now, testScope, bolognaCampus, Driving, cesenaCampus, inTheFuture)
+          val routingStarted = RoutingStarted(now, testScope, bolognaCampus.position, Driving, destination, inTheFuture)
           (Active | Inactive) -- routingStarted --> Routing verifying: (_, s) =>
             s shouldMatch (Some(routingStarted.toMonitorableTracking), Some(routingStarted: SampledLocation))
 
@@ -80,7 +85,7 @@ class RealTimeUserTrackerTest
       "reaching the destination" should:
         "transition to active state" in:
           given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(10, Seconds), Span(1, Seconds))
-          (Routing | Warning) -- SampledLocation(now, testScope, destination) --> Active verifying: (e, s) =>
+          (Routing | Warning) -- SampledLocation(now, testScope, destination.position) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing stopped event" should:
@@ -91,7 +96,7 @@ class RealTimeUserTrackerTest
       "no events are received for a while" should:
         "transition to warning state" in:
           given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
-          val routingStarted = RoutingStarted(now, testScope, bolognaCampus, Driving, cesenaCampus, inTheFuture)
+          val routingStarted = RoutingStarted(now, testScope, bolognaCampus.position, Driving, destination, inTheFuture)
           Inactive -- routingStarted --> Warning verifying: (_, s) =>
             s shouldMatch (
               Some(routingStarted.toMonitorableTracking.addAlert(Alert.Offline)),
@@ -113,13 +118,13 @@ class RealTimeUserTrackerTest
 
     "receives an SOS alert triggered event" should:
       "transition to SOS state" in:
-        val sosAlertTriggered = SOSAlertTriggered(now, testScope, cesenaCampus)
+        val sosAlertTriggered = SOSAlertTriggered(now, testScope, cesenaCampus.position)
         (Active | Inactive | Routing | Warning) -- sosAlertTriggered --> SOS verifying: (_, s) =>
           s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
   extension (s: Session)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[ClientDrivingEvent]): Unit =
-      val sampledLocation = SampledLocation(now, testScope, cesenaCampus)
+      val sampledLocation = SampledLocation(now, testScope, cesenaCampus.position)
       s.tracking shouldBe route
       s.lastSampledLocation shouldBe lastSample
 
@@ -146,8 +151,8 @@ object RealTimeUserTrackerTest:
     .parseFile(File(ClassLoader.getSystemResource("testable-akka-config.conf").toURI))
     .withFallback(EventSourcedBehaviorTestKit.config)
     .resolve()
-  val testUser: UserId = UserId.create("luke")
+  val testUser: User = User.create(UserId.create("luke"), "Luke", "Skywalker", "luke.skywalker@gmail.com")
   val testGroup: GroupId = GroupId.create("astro")
-  val testScope: Scope = Scope(testUser, testGroup)
-  val defaultContextSample: SampledLocation = SampledLocation(now, testScope, bolognaCampus)
-  val destination: GPSLocation = cesenaCampus
+  val testScope: Scope = Scope(testUser.id(), testGroup)
+  val defaultContextSample: SampledLocation = SampledLocation(now, testScope, bolognaCampus.position)
+  val destination: Address = cesenaCampus

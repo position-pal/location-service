@@ -6,7 +6,7 @@ import io.github.positionpal.location.domain.{Scope, Session}
   * operations for querying and retrieving [[Session]]s from the underlying store.
   * @tparam F the effect type
   */
-trait UserSessionReader[F[_]]:
+trait UserSessionsReader[F[_]]:
 
   /** @return the current [[Session]] of the given [[userId]] if it exists. */
   def sessionOf(scope: Scope): F[Option[Session]]
@@ -16,7 +16,7 @@ trait UserSessionReader[F[_]]:
   * @tparam F the effect type
   * @tparam T the result type of the write operation
   */
-trait UserSessionWriter[F[_], T]:
+trait UserSessionsWriter[F[_], T]:
 
   /** Save the given [[variation]] in the store. */
   def update(variation: Session.Snapshot): F[T]
@@ -25,4 +25,4 @@ trait UserSessionWriter[F[_], T]:
   * @tparam F the effect type
   * @tparam T the result type of the write operation
   */
-trait UserSessionStore[F[_], T] extends UserSessionReader[F] with UserSessionWriter[F, T]
+trait UserSessionsStore[F[_], T] extends UserSessionsReader[F] with UserSessionsWriter[F, T]

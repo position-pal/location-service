@@ -6,7 +6,7 @@ import io.github.positionpal.location.storage.{StorageUtils, StoreError}
 import akka.actor.typed.ActorSystem
 import cats.implicits.toFunctorOps
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
-import io.github.positionpal.entities.{GroupId, UserId}
+import io.github.positionpal.entities.{GroupId, User, UserId}
 import cats.effect.kernel.Async
 import io.github.positionpal.location.application.groups.UserGroupsStore
 import io.github.positionpal.location.commons.CanRaise
@@ -14,12 +14,12 @@ import com.datastax.oss.driver.api.core.cql.SimpleStatement
 
 object CassandraUserGroupsStore:
 
-  def apply[F[_]: Async: CanRaise[StoreError]](
+  def apply[F[_]: {Async, CanRaise[StoreError]}](
       session: F[CassandraSession],
       keyspace: String = "locationservice",
   )(using actorSystem: ActorSystem[?]): F[UserGroupsStore[F, Unit]] = session.map(Impl(_, keyspace))
 
-  private class Impl[F[_]: Async: CanRaise[StoreError]](using actorSystem: ActorSystem[?])(
+  private class Impl[F[_]: {Async, CanRaise[StoreError]}](using actorSystem: ActorSystem[?])(
       session: CassandraSession,
       keyspace: String,
   ) extends UserGroupsStore[F, Unit]
@@ -28,18 +28,25 @@ object CassandraUserGroupsStore:
 
     given ExecutionContext = actorSystem.executionContext
 
-    override def addMember(groupId: GroupId, userId: UserId): F[Unit] = executeWithErrorHandling:
-      session.executeWrite(insertMemberQuery(groupId, userId)).void
+    override def addMember(groupId: GroupId, user: User): F[Unit] = executeWithErrorHandling:
+      session.executeWrite(insertMemberQuery(groupId, user)).void
 
     override def groupsOf(userId: UserId): F[Set[GroupId]] = executeWithErrorHandling:
       session
         .select(getGroupsQuery(userId))
-        .runFold(Set.empty[GroupId])((acc, row) => acc + GroupId.create(row.getString("GroupId")))
+        .runFold(Set.empty)((acc, row) => acc + GroupId.create(row.getString("GroupId")))
 
-    override def membersOf(groupId: GroupId): F[Set[UserId]] = executeWithErrorHandling:
+    override def membersOf(groupId: GroupId): F[Set[User]] = executeWithErrorHandling:
       session
         .select(getMembersQuery(groupId))
-        .runFold(Set.empty[UserId])((acc, row) => acc + UserId.create(row.getString("UserId")))
+        .runFold(Set.empty)((acc, row) =>
+          acc + User.create(
+            UserId.create(row.getString("UserId")),
+            row.getString("Name"),
+            row.getString("Surname"),
+            row.getString("Email"),
+          ),
+        )
 
     override def removeMember(groupId: GroupId, userId: UserId): F[Unit] = executeWithErrorHandling:
       session.executeWrite(deleteMemberQuery(groupId, userId)).void
@@ -51,17 +58,25 @@ object CassandraUserGroupsStore:
     private[CassandraUserGroupsStore] object Queries:
       import Tables.*
 
-      def insertMemberQuery(groupId: GroupId, userId: UserId) =
-        batch(insert(userGroupsByUserId)(groupId, userId) :: insert(userGroupsByGroupId)(groupId, userId) :: Nil)
+      def insertMemberQuery(groupId: GroupId, user: User) =
+        batch(insert(userGroupsByUserId)(groupId, user) :: insert(userGroupsByGroupId)(groupId, user) :: Nil)
 
-      private def insert(table: String)(groupId: GroupId, userId: UserId): SimpleStatement =
-        cql(s"INSERT INTO $keyspace.$table (GroupId, UserId) VALUES (?, ?)", groupId.value(), userId.value())
+      private def insert(table: String)(groupId: GroupId, user: User) = cql(
+        s"INSERT INTO $keyspace.$table (GroupId, UserId, Name, Surname, Email) VALUES (?, ?, ?, ?, ?)",
+        groupId.value(),
+        user.id().value(),
+        user.name(),
+        user.surname(),
+        user.email(),
+      )
 
       def getGroupsQuery(userId: UserId) =
-        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByUserId WHERE UserId = ?", userId.value())
+        cql(s"SELECT GroupId FROM $keyspace.$userGroupsByUserId WHERE UserId = ?", userId.value())
 
-      def getMembersQuery(groupId: GroupId) =
-        cql(s"SELECT GroupId, UserId FROM $keyspace.$userGroupsByGroupId WHERE GroupId = ?", groupId.value())
+      def getMembersQuery(groupId: GroupId) = cql(
+        s"SELECT UserId, Name, Surname, Email FROM $keyspace.$userGroupsByGroupId WHERE GroupId = ?",
+        groupId.value(),
+      )
 
       def deleteMemberQuery(groupId: GroupId, userId: UserId) =
         batch(delete(userGroupsByUserId)(groupId, userId) :: delete(userGroupsByGroupId)(groupId, userId) :: Nil)

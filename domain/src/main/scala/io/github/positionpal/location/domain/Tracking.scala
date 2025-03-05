@@ -44,8 +44,8 @@ trait MonitorableTracking extends Tracking:
   /** @return the mode of routing to the destination. */
   def mode: RoutingMode
 
-  /** @return the destination of the route. */
-  def destination: GPSLocation
+  /** @return the destination address. */
+  def destination: Address
 
   /** @return the expected arrival time at the destination. */
   def expectedArrival: Instant
@@ -77,10 +77,10 @@ object Tracking:
   /** Creates a new [[MonitorableTracking]]. */
   def withMonitoring(
       routingMode: RoutingMode,
-      arrivalLocation: GPSLocation,
+      destination: Address,
       estimatedArrival: Instant,
       route: Route = List(),
-  ): MonitorableTracking = MonitorableTrackingImpl(route, routingMode, arrivalLocation, estimatedArrival)
+  ): MonitorableTracking = MonitorableTrackingImpl(route, routingMode, destination, estimatedArrival)
 
   private case class TrackingImpl(override val route: Route) extends Tracking:
     override def addSample(sample: SampledLocation): Tracking = TrackingImpl(sample :: route)
@@ -88,7 +88,7 @@ object Tracking:
   private case class MonitorableTrackingImpl(
       override val route: Route,
       override val mode: RoutingMode,
-      override val destination: GPSLocation,
+      override val destination: Address,
       override val expectedArrival: Instant,
       private val alerts: Set[Alert] = Set(),
   ) extends MonitorableTracking:

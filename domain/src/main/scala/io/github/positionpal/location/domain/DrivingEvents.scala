@@ -46,7 +46,7 @@ case class RoutingStarted(
     group: GroupId,
     position: GPSLocation,
     mode: RoutingMode,
-    destination: GPSLocation,
+    destination: Address,
     expectedArrival: Instant,
 ) extends ClientDrivingEvent
 
@@ -56,7 +56,7 @@ object RoutingStarted:
       scope: Scope,
       position: GPSLocation,
       mode: RoutingMode,
-      destination: GPSLocation,
+      destination: Address,
       expectedArrival: Instant,
   ): RoutingStarted = this(timestamp, scope.userId, scope.groupId, position, mode, destination, expectedArrival)
 

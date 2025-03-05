@@ -41,9 +41,14 @@ message Route {
   repeated SampledLocation locations = 1;
 }
 
+message Address {
+  string name = 1;
+  GPSLocation location = 2;
+}
+
 message Tracking {
   Route route = 1;
-  optional GPSLocation destination = 2;
+  optional Address destination = 2;
   optional google.protobuf.Timestamp eta = 3;
 }
 
@@ -85,7 +90,7 @@ message SessionResponse {
   Session session = 2;
 }
 
-service UserSessionService {
+service UserSessionsService {
   rpc GetCurrentSession(GroupId) returns (stream SessionResponse) { }
   rpc GetCurrentLocation(Scope) returns (LocationResponse) { }
   rpc GetCurrentState(Scope) returns (UserStateResponse) { }

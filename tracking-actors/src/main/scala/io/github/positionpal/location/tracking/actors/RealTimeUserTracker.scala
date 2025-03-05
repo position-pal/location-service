@@ -14,16 +14,16 @@ import io.github.positionpal.location.tracking.utils.AkkaUtils.refOf
 import io.github.positionpal.location.application.tracking.reactions.*
 import io.github.positionpal.location.application.tracking.MapsService
 import io.github.positionpal.location.presentation.ScopeCodec.*
+import io.github.positionpal.location.domain.*
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import akka.actor.typed.SupervisorStrategy.restartWithBackoff
 import io.github.positionpal.location.domain.UserState.*
 import akka.cluster.sharding.typed.scaladsl.*
 import cats.effect.IO
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 import akka.persistence.typed.PersistenceId
 import io.github.positionpal.location.domain.EventConversions.userUpdateFrom
-import io.github.positionpal.location.domain.*
-import io.github.positionpal.entities.NotificationMessage
+import io.github.positionpal.location.application.groups.UserGroupsService
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 
 /** The actor in charge of tracking the real-time location of users, reacting to
   * their movements and status changes. This actor is managed by Akka Cluster Sharding.
@@ -55,10 +55,18 @@ object RealTimeUserTracker:
 
   case class StatefulDrivingEvent(state: UserState, event: DrivingEvent) extends AkkaSerializable
 
-  def apply(using NotificationService[IO], MapsService[IO]): Entity[Command, ShardingEnvelope[Command]] =
+  def apply(using
+      NotificationService[IO],
+      MapsService[IO],
+      UserGroupsService[IO],
+  ): Entity[Command, ShardingEnvelope[Command]] =
     Entity(key)(ctx => this(ctx.entityId.decode, tags(math.abs(ctx.entityId.hashCode % tags.size))))
 
-  def apply(scope: Scope, tag: String)(using NotificationService[IO], MapsService[IO]): Behavior[Command] =
+  def apply(scope: Scope, tag: String)(using
+      NotificationService[IO],
+      MapsService[IO],
+      UserGroupsService[IO],
+  ): Behavior[Command] =
     Behaviors.setup: ctx =>
       given ActorContext[Command] = ctx
       Behaviors.withTimers: timer =>
@@ -77,17 +85,21 @@ object RealTimeUserTracker:
       ctx: ActorContext[Command],
       notifier: NotificationService[IO],
       maps: MapsService[IO],
+      userGroupsService: UserGroupsService[IO],
   ): (Session, Command) => Effect[Event, Session] = (session, command) =>
     command match
       case e: DrivingEvent if e canBeAppliedTo session =>
         e match
           case event: ClientDrivingEvent =>
-            if !timerScheduler.isTimerActive(timerKey) then
-              timerScheduler.startTimerAtFixedRate(key = timerKey, msg = AliveCheck, interval = 20.seconds)
+            event match
+              case _: WentOffline => timerScheduler.cancel(timerKey)
+              case _ if !timerScheduler.isTimerActive(timerKey) =>
+                timerScheduler.startTimerAtFixedRate(timerKey, msg = AliveCheck, interval = 20.seconds)
+              case _ => ()
             trackingHandler(session, event)
           case _ => ()
         persistAndNotify(session.userState.next(e, session.tracking).toOption.get, e)
-      case e: AliveCheck.type => aliveCheckHandler(timerScheduler)(session, e)
+      case _: AliveCheck.type => aliveCheckHandler(session)
       case e => ctx.log.info("Ignoring {}", e); Effect.none
 
   import cats.effect.unsafe.implicits.global
@@ -96,6 +108,7 @@ object RealTimeUserTracker:
       ctx: ActorContext[Command],
       notifier: NotificationService[IO],
       maps: MapsService[IO],
+      userGroupsService: UserGroupsService[IO],
   ): (Session, ClientDrivingEvent) => Unit = (s, e) =>
     val reaction = (PreCheckNotifier[IO] >>> ArrivalCheck[IO] >>> StationaryCheck[IO] >>> ArrivalTimeoutCheck[IO])(s, e)
     ctx.pipeToSelf(reaction.unsafeToFuture()):
@@ -105,21 +118,11 @@ object RealTimeUserTracker:
           case _ => Ignore
       case Failure(exception) => ctx.log.error("Error while reacting: {}", exception.getMessage); Ignore
 
-  private def aliveCheckHandler(timerScheduler: TimerScheduler[Command])(using
-      ctx: ActorContext[Command],
-      notifier: NotificationService[IO],
-  ): (Session, AliveCheck.type) => Effect[Event, Session] = (session, _) =>
+  private def aliveCheckHandler(using ctx: ActorContext[Command]): (Session) => Effect[Event, Session] = session =>
     val event = WentOffline(now(), session.scope)
     if (event canBeAppliedTo session) && session.lastSampledLocation.get.timestamp.isBefore(now().minusSeconds(60)) then
-      timerScheduler.cancel(timerKey)
-      if session.userState != Active then
-        val notification = NotificationMessage.create(
-          s"${event.user.value()} connection lost!",
-          s"User ${event.user.value()} went offline while in ${session.userState} mode!",
-        )
-        notifier.sendToOwnGroup(session.scope, notification).unsafeRunAndForget()
-      persistAndNotify(session.userState.next(event, session.tracking).toOption.get, event)
-    else Effect.none
+      ctx.self ! event
+    Effect.none
 
   private def persistAndNotify(state: UserState, event: DrivingEvent)(using ctx: ActorContext[Command]) =
     Effect

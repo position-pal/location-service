@@ -1,8 +1,9 @@
 -- This CQL script will create the keyspace and all tables needed for the service.
 -- It includes the messages and snapshot tables (write-side) and the projection tables (read-side).
 
--- NOTE: the keyspace as created here is probably not what you need in a production environment.
+-- NOTE: the keyspace as created here is not what we need in a production environment.
 -- This is good enough for local development though.
+-- For production see the location-service-chart (https://github.com/position-pal/location-service-chart)
 
 CREATE KEYSPACE IF NOT EXISTS locationservice
     WITH REPLICATION = { 'class' : 'SimpleStrategy','replication_factor':1 };
