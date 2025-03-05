@@ -1,3 +1,25 @@
+## [5.0.0](https://github.com/position-pal/location-service/compare/4.0.10...5.0.0) (2025-03-05)
+
+### ⚠ BREAKING CHANGES
+
+* **application:** correctly include user name, surname and addresses in notifications instead of their id and gps location (#252)
+
+### Dependency updates
+
+* **deps:** update akkaprojection to v1.6.10 ([#249](https://github.com/position-pal/location-service/issues/249)) ([7d4c9af](https://github.com/position-pal/location-service/commit/7d4c9aff882663e50787c36bb720b86e53cbeb0f))
+* **deps:** update dependency com.google.protobuf:protoc to v4.30.0 ([#251](https://github.com/position-pal/location-service/issues/251)) ([1e26b13](https://github.com/position-pal/location-service/commit/1e26b130db650474c1cd30e9225612610b48b219))
+* **deps:** update grpc-java monorepo to v1.71.0 ([#250](https://github.com/position-pal/location-service/issues/250)) ([3ebb808](https://github.com/position-pal/location-service/commit/3ebb80822c0a181bd8a284163c3eb0598d5c456f))
+* **deps:** update plugin scala-extras to v3.4.0 ([#246](https://github.com/position-pal/location-service/issues/246)) ([fe84237](https://github.com/position-pal/location-service/commit/fe84237befbb86cc39e324bf73ca6325a22df698))
+* **deps:** update plugin scala-extras to v3.5.0 ([#248](https://github.com/position-pal/location-service/issues/248)) ([f23d485](https://github.com/position-pal/location-service/commit/f23d48576348aaf0bcb7c6851ea7f2cc0d0671f4))
+
+### Bug Fixes
+
+* **application:** correctly include user name, surname and addresses in notifications instead of their id and gps location ([#252](https://github.com/position-pal/location-service/issues/252)) ([0203100](https://github.com/position-pal/location-service/commit/02031004e1ad0def51dc8e9e28c2f180c40527ee))
+
+### Build and continuous integration
+
+* **deps:** update docker/setup-qemu-action digest to 2910929 ([#247](https://github.com/position-pal/location-service/issues/247)) ([6def059](https://github.com/position-pal/location-service/commit/6def0593b504c971fff92510f4737ba78ccb8391))
+
 ## [4.0.10](https://github.com/position-pal/location-service/compare/4.0.9...4.0.10) (2025-02-28)
 
 ### Dependency updates
