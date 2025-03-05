@@ -24,8 +24,8 @@ trait UserGroupsWriter[F[_], T]:
   /** Add the given [[user]] to the given [[groupId]]. */
   def addMember(groupId: GroupId, user: User): F[T]
 
-  /** Remove the given [[user]] from the given [[groupId]]. */
-  def removeMember(groupId: GroupId, user: UserId): F[T]
+  /** Remove the user with the given [[userId]] from the given [[groupId]]. */
+  def removeMember(groupId: GroupId, userId: UserId): F[T]
 
 /** A store for user groups related information, supporting both read and write operations. */
 trait UserGroupsStore[F[_], T] extends UserGroupsReader[F] with UserGroupsWriter[F, T]

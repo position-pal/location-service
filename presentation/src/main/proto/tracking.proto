@@ -90,7 +90,7 @@ message SessionResponse {
   Session session = 2;
 }
 
-service UserSessionService {
+service UserSessionsService {
   rpc GetCurrentSession(GroupId) returns (stream SessionResponse) { }
   rpc GetCurrentLocation(Scope) returns (LocationResponse) { }
   rpc GetCurrentState(Scope) returns (UserStateResponse) { }

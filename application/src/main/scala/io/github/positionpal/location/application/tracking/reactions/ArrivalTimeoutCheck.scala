@@ -15,7 +15,7 @@ import io.github.positionpal.location.domain.Alert.Late
   */
 object ArrivalTimeoutCheck:
 
-  def apply[F[_]: Async](using notifier: NotificationService[F], groups: UserGroupsService[F]): EventReaction[F] =
+  def apply[F[_]: Async](using NotificationService[F], UserGroupsService[F]): EventReaction[F] =
     on[F]: (session, event) =>
       event match
         case e: SampledLocation if session.tracking.exists(_.isMonitorable) =>

@@ -17,11 +17,7 @@ import io.github.positionpal.location.domain.Alert.Stuck
   */
 object StationaryCheck:
 
-  def apply[F[_]: Async](using
-      maps: MapsService[F],
-      notifier: NotificationService[F],
-      groups: UserGroupsService[F],
-  ): EventReaction[F] =
+  def apply[F[_]: Async](using MapsService[F], NotificationService[F], UserGroupsService[F]): EventReaction[F] =
     on[F]: (session, event) =>
       event match
         case e: SampledLocation if session.tracking.exists(_.isMonitorable) =>
@@ -29,7 +25,7 @@ object StationaryCheck:
             config <- ReactionsConfiguration.get
             tracking <- session.tracking.asMonitorable.get.pure[F]
             samples = tracking.route.take(config.stationarySamples)
-            distances <- samples.traverse(s => maps.distance(tracking.mode)(s.position, e.position))
+            distances <- samples.traverse(s => summon[MapsService[F]].distance(tracking.mode)(s.position, e.position))
             isStationary = distances.size >= config.stationarySamples &&
               distances.forall(_.toMeters.value <= config.proximityToleranceMeters.meters.value)
             res <-

@@ -1,9 +1,9 @@
 package io.github.positionpal.location.messages.notifications
 
 import lepus.protocol.domains.{ExchangeType, ShortString}
+import io.github.positionpal.location.application.notifications.NotificationServiceProxy
 import io.github.positionpal.commands.{CoMembersPushNotification, GroupWisePushNotification, PushNotificationCommand}
 import cats.implicits.{toFlatMapOps, toFunctorOps}
-import io.github.positionpal.location.application.notifications.impl.NotificationServiceProxy
 import lepus.client.{Connection, Message}
 import io.github.positionpal.location.messages.RabbitMQ
 import cats.effect.Async

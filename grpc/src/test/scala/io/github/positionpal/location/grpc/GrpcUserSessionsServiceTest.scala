@@ -5,7 +5,7 @@ import scala.language.postfixOps
 import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.presentation.ProtoConversions.given
 import eu.monniot.scala3mock.cats.withExpectations
-import io.github.positionpal.location.presentation.proto.UserSessionServiceFs2Grpc
+import io.github.positionpal.location.presentation.proto.UserSessionsServiceFs2Grpc
 import io.grpc.Metadata
 import org.scalatest.matchers.should.Matchers
 import io.github.positionpal.location.domain.Session
@@ -13,14 +13,14 @@ import cats.effect.kernel.Resource
 import org.scalatest.wordspec.AnyWordSpec
 import cats.effect.IO
 import io.github.positionpal.location.presentation.proto
-import io.github.positionpal.location.application.sessions.UsersSessionService
+import io.github.positionpal.location.application.sessions.UserSessionsService
 
-class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFactory:
+class GrpcUserSessionsServiceTest extends AnyWordSpec with Matchers with MockFactory:
 
   import Utils.*
   import cats.effect.unsafe.implicits.global
 
-  val fakeSessionService: UsersSessionService[IO] = mock[UsersSessionService[IO]]
+  val fakeSessionService: UserSessionsService[IO] = mock[UserSessionsService[IO]]
 
   "User sessions gRPC API service" when:
     "attempting to get the current session of a group" should:
@@ -28,7 +28,7 @@ class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFact
         val result = withExpectations() {
           when(fakeSessionService.ofGroup) expects sessions._1 returns fs2.Stream.emits[IO, Session](sessions._2)
           for
-            _ <- grpcServerFrom(GrpcUserSessionService[IO](fakeSessionService)).start
+            _ <- grpcServerFrom(GrpcUserSessionsService[IO](fakeSessionService)).start
             response <- managedChannelRes.use(_.getCurrentSession(sessions._1, Metadata()).compile.toList)
           yield response
         }.unsafeRunSync()
@@ -59,19 +59,19 @@ class GrpcUserSessionServiceTest extends AnyWordSpec with Matchers with MockFact
 
     val port = 50052
     val grpcLocalConfiguration = GrpcServer.Configuration[IO](port)
-    def grpcServerFrom(service: GrpcUserSessionService[IO]): IO[Nothing] =
+    def grpcServerFrom(service: GrpcUserSessionsService[IO]): IO[Nothing] =
       grpcLocalConfiguration.flatMap:
         case Valid(c) =>
-          UserSessionServiceFs2Grpc
+          UserSessionsServiceFs2Grpc
             .bindServiceResource[IO](service)
             .flatMap(s => GrpcServer.start[IO](c, Set(s)))
             .evalMap(s => IO(s.start()))
             .useForever
         case Invalid(e) => IO.raiseError(new RuntimeException(e.toString))
-    val managedChannelRes: Resource[IO, UserSessionServiceFs2Grpc[IO, Metadata]] =
+    val managedChannelRes: Resource[IO, UserSessionsServiceFs2Grpc[IO, Metadata]] =
       NettyChannelBuilder
         .forAddress("127.0.0.1", port)
         .usePlaintext()
         .resource[IO]
-        .flatMap(ch => UserSessionServiceFs2Grpc.stubResource[IO](ch))
+        .flatMap(ch => UserSessionsServiceFs2Grpc.stubResource[IO](ch))
   end Utils

@@ -8,15 +8,16 @@ import io.grpc.Metadata
 import io.github.positionpal.location.domain.Session
 import cats.effect.kernel.Async
 import io.github.positionpal.location.presentation.{proto, ProtoUtils}
-import io.github.positionpal.location.application.sessions.UsersSessionService
+import io.github.positionpal.location.application.sessions.UserSessionsService
 
-/** A gRPC service adapter for the [[UsersSessionService]] to expose the session information of users.
+/** A gRPC service adapter for the [[UserSessionsService]] to expose the session information of users.
+  *
   * @param usersSessionService the service to which delegate the session queries logic
   * @tparam F the effect type
   */
-class GrpcUserSessionService[F[_]: Async](
-    usersSessionService: UsersSessionService[F],
-) extends proto.UserSessionServiceFs2Grpc[F, Metadata]:
+class GrpcUserSessionsService[F[_]: Async](
+    usersSessionService: UserSessionsService[F],
+) extends proto.UserSessionsServiceFs2Grpc[F, Metadata]:
 
   override def getCurrentLocation(request: proto.Scope, ctx: Metadata): F[proto.LocationResponse] =
     ofUser(request):

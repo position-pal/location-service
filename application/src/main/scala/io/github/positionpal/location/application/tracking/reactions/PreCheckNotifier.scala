@@ -14,7 +14,7 @@ import io.github.positionpal.entities.NotificationMessage
   */
 object PreCheckNotifier:
 
-  def apply[F[_]: Async](using notifier: NotificationService[F], groups: UserGroupsService[F]): EventReaction[F] =
+  def apply[F[_]: Async](using NotificationService[F], UserGroupsService[F]): EventReaction[F] =
     on[F]: (session, event) =>
       createFrom(event, session) match
         case Some(n) => sendNotification(session.scope, n).as(Left(()))

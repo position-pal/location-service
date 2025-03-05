@@ -20,7 +20,7 @@ import akka.persistence.query.Offset
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.{GroupId, UserId}
 import akka.projection.eventsourced.EventEnvelope
-import io.github.positionpal.location.application.sessions.UserSessionWriter
+import io.github.positionpal.location.application.sessions.UserSessionsWriter
 
 class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWordSpecLike:
   import UserSessionProjectionTest.*
@@ -29,7 +29,7 @@ class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWord
 
   "The UserSessionProjection" should {
     "process events correctly" in {
-      val storageSessionWriter = MockedUserSessionWriter()
+      val storageSessionWriter = MockedUserSessionsWriter()
       val handler = UserSessionProjectionHandler(system, storageSessionWriter)
       val scope = Scope(UserId.create("luke"), GroupId.create("astro"))
       val events = StatefulDrivingEvent(Active, SampledLocation(now, scope, bolognaCampus.location))
@@ -59,7 +59,7 @@ class UserSessionProjectionTest extends ScalaTestWithActorTestKit() with AnyWord
     EventEnvelope(Offset.sequence(seqNo), "persistenceId", seqNo, event, timestamp)
 
 object UserSessionProjectionTest:
-  class MockedUserSessionWriter extends UserSessionWriter[IO, Unit]:
+  class MockedUserSessionsWriter extends UserSessionsWriter[IO, Unit]:
     var sessions: TrieMap[Scope, List[Snapshot]] = TrieMap.empty[Scope, List[Snapshot]]
     override def update(variation: Session.Snapshot): IO[Unit] = IO:
       sessions.updateWith(variation.scope)(_.map(_.appended(variation)).orElse(Some(List(variation))))

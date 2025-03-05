@@ -11,32 +11,33 @@ import io.github.positionpal.location.domain.Session.Snapshot
 import cats.implicits.{catsSyntaxApplicativeId, toFunctorOps, toTraverseOps}
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
 import io.github.positionpal.location.domain.*
-import io.github.positionpal.location.application.sessions.UserSessionStore
+import io.github.positionpal.location.application.sessions.UserSessionsStore
 import cats.effect.kernel.Async
 import io.github.positionpal.location.domain.UserState.*
 import io.github.positionpal.location.commons.CanRaise
 import com.datastax.oss.driver.api.core.cql.Row
 
-/** A Cassandra-based implementation of the [[UserSessionStore]]. */
+/** A Cassandra-based implementation of the [[UserSessionsStore]]. */
 object CassandraUserSessionStore:
 
-  /** Creates a new instance of the Cassandra-based implementation of [[UserSessionStore]].
+  /** Creates a new instance of the Cassandra-based implementation of [[UserSessionsStore]].
+    *
     * @param keyspace the keyspace where the tables are stored. Default is "locationservice".
     * @param actorSystem the actor system to use for the Cassandra session
     * @tparam F the effect type
-    * @return a new instance of the Cassandra-based implementation of [[UserSessionStore]]
+    * @return a new instance of the Cassandra-based implementation of [[UserSessionsStore]]
     */
   def apply[F[_]: Async: CanRaise[StoreError]](
       session: F[CassandraSession],
       keyspace: String = "locationservice",
-  )(using actorSystem: ActorSystem[?]): F[UserSessionStore[F, Unit]] = session.map(Impl(_, keyspace))
+  )(using actorSystem: ActorSystem[?]): F[UserSessionsStore[F, Unit]] = session.map(Impl(_, keyspace))
 
   final case class InvalidSessionVariation(message: String) extends StoreError(message)
 
   private class Impl[F[_]: Async: CanRaise[StoreError]](using actorSystem: ActorSystem[?])(
       session: CassandraSession,
       keyspace: String,
-  ) extends UserSessionStore[F, Unit]
+  ) extends UserSessionsStore[F, Unit]
       with StorageUtils:
     import Queries.*
 

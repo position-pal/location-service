@@ -1,6 +1,5 @@
-package io.github.positionpal.location.application.notifications.impl
+package io.github.positionpal.location.application.notifications
 
-import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.commands.{CoMembersPushNotification, GroupWisePushNotification, PushNotificationCommand}
 import io.github.positionpal.entities.{GroupId, NotificationMessage, UserId}
 
