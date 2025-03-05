@@ -65,19 +65,19 @@ class RealTimeUserTrackerTest
       "no events are received for a while" should:
         "transition to inactive state" in:
           given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
-          val sampledLocation = SampledLocation(now, testScope, cesenaCampus.location)
+          val sampledLocation = SampledLocation(now, testScope, cesenaCampus.position)
           Inactive -- sampledLocation --> Inactive verifying: (_, s) =>
             s.lastSampledLocation shouldBe Some(sampledLocation)
 
     "in inactive or active state" when:
       "receives a new location sample" should:
         "update the last known location" in:
-          (Active | Inactive) -- SampledLocation(now, testScope, cesenaCampus.location) --> Active verifying: (e, s) =>
+          (Active | Inactive) -- SampledLocation(now, testScope, cesenaCampus.position) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing started event" should:
         "transition to routing state" in:
-          val routingStarted = RoutingStarted(now, testScope, bolognaCampus.location, Driving, destination, inTheFuture)
+          val routingStarted = RoutingStarted(now, testScope, bolognaCampus.position, Driving, destination, inTheFuture)
           (Active | Inactive) -- routingStarted --> Routing verifying: (_, s) =>
             s shouldMatch (Some(routingStarted.toMonitorableTracking), Some(routingStarted: SampledLocation))
 
@@ -85,7 +85,7 @@ class RealTimeUserTrackerTest
       "reaching the destination" should:
         "transition to active state" in:
           given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(10, Seconds), Span(1, Seconds))
-          (Routing | Warning) -- SampledLocation(now, testScope, destination.location) --> Active verifying: (e, s) =>
+          (Routing | Warning) -- SampledLocation(now, testScope, destination.position) --> Active verifying: (e, s) =>
             s shouldMatch (None, Some(e))
 
       "receives a routing stopped event" should:
@@ -96,7 +96,7 @@ class RealTimeUserTrackerTest
       "no events are received for a while" should:
         "transition to warning state" in:
           given Eventually.PatienceConfig = Eventually.PatienceConfig(Span(90, Seconds), Span(5, Seconds))
-          val routingStarted = RoutingStarted(now, testScope, bolognaCampus.location, Driving, destination, inTheFuture)
+          val routingStarted = RoutingStarted(now, testScope, bolognaCampus.position, Driving, destination, inTheFuture)
           Inactive -- routingStarted --> Warning verifying: (_, s) =>
             s shouldMatch (
               Some(routingStarted.toMonitorableTracking.addAlert(Alert.Offline)),
@@ -118,13 +118,13 @@ class RealTimeUserTrackerTest
 
     "receives an SOS alert triggered event" should:
       "transition to SOS state" in:
-        val sosAlertTriggered = SOSAlertTriggered(now, testScope, cesenaCampus.location)
+        val sosAlertTriggered = SOSAlertTriggered(now, testScope, cesenaCampus.position)
         (Active | Inactive | Routing | Warning) -- sosAlertTriggered --> SOS verifying: (_, s) =>
           s shouldMatch (Some(sosAlertTriggered.toTracking), Some(sosAlertTriggered: SampledLocation))
 
   extension (s: Session)
     infix def shouldMatch(route: Option[Tracking], lastSample: Option[ClientDrivingEvent]): Unit =
-      val sampledLocation = SampledLocation(now, testScope, cesenaCampus.location)
+      val sampledLocation = SampledLocation(now, testScope, cesenaCampus.position)
       s.tracking shouldBe route
       s.lastSampledLocation shouldBe lastSample
 
@@ -154,5 +154,5 @@ object RealTimeUserTrackerTest:
   val testUser: User = User.create(UserId.create("luke"), "Luke", "Skywalker", "luke.skywalker@gmail.com")
   val testGroup: GroupId = GroupId.create("astro")
   val testScope: Scope = Scope(testUser.id(), testGroup)
-  val defaultContextSample: SampledLocation = SampledLocation(now, testScope, bolognaCampus.location)
+  val defaultContextSample: SampledLocation = SampledLocation(now, testScope, bolognaCampus.position)
   val destination: Address = cesenaCampus

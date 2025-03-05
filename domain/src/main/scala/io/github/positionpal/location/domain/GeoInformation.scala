@@ -9,5 +9,5 @@ type Longitude = Double
 /** A GPS location, identified by a [[Latitude]] and a [[Longitude]]. */
 final case class GPSLocation(latitude: Latitude, longitude: Longitude)
 
-/** An address, identified by a [[name]] and a [[location]]. */
-final case class Address(name: String, location: GPSLocation)
+/** An address, identified by a [[name]] and a [[position]]. */
+final case class Address(name: String, position: GPSLocation)

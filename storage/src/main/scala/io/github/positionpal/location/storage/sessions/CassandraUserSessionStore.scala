@@ -27,14 +27,14 @@ object CassandraUserSessionStore:
     * @tparam F the effect type
     * @return a new instance of the Cassandra-based implementation of [[UserSessionsStore]]
     */
-  def apply[F[_]: Async: CanRaise[StoreError]](
+  def apply[F[_]: {Async, CanRaise[StoreError]}](
       session: F[CassandraSession],
       keyspace: String = "locationservice",
   )(using actorSystem: ActorSystem[?]): F[UserSessionsStore[F, Unit]] = session.map(Impl(_, keyspace))
 
   final case class InvalidSessionVariation(message: String) extends StoreError(message)
 
-  private class Impl[F[_]: Async: CanRaise[StoreError]](using actorSystem: ActorSystem[?])(
+  private class Impl[F[_]: {Async, CanRaise[StoreError]}](using actorSystem: ActorSystem[?])(
       session: CassandraSession,
       keyspace: String,
   ) extends UserSessionsStore[F, Unit]

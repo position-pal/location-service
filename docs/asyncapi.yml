@@ -6,9 +6,9 @@ info:
     API for publishing location-based tracking events in the PositionPal system.
     This WebSocket API allows real-time communication for location tracking, routing, and SOS alerts.
     Clients can send various events and receive user updates from the server.
-#  license:
-#    name: Apache 2.0
-#    url: 'https://www.apache.org/licenses/LICENSE-2.0'
+  #  license:
+  #    name: Apache 2.0
+  #    url: 'https://www.apache.org/licenses/LICENSE-2.0'
   contact:
     email: positionpal@gmail.com
     url: https://position-pal.github.io
@@ -142,9 +142,26 @@ components:
     UserId:
       type: string
       description: Unique identifier for a user.
+      example: 0cf7a1de-d7f7-43c5-8bd2-2b70b5f86d1f
     GroupId:
       type: string
       description: Unique identifier for a group.
+      example: 9a4763d0-b06e-49bc-9e0f-c4a051744e9f
+    Address:
+      type: object
+      required:
+        - name
+        - position
+      properties:
+        name:
+          type: string
+        position:
+          $ref: '#/components/schemas/GPSLocation'
+      example:
+        name: "Via Dell'Università 50, Cesena, Italy"
+        position:
+          latitude: 44.147843982335836
+          longitude: 12.23510261898422
     GPSLocation:
       type: object
       required:
@@ -161,6 +178,9 @@ components:
           format: float
           minimum: -180
           maximum: 180
+      example:
+        latitude: 44.147843982335836
+        longitude: 12.23510261898422
     RoutingMode:
       type: string
       enum:
@@ -221,7 +241,7 @@ components:
             mode:
               $ref: '#/components/schemas/RoutingMode'
             destination:
-              $ref: '#/components/schemas/GPSLocation'
+              $ref: '#/components/schemas/Address'
             expectedArrival:
               type: string
               format: date-time

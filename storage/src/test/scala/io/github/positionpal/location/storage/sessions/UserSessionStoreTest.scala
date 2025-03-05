@@ -30,12 +30,12 @@ class UserSessionStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecL
           .unsafeRunSync() shouldBe None
 
     val scope = Scope(UserId.create("luke"), GroupId.create("astro"))
-    val initialVariation = Snapshot(scope, Active, Some(SampledLocation(now, scope, bolognaCampus.location)))
-    val lastVariation = Snapshot(scope, Active, Some(SampledLocation(now, scope, imolaCampus.location)))
-    val routingVariations = Snapshot(scope, Routing, Some(SampledLocation(now, scope, ravennaCampus.location))) ::
-      Snapshot(scope, Routing, Some(SampledLocation(now.plusSeconds(1), scope, forliCampus.location))) ::
-      Snapshot(scope, SOS, Some(SampledLocation(now.plusSeconds(2), scope, cesenaCampus.location))) ::
-      Snapshot(scope, SOS, Some(SampledLocation(now.plusSeconds(3), scope, riminiCampus.location))) :: Nil
+    val initialVariation = Snapshot(scope, Active, Some(SampledLocation(now, scope, bolognaCampus.position)))
+    val lastVariation = Snapshot(scope, Active, Some(SampledLocation(now, scope, imolaCampus.position)))
+    val routingVariations = Snapshot(scope, Routing, Some(SampledLocation(now, scope, ravennaCampus.position))) ::
+      Snapshot(scope, Routing, Some(SampledLocation(now.plusSeconds(1), scope, forliCampus.position))) ::
+      Snapshot(scope, SOS, Some(SampledLocation(now.plusSeconds(2), scope, cesenaCampus.position))) ::
+      Snapshot(scope, SOS, Some(SampledLocation(now.plusSeconds(3), scope, riminiCampus.position))) :: Nil
 
     "receiving a variation of an active user" should:
       "record their state and last known location" in:

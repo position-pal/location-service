@@ -14,12 +14,12 @@ import com.datastax.oss.driver.api.core.cql.SimpleStatement
 
 object CassandraUserGroupsStore:
 
-  def apply[F[_]: Async: CanRaise[StoreError]](
+  def apply[F[_]: {Async, CanRaise[StoreError]}](
       session: F[CassandraSession],
       keyspace: String = "locationservice",
   )(using actorSystem: ActorSystem[?]): F[UserGroupsStore[F, Unit]] = session.map(Impl(_, keyspace))
 
-  private class Impl[F[_]: Async: CanRaise[StoreError]](using actorSystem: ActorSystem[?])(
+  private class Impl[F[_]: {Async, CanRaise[StoreError]}](using actorSystem: ActorSystem[?])(
       session: CassandraSession,
       keyspace: String,
   ) extends UserGroupsStore[F, Unit]
