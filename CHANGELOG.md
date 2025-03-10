@@ -1,3 +1,21 @@
+## [5.0.2](https://github.com/position-pal/location-service/compare/5.0.1...5.0.2) (2025-03-10)
+
+### Dependency updates
+
+* **deps:** update plugin scala-extras to v3.6.0 ([#256](https://github.com/position-pal/location-service/issues/256)) ([57734f9](https://github.com/position-pal/location-service/commit/57734f99ec347eb5a3c8f754ee32c280bdd22627))
+* **deps:** update rabbitmq:4-management docker digest to 31e2923 ([#254](https://github.com/position-pal/location-service/issues/254)) ([bf15f72](https://github.com/position-pal/location-service/commit/bf15f72d88a34a7ac298d7fa3b10c0aa27930e3b))
+* **deps:** update rabbitmq:4-management docker digest to 3c0bffc ([#253](https://github.com/position-pal/location-service/issues/253)) ([44889f5](https://github.com/position-pal/location-service/commit/44889f5f5b19966c7f711412351fa2e8597a2479))
+
+### Documentation
+
+* **license:** create license ([74674d0](https://github.com/position-pal/location-service/commit/74674d089eaa8ff7de1eb762f6269ced37ec42dd))
+
+### Build and continuous integration
+
+* **deps:** update asyncapi/cli action to v2.16.6 ([#257](https://github.com/position-pal/location-service/issues/257)) ([26b9b9f](https://github.com/position-pal/location-service/commit/26b9b9f4f25c678d3f4c01d02684be3d07d0b02e))
+* **deps:** update asyncapi/cli action to v2.16.7 ([#258](https://github.com/position-pal/location-service/issues/258)) ([8cccc8e](https://github.com/position-pal/location-service/commit/8cccc8eddf54b84677337ca03dd72defc933f615))
+* **deps:** update asyncapi/cli action to v2.16.8 ([#259](https://github.com/position-pal/location-service/issues/259)) ([8080c71](https://github.com/position-pal/location-service/commit/8080c71cc8fd69840be7b4ec0e7271adcfba72ba))
+
 ## [5.0.1](https://github.com/position-pal/location-service/compare/5.0.0...5.0.1) (2025-03-05)
 
 ### Bug Fixes
