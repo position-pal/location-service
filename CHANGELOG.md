@@ -1,3 +1,26 @@
+## [5.0.3](https://github.com/position-pal/location-service/compare/5.0.2...5.0.3) (2025-03-11)
+
+### Dependency updates
+
+* **core-deps:** update dependency org.scala-lang:scala3-library_3 to v3.6.4 ([#255](https://github.com/position-pal/location-service/issues/255)) ([cbc1d0f](https://github.com/position-pal/location-service/commit/cbc1d0f7c50038f069250d638a547dc9846384bb))
+
+### Tests
+
+* increase timeout in tests ([49c9a47](https://github.com/position-pal/location-service/commit/49c9a47dd402860ae8ba82faefdf47dda36b9053))
+* **maps:** use MAPBOX_TOKEN if present, otherwise mock the response ([4601d49](https://github.com/position-pal/location-service/commit/4601d49e3d13fb573ed12b5532d82546e3ae3429))
+
+### Build and continuous integration
+
+* align github packages envs with corresponding properties and use default GITHUB_TOKEN and github.actor in CI ([3bbfdf3](https://github.com/position-pal/location-service/commit/3bbfdf360a5afbb9f97bbfc93f2b1b9ef9ea8f65))
+
+### General maintenance
+
+* **readme:** specify for test puposes no need for envs ([1000754](https://github.com/position-pal/location-service/commit/100075425653236982c16a05696e06f6701c1c3a))
+
+### Refactoring
+
+* **application:** improve isNear variable name ([9abba82](https://github.com/position-pal/location-service/commit/9abba82bf175d985a563ca319d6896828f5ef9ee))
+
 ## [5.0.2](https://github.com/position-pal/location-service/compare/5.0.1...5.0.2) (2025-03-10)
 
 ### Dependency updates
