@@ -20,9 +20,9 @@ object ArrivalCheck:
             config <- ReactionsConfiguration.get
             tracking <- session.tracking.asMonitorable.get.pure[F]
             distance <- summon[MapsService[F]].distance(tracking.mode)(e.position, tracking.destination.position)
-            isWithinProximity = distance.toMeters.value <= config.proximityToleranceMeters.meters.value
-            _ <- if isWithinProximity then sendNotification(session.scope, successMessage) else Async[F].unit
-          yield if isWithinProximity then Left(RoutingStopped(e.timestamp, e.user, e.group)) else Right(Continue)
+            isNear = distance.toMeters.value <= config.proximityToleranceMeters.meters.value
+            _ <- if isNear then sendNotification(session.scope, successMessage) else Async[F].unit
+          yield if isNear then Left(RoutingStopped(e.timestamp, e.scope)) else Right(Continue)
         case _ => Right(Continue).pure[F]
 
   private val successMessage = notification(" arrived!", " has reached their destination on time.")
