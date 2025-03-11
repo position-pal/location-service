@@ -2,6 +2,33 @@
 
 PositionPal service for location tracking.
 
+## Development
+
+> [!WARNING]
+> This repository depends on the [`shared-kernel`](https://github.com/orgs/position-pal/packages?repo_name=shared-kernel) package published on GitHub Packages, which requires authentication to be successfully resolved.
+> In CI environments, credentials are automatically inherited from the context of the GitHub Actions workflow.
+> However, to correctly build and run the project locally, you need to make sure to have configured your GitHub username and a valid personal access token either in the `gradle.properties` file or as environment variables:
+>
+> **Credential setup**:
+>
+> - **`gradle.properties`**:
+>   Add your credentials to the `gradle.properties` file located in `GRADLE_USER_HOME` (`~/.gradle` on Unix and `C:\Users\YourUser\.gradle` on Windows) as follows:
+>     ```properties
+>     gpr.user=<USERNAME>
+>     gpr.key=<TOKEN>
+>     ```
+>   For more information about `gradle.properties` file refer to the [Gradle documentation](https://docs.gradle.org/current/userguide/build_environment.html).
+>
+> - **Environment variables**:
+>   Setup the following environment variables:
+>     ```scala
+>     export GPR_USER=<USERNAME>
+>     export GPR_KEY=<TOKEN>
+>     ```
+> For more information about how to create a personal access token, refer to the [GitHub documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+>
+> In case you encounter any problem, please open a new issue in the repository.
+
 ## Pre-requisites
 
 For the correct operation of the service, it is necessary the following environment variables are set and available at startup: 
