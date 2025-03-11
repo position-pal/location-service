@@ -44,7 +44,7 @@ end HelloWorld
 import dev.hnaderi.namedcodec.{of, CirceAdapter}
 import io.circe.generic.auto.*
 import lepus.circe.given
-import lepus.std.{ChannelCodec, EventChannel, TopicDefinition, TopicNameEncoder, TopicSelector}
+import lepus.std.*
 
 object PubSub extends IOApp.Simple:
 
@@ -90,8 +90,6 @@ object PubSub extends IOApp.Simple:
     fs2.Stream(publisher(con), consumer1(con), consumer2(con)).parJoinUnbounded.interruptAfter(15.seconds).compile.drain
 
 import cats.effect.{Async, ExitCode}
-import lepus.client.{json, MessageCodec}
-import lepus.std.{WorkPoolChannel, WorkPoolDefinition}
 
 object WorkPool:
 
