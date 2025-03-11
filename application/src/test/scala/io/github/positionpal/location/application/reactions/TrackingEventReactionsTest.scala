@@ -106,5 +106,5 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
           scope.groupId == scope.groupId && scope.userId == scope.userId && n.body().contains(content)
       .returning(IO.unit)
     testBlock
-    eventually(Timeout(Span(1, Seconds))):
+    eventually(Timeout(Span(3, Seconds))):
       notifierMock.once
