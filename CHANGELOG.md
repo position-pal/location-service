@@ -1,3 +1,9 @@
+## [5.1.0](https://github.com/position-pal/location-service/compare/5.0.3...5.1.0) (2025-03-11)
+
+### Dependency updates
+
+* **api-deps:** update kernel to v1.0.1 ([#260](https://github.com/position-pal/location-service/issues/260)) ([cae34fe](https://github.com/position-pal/location-service/commit/cae34fe231d039304bf7596e1f53ca03164c6c41))
+
 ## [5.0.3](https://github.com/position-pal/location-service/compare/5.0.2...5.0.3) (2025-03-11)
 
 ### Dependency updates
