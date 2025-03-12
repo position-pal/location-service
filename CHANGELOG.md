@@ -1,3 +1,13 @@
+## [5.2.0](https://github.com/position-pal/location-service/compare/5.1.0...5.2.0) (2025-03-12)
+
+### Features
+
+* **storage:** add support to store route info ([a2fb52a](https://github.com/position-pal/location-service/commit/a2fb52a02bdcf1f97f8f6050ef7fc7e33eaae5c8))
+
+### General maintenance
+
+* **readme:** fix wrong documentation link ([8eecfa0](https://github.com/position-pal/location-service/commit/8eecfa01274721725fd8b7adba6f61218231c162))
+
 ## [5.1.0](https://github.com/position-pal/location-service/compare/5.0.3...5.1.0) (2025-03-11)
 
 ### Dependency updates
