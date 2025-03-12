@@ -20,6 +20,17 @@ CREATE TABLE IF NOT EXISTS ScopedUserInfo (
     PRIMARY KEY (GroupId, UserId)
 );
 
+CREATE TABLE IF NOT EXISTS ScopedUserRoutesInfo (
+    GroupId TEXT,
+    UserId TEXT,
+    Mode TEXT,
+    ETA TIMESTAMP,
+    Destination TEXT,
+    Latitude DOUBLE, -- Destination Latitude
+    Longitude DOUBLE, -- Destination Longitude
+    PRIMARY KEY (GroupId, UserId)
+);
+
 CREATE TABLE IF NOT EXISTS ScopedUserRoutes (
     GroupId TEXT,
     UserId TEXT,

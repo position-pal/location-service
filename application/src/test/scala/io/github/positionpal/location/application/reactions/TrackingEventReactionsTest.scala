@@ -4,21 +4,18 @@ import eu.monniot.scala3mock.scalatest.MockFactory
 import io.github.positionpal.location.domain.Distance.*
 import io.github.positionpal.location.application.notifications.NotificationService
 import io.github.positionpal.location.domain.TimeUtils.*
+import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
 import cats.effect.unsafe.implicits.global
 import io.github.positionpal.location.application.tracking.reactions.*
 import io.github.positionpal.location.application.tracking.MapsService
+import org.scalatest.matchers.should.Matchers
 import io.github.positionpal.location.domain.GeoUtils.*
+import org.scalatest.funspec.AnyFunSpec
 import io.github.positionpal.location.domain.RoutingMode.*
 import cats.effect.IO
 import io.github.positionpal.location.application.groups.UserGroupsService
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import io.github.positionpal.location.application.tracking.reactions.TrackingEventReaction.*
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.{Seconds, Span}
 import io.github.positionpal.location.domain.*
 import io.github.positionpal.entities.{GroupId, User, UserId}
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.concurrent.Eventually.eventually
 
 class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFactory:
 
@@ -106,5 +103,5 @@ class TrackingEventReactionsTest extends AnyFunSpec with Matchers with MockFacto
           scope.groupId == scope.groupId && scope.userId == scope.userId && n.body().contains(content)
       .returning(IO.unit)
     testBlock
-    eventually(Timeout(Span(3, Seconds))):
-      notifierMock.once
+    Thread.sleep(3_000) // scala3mock lib doesn't work with `eventually` from ScalaTest :(
+    notifierMock.once

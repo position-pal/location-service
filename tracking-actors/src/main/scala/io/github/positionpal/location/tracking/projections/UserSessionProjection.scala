@@ -71,7 +71,14 @@ class UserSessionProjectionHandler[T](
       case RealTimeUserTracker.StatefulDrivingEvent(state, event) =>
         val operation = event match
           case e: SampledLocation => storage.update(Snapshot(e.scope, state, Some(e)))
-          case e: RoutingStarted => storage.update(Snapshot(e.scope, state, Some(e)))
           case e: SOSAlertTriggered => storage.update(Snapshot(e.scope, state, Some(e)))
+          case e: RoutingStarted =>
+            storage.addRoute(e.scope, e.mode, e.destination, e.expectedArrival) >>
+              storage.update(Snapshot(e.scope, state, Some(e)))
+          case e: (SOSAlertStopped | RoutingStopped) =>
+            storage.removeRoute(e.scope) >> storage.update(Snapshot(e.scope, state, None))
           case e @ _ => storage.update(Snapshot(e.scope, state, None))
-        operation.map(_ => Done).unsafeToFuture()
+        operation
+          .handleErrorWith(err => IO(system.log.error("Persistent projection fatal error: {}", err)))
+          .map(_ => Done)
+          .unsafeToFuture()

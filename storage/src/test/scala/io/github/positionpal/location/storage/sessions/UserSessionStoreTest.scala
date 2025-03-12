@@ -3,6 +3,7 @@ package io.github.positionpal.location.storage.sessions
 import io.github.positionpal.location.storage.CassandraConnectionFactory
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import org.scalatest.matchers.should.Matchers
+import io.github.positionpal.location.domain.RoutingMode.Walking
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class UserSessionStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecLike with Matchers:
@@ -32,9 +33,9 @@ class UserSessionStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecL
     val scope = Scope(UserId.create("luke"), GroupId.create("astro"))
     val initialVariation = Snapshot(scope, Active, Some(SampledLocation(now, scope, bolognaCampus.position)))
     val lastVariation = Snapshot(scope, Active, Some(SampledLocation(now, scope, imolaCampus.position)))
-    val routingVariations = Snapshot(scope, Routing, Some(SampledLocation(now, scope, ravennaCampus.position))) ::
-      Snapshot(scope, Routing, Some(SampledLocation(now.plusSeconds(1), scope, forliCampus.position))) ::
-      Snapshot(scope, SOS, Some(SampledLocation(now.plusSeconds(2), scope, cesenaCampus.position))) ::
+    val routeVariations = Snapshot(scope, Routing, Some(SampledLocation(now, scope, ravennaCampus.position))) ::
+      Snapshot(scope, Routing, Some(SampledLocation(now.plusSeconds(1), scope, forliCampus.position))) :: Nil
+    val sosVariations = Snapshot(scope, SOS, Some(SampledLocation(now.plusSeconds(2), scope, cesenaCampus.position))) ::
       Snapshot(scope, SOS, Some(SampledLocation(now.plusSeconds(3), scope, riminiCampus.position))) :: Nil
 
     "receiving a variation of an active user" should:
@@ -56,11 +57,21 @@ class UserSessionStoreTest extends ScalaTestWithActorTestKit() with AnyWordSpecL
         updateAndGet(neverActiveScope, variation).unsafeRunSync().map(_.toSnapshot) shouldBe
           Some(Snapshot(neverActiveScope, Inactive, None))
 
-    "receiving variations of a routing or SOS user" should:
+    "receiving variations and of a routing user" should:
+      "record all variations and the route info" in:
+        storeResource.use(store => store.addRoute(scope, Walking, riminiCampus, inTheFuture)).unsafeRunSync()
+        val result = routeVariations.map(updateAndGet(scope, _).unsafeRunSync()).last
+        result.map(_.toSnapshot) shouldBe Some(routeVariations.last)
+        result.flatMap(_.tracking) shouldBe Some:
+          Tracking.withMonitoring(Walking, riminiCampus, inTheFuture, routeVariations.map(_.lastSampledLocation.value))
+
+    "receiving variations of an SOS user" should:
       "record all variations" in:
-        val result = routingVariations.map(updateAndGet(scope, _).unsafeRunSync()).last
-        result.map(_.toSnapshot) shouldBe Some(routingVariations.last)
-        result.flatMap(_.tracking) shouldBe Some(Tracking(routingVariations.map(_.lastSampledLocation.value)))
+        storeResource.use(s => s.removeRoute(scope)).unsafeRunSync()
+        val result = sosVariations.map(updateAndGet(scope, _).unsafeRunSync()).last
+        result.map(_.toSnapshot) shouldBe Some(sosVariations.last)
+        result.flatMap(_.tracking) shouldBe Some:
+          Tracking(sosVariations.map(_.lastSampledLocation.value))
 
   private def updateAndGet(scope: Scope, variation: Session.Snapshot): IO[Option[Session]] =
     storeResource.use: store =>

@@ -1,5 +1,7 @@
 package io.github.positionpal.location.tracking.projections
 
+import java.time.Instant
+
 import scala.collection.concurrent.TrieMap
 
 import akka.stream.scaladsl.Source
@@ -64,3 +66,6 @@ object UserSessionProjectionTest:
     override def update(variation: Session.Snapshot): IO[Unit] = IO:
       sessions.updateWith(variation.scope)(_.map(_.appended(variation)).orElse(Some(List(variation))))
     *> IO.unit
+    override def addRoute(scope: Scope, mode: RoutingMode, destination: Address, expectedArrival: Instant): IO[Unit] =
+      IO.unit
+    override def removeRoute(scope: Scope): IO[Unit] = IO.unit

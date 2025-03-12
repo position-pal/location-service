@@ -47,33 +47,52 @@ object CassandraUserSessionStore:
       for
         userInfoRow <- session.selectOne(getUserInfoQuery(scope))
         userInfo <- userInfoRow.traverse(row => (row.userState, row.sampledLocationOf(scope)).pure[Future])
+        trackingInfo <- session.selectOne(getTrackingInfoQuery(scope))
         routes <- session
           .select(getTrackingQuery(scope))
           .runFold(List.empty[(Instant, GPSLocation)])((acc, row) => (row.timestamp, row.location) :: acc)
-        tracking = Option.when(routes.nonEmpty)(Tracking(routes.reverse.map(SampledLocation(_, scope, _))))
+        tracking = Option.when(routes.nonEmpty):
+          val route = routes.reverse.map(SampledLocation(_, scope, _))
+          trackingInfo
+            .map(info => Tracking.withMonitoring(info.mode, info.address, info.eta, route))
+            .getOrElse(Tracking(route))
       yield userInfo.map((state, location) => Session.from(scope, state, location, tracking))
 
     override def update(variation: Session.Snapshot): F[Unit] = executeWithErrorHandling:
       variation match
-        case Snapshot(uid, state @ (Active | Routing | SOS), Some(e)) =>
+        case Snapshot(scope, state @ (Active | Routing | SOS), Some(e)) =>
           for
-            _ <- session.executeWrite(insertUserInfoQuery(uid, state, e.position, e.timestamp))
+            _ <- session.executeWrite(insertUserInfoQuery(scope, state, e.position, e.timestamp))
             _ <- state match
-              case Active => session.executeWrite(deleteUserRoutesQuery(uid))
-              case _ => session.executeWrite(updateUserRoutesQuery(uid, e.position, e.timestamp))
+              case Routing | SOS => session.executeWrite(updateUserRoutesQuery(scope, e.position, e.timestamp))
+              case _ => Future.unit
           yield ()
         case Snapshot(uid, state @ (Active | Inactive | Warning | SOS), None) =>
           session.executeWrite(updateUserInfoQuery(uid, state)).void
         case _ => Future.failed(InvalidSessionVariation(s"The given variation $variation is invalid"))
 
+    override def addRoute(scope: Scope, mode: RoutingMode, destination: Address, expectedArrival: Instant): F[Unit] =
+      executeWithErrorHandling:
+        session.executeWrite(addUserRoutesInfoQuery(scope, destination, expectedArrival, mode)).void
+
+    override def removeRoute(scope: Scope): F[Unit] = executeWithErrorHandling:
+      for
+        _ <- session.executeWrite(deleteUserRoutesQuery(scope))
+        _ <- session.executeWrite(deleteUserRoutesInfoQuery(scope))
+      yield ()
+
     private object Tables:
       val userInfo = "ScopedUserInfo"
       val userRoutes = "ScopedUserRoutes"
+      val userRoutesInfo = "ScopedUserRoutesInfo"
 
       extension (r: Row)
         def timestamp = r.getInstant("Timestamp")
+        def eta = r.getInstant("ETA")
         def userState = UserState.valueOf(r.getString("Status"))
         def location = GPSLocation(r.getDouble("Latitude"), r.getDouble("Longitude"))
+        def mode = RoutingMode.valueOf(r.getString("Mode"))
+        def address = Address(r.getString("Destination"), r.location)
         def sampledLocationOf(scope: Scope) =
           for
             timestamp <- Option(r.getInstant("LastUpdated"))
@@ -88,6 +107,12 @@ object CassandraUserSessionStore:
 
       def getUserInfoQuery(scope: Scope) = cql(
         s"SELECT Status, Latitude, Longitude, LastUpdated FROM $keyspace.$userInfo WHERE GroupId = ? AND UserId = ?",
+        scope.groupId.value(),
+        scope.userId.value(),
+      )
+
+      def getTrackingInfoQuery(scope: Scope) = cql(
+        s"SELECT Mode, ETA, Destination, Latitude, Longitude FROM $keyspace.$userRoutesInfo WHERE GroupId = ? AND UserId = ?",
         scope.groupId.value(),
         scope.userId.value(),
       )
@@ -119,6 +144,23 @@ object CassandraUserSessionStore:
         s"DELETE FROM $keyspace.$userRoutes WHERE GroupId = ? AND UserId = ?",
         scope.groupId.value(),
         scope.userId.value(),
+      )
+
+      def deleteUserRoutesInfoQuery(scope: Scope) = cql(
+        s"DELETE FROM $keyspace.$userRoutesInfo WHERE GroupId = ? AND UserId = ?",
+        scope.groupId.value(),
+        scope.userId.value(),
+      )
+
+      def addUserRoutesInfoQuery(scope: Scope, destination: Address, expectedArrival: Instant, mode: RoutingMode) = cql(
+        s"INSERT INTO $keyspace.$userRoutesInfo(GroupId, UserId, Mode, ETA, Destination, Latitude, Longitude) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        scope.groupId.value(),
+        scope.userId.value(),
+        mode.toString,
+        expectedArrival,
+        destination.name,
+        destination.position.latitude,
+        destination.position.longitude,
       )
 
       def updateUserRoutesQuery(scope: Scope, position: GPSLocation, timestamp: Instant) = cql(
