@@ -37,7 +37,6 @@ object Launcher extends IOApp.Simple:
 
   private val app: Resource[IO, Unit] = for
     actorSystem <- configureActorSystem()
-    _ = println("---actor system" + actorSystem + "----")
     given ActorSystem[?] = actorSystem
     mapsService <- configureMapsService()
     notificationService <- Resource.eval(RabbitMQNotificationsPublisher[IO]())
