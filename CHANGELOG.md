@@ -1,3 +1,22 @@
+## [5.3.0](https://github.com/position-pal/location-service/compare/5.2.0...5.3.0) (2025-03-17)
+
+### Dependency updates
+
+* **api-deps:** update kernel to v1.0.2 ([#262](https://github.com/position-pal/location-service/issues/262)) ([87e204e](https://github.com/position-pal/location-service/commit/87e204ec22033968e406008fb8d8a3ae9ff79e83))
+* **deps:** update borer to v1.16.0 ([#268](https://github.com/position-pal/location-service/issues/268)) ([829198c](https://github.com/position-pal/location-service/commit/829198c080d64160dd5cf7a4d79e9046740e045e))
+* **deps:** update circe to v0.14.12 ([#269](https://github.com/position-pal/location-service/issues/269)) ([c3c84cd](https://github.com/position-pal/location-service/commit/c3c84cda877a71db147590562eb28d288cd235e6))
+* **deps:** update dependency com.google.protobuf:protoc to v4.30.1 ([#263](https://github.com/position-pal/location-service/issues/263)) ([454cddc](https://github.com/position-pal/location-service/commit/454cddc6de89977d2239b67a27d19b55a214fd6c))
+* **deps:** update eclipse-temurin:21 docker digest to 6634936 ([#261](https://github.com/position-pal/location-service/issues/261)) ([af66ae7](https://github.com/position-pal/location-service/commit/af66ae74cbef8f11780f84d4e7f349abbe5b13d4))
+* **deps:** update junit5 monorepo to v1.12.1 ([#267](https://github.com/position-pal/location-service/issues/267)) ([12cc008](https://github.com/position-pal/location-service/commit/12cc008eb12f96baa0f774d86a6312809138ac23))
+* **deps:** update plugin scala-extras to v3.7.0 ([#266](https://github.com/position-pal/location-service/issues/266)) ([aad619b](https://github.com/position-pal/location-service/commit/aad619ba3abe48ee62519ed7f9a02c3b7c236d7b))
+
+### Build and continuous integration
+
+* **deps:** update actions/setup-node action to v4.3.0 ([#270](https://github.com/position-pal/location-service/issues/270)) ([80e0b9c](https://github.com/position-pal/location-service/commit/80e0b9ce2d5e480e53cddfdf135345a0c946db1a))
+* **deps:** update asyncapi/cli action to v2.16.9 ([#264](https://github.com/position-pal/location-service/issues/264)) ([73a4e3e](https://github.com/position-pal/location-service/commit/73a4e3effc7f97db82c6bc071d973e9436ea96f7))
+* **deps:** update docker/login-action digest to 74a5d14 ([#265](https://github.com/position-pal/location-service/issues/265)) ([ce1544c](https://github.com/position-pal/location-service/commit/ce1544cc2675421db7194b448e1851c9c9f1010d))
+* download artifacts with actions/download-artifact and do not run release on forks ([#271](https://github.com/position-pal/location-service/issues/271)) ([340de88](https://github.com/position-pal/location-service/commit/340de8830c29641f56335e14c9bd1e40e0b3d229))
+
 ## [5.2.0](https://github.com/position-pal/location-service/compare/5.1.0...5.2.0) (2025-03-12)
 
 ### Features
