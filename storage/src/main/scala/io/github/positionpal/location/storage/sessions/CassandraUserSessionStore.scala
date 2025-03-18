@@ -60,11 +60,12 @@ object CassandraUserSessionStore:
 
     override def update(variation: Session.Snapshot): F[Unit] = executeWithErrorHandling:
       variation match
-        case Snapshot(scope, state @ (Active | Routing | SOS), Some(e)) =>
+        case Snapshot(scope, state @ (Active | Routing | SOS | Warning), Some(e)) =>
           for
             _ <- session.executeWrite(insertUserInfoQuery(scope, state, e.position, e.timestamp))
             _ <- state match
-              case Routing | SOS => session.executeWrite(updateUserRoutesQuery(scope, e.position, e.timestamp))
+              case Routing | SOS | Warning =>
+                session.executeWrite(updateUserRoutesQuery(scope, e.position, e.timestamp))
               case _ => Future.unit
           yield ()
         case Snapshot(uid, state @ (Active | Inactive | Warning | SOS), None) =>
