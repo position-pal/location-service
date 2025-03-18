@@ -1,3 +1,14 @@
+## [5.3.1](https://github.com/position-pal/location-service/compare/5.3.0...5.3.1) (2025-03-18)
+
+### Bug Fixes
+
+* **storage:** allow to persist a snapshot in warning mode with a location update ([dd5990e](https://github.com/position-pal/location-service/commit/dd5990e49b9d69507fa9f79e0c66882a5cd8ec91))
+
+### Build and continuous integration
+
+* **deps:** pin actions/download-artifact action to cc20338 ([#272](https://github.com/position-pal/location-service/issues/272)) ([cc0d3a1](https://github.com/position-pal/location-service/commit/cc0d3a101fa274ccf6fdd964678f5ac4ec67e2bd))
+* **deps:** update asyncapi/cli action to v2.16.10 ([#273](https://github.com/position-pal/location-service/issues/273)) ([0d0c7be](https://github.com/position-pal/location-service/commit/0d0c7be18a65bd6a3b19c79b6fcc56e134326bf3))
+
 ## [5.3.0](https://github.com/position-pal/location-service/compare/5.2.0...5.3.0) (2025-03-17)
 
 ### Dependency updates
