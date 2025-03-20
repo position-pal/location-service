@@ -1,3 +1,17 @@
+## [5.4.0](https://github.com/position-pal/location-service/compare/5.3.1...5.4.0) (2025-03-20)
+
+### Dependency updates
+
+* **api-deps:** update kernel to v1.0.3 ([#279](https://github.com/position-pal/location-service/issues/279)) ([c1ade35](https://github.com/position-pal/location-service/commit/c1ade353fb7fe409e76f512f5883a6d5a8073be9))
+* **deps:** update dependency ch.qos.logback:logback-classic to v1.5.18 ([#274](https://github.com/position-pal/location-service/issues/274)) ([3744c5b](https://github.com/position-pal/location-service/commit/3744c5bf90858b26a394b773f52c193ffe2888b9))
+
+### Build and continuous integration
+
+* **deps:** update actions/download-artifact digest to 95815c3 ([#277](https://github.com/position-pal/location-service/issues/277)) ([7df6ac5](https://github.com/position-pal/location-service/commit/7df6ac53d665932f2c9d16f964d97e840b4eab00))
+* **deps:** update actions/download-artifact digest to b14cf4c ([#275](https://github.com/position-pal/location-service/issues/275)) ([2d540b2](https://github.com/position-pal/location-service/commit/2d540b2a0c5417114023ece1c3991b55256458be))
+* **deps:** update actions/download-artifact digest to cc20338 ([#276](https://github.com/position-pal/location-service/issues/276)) ([9a2d000](https://github.com/position-pal/location-service/commit/9a2d00022da24ab3aceb28a2964387aa518d770b))
+* **deps:** update actions/upload-artifact action to v4.6.2 ([#278](https://github.com/position-pal/location-service/issues/278)) ([fd6571f](https://github.com/position-pal/location-service/commit/fd6571f8d73dfab049173f583e668e4da1a0797f))
+
 ## [5.3.1](https://github.com/position-pal/location-service/compare/5.3.0...5.3.1) (2025-03-18)
 
 ### Bug Fixes
