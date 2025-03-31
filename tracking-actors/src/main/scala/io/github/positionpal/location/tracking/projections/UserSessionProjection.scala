@@ -1,7 +1,9 @@
 package io.github.positionpal.location.tracking.projections
 
 import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
 
+import akka.projection.HandlerRecoveryStrategy.retryAndSkip
 import akka.actor.typed.ActorSystem
 import io.github.positionpal.location.tracking.actors.RealTimeUserTracker
 import akka.projection.{ProjectionBehavior, ProjectionId}
@@ -47,11 +49,13 @@ object UserSessionProjection:
       readJournalPluginId = CassandraReadJournal.Identifier,
       tag = tag,
     )
-    CassandraProjection.atLeastOnce(
-      projectionId = ProjectionId(getClass.getSimpleName, tag),
-      sourceProvider,
-      handler = () => UserSessionProjectionHandler(system, storage),
-    )
+    CassandraProjection
+      .atLeastOnce(
+        projectionId = ProjectionId(getClass.getSimpleName, tag),
+        sourceProvider,
+        handler = () => UserSessionProjectionHandler(system, storage),
+      )
+      .withRecoveryStrategy(retryAndSkip(retries = 1, delay = 1.second))
 
 /** The handler that processes the events emitted by the [[RealTimeUserTracker]] actor
   * updating the user's session state with the provided [[storage]].
