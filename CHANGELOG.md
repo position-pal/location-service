@@ -1,3 +1,22 @@
+## [5.5.0](https://github.com/position-pal/location-service/compare/5.4.0...5.5.0) (2025-03-31)
+
+### Features
+
+* **projection:** add recovery strategy to handle failing events ([8a596f7](https://github.com/position-pal/location-service/commit/8a596f754af46b670ab0ae5ffc4ad1dd78eb1572))
+
+### Dependency updates
+
+* **deps:** update dependency com.google.protobuf:protoc to v4.30.2 ([#286](https://github.com/position-pal/location-service/issues/286)) ([cc2c299](https://github.com/position-pal/location-service/commit/cc2c299f85340215086cbc6df906cfe1f1132845))
+* **deps:** update fs2 to v3.12.0 ([#283](https://github.com/position-pal/location-service/issues/283)) ([57a7805](https://github.com/position-pal/location-service/commit/57a78059139eb9f55da42df38224e3d4ea2bf9f6))
+* **deps:** update fs2.grpc to v2.7.22 ([#282](https://github.com/position-pal/location-service/issues/282)) ([1545a35](https://github.com/position-pal/location-service/commit/1545a35c1ef99f0349e04a526c8373070cb59e72))
+* **deps:** update fs2.grpc to v2.8.0 ([#285](https://github.com/position-pal/location-service/issues/285)) ([3aa1f7f](https://github.com/position-pal/location-service/commit/3aa1f7f578801c5d53ab004cba9a59b2be46681a))
+* **deps:** update lepus to v0.5.5 ([#284](https://github.com/position-pal/location-service/issues/284)) ([bff0f1d](https://github.com/position-pal/location-service/commit/bff0f1dd1fcba1ef578f2078a56d5e7467c9d7e6))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.22 ([#281](https://github.com/position-pal/location-service/issues/281)) ([b4ae643](https://github.com/position-pal/location-service/commit/b4ae643686dac95336e8cff5839810bb81e87bd1))
+
+### Build and continuous integration
+
+* **deps:** update asyncapi/cli action to v2.17.0 ([#280](https://github.com/position-pal/location-service/issues/280)) ([24ec064](https://github.com/position-pal/location-service/commit/24ec064c1b7024a1b2cd001e320c26ee60c9268f))
+
 ## [5.4.0](https://github.com/position-pal/location-service/compare/5.3.1...5.4.0) (2025-03-20)
 
 ### Dependency updates
