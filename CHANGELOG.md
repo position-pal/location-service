@@ -1,3 +1,20 @@
+## [5.5.1](https://github.com/position-pal/location-service/compare/5.5.0...5.5.1) (2025-04-02)
+
+### Dependency updates
+
+* **deps:** update plugin protobuf to v0.9.5 ([#288](https://github.com/position-pal/location-service/issues/288)) ([b427b5f](https://github.com/position-pal/location-service/commit/b427b5fb55e7ac50ef6a879038929bd8a37be476))
+* **deps:** update rabbitmq:4-management docker digest to 2a2f656 ([#287](https://github.com/position-pal/location-service/issues/287)) ([bbde61a](https://github.com/position-pal/location-service/commit/bbde61a78c42d4ade16db22bcd638285af5655a9))
+* **deps:** update rabbitmq:4-management docker digest to 4f907f0 ([#291](https://github.com/position-pal/location-service/issues/291)) ([5cfb2fd](https://github.com/position-pal/location-service/commit/5cfb2fd224106b56a84b36224103a59ecac5ba1d))
+* **deps:** update rabbitmq:4-management docker digest to d888247 ([#289](https://github.com/position-pal/location-service/issues/289)) ([6102d12](https://github.com/position-pal/location-service/commit/6102d126509078ee93dd77aaf4f13b1a4ac3fff6))
+
+### Bug Fixes
+
+* increase cassandra request timeout ([7ecee8c](https://github.com/position-pal/location-service/commit/7ecee8cf8e1ade7cb547ac46f1d65a4409e9d364))
+
+### Build and continuous integration
+
+* **deps:** update asyncapi/cli action to v3 ([#290](https://github.com/position-pal/location-service/issues/290)) ([993e6f9](https://github.com/position-pal/location-service/commit/993e6f9d1c56c0d94c60c0a247043a0ad081fc02))
+
 ## [5.5.0](https://github.com/position-pal/location-service/compare/5.4.0...5.5.0) (2025-03-31)
 
 ### Features
