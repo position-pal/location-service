@@ -104,7 +104,7 @@ scala-testing = [
 ]
 
 [plugins]
-git-sensitive-semantic-versioning = "org.danilopianini.git-sensitive-semantic-versioning:4.0.2"
+git-sensitive-semantic-versioning = "org.danilopianini.git-sensitive-semantic-versioning:5.1.1"
 gradle-docker-compose = "com.avast.gradle.docker-compose:0.17.12"
 protobuf = "com.google.protobuf:0.9.5"
 scala-extras = "io.github.tassiluca.gradle-scala-extras:3.7.0"
