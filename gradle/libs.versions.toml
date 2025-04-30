@@ -1,5 +1,5 @@
 [versions]
-akka = "2.10.4"
+akka = "2.10.5"
 akkaprojection = "1.6.12"
 akkamanagement = "1.6.1"
 borer = "1.16.1"
