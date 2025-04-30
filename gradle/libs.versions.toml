@@ -2,7 +2,7 @@
 akka = "2.10.4"
 akkaprojection = "1.6.12"
 akkamanagement = "1.6.1"
-borer = "1.16.0"
+borer = "1.16.1"
 circe = "0.14.13"
 fs2 = "3.12.0"
 fs2-grpc = "2.8.0"
