@@ -37,7 +37,7 @@ akka-management-cluster-http = { module = "com.lightbend.akka.management:akka-ma
 akka-management-cluster-bootstrap = { module = "com.lightbend.akka.management:akka-management-cluster-bootstrap_3", version.ref = "akkamanagement"}
 akka-discovery = { module = "com.typesafe.akka:akka-discovery_3", version.ref = "akka" }
 akka-discovery-kubernetes-api = { module = "com.lightbend.akka.discovery:akka-discovery-kubernetes-api_3", version.ref = "akkamanagement"}
-archunit = "com.tngtech.archunit:archunit:1.4.0"
+archunit = "com.tngtech.archunit:archunit:1.4.1"
 borer-core = { module = "io.bullet:borer-core_3", version.ref = "borer" }
 borer-derivation = { module = "io.bullet:borer-derivation_3", version.ref = "borer" }
 cats-core = "org.typelevel:cats-core_3:2.13.0"
