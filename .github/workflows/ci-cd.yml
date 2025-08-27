@@ -149,7 +149,7 @@ jobs:
       - name: Generate scaladoc
         run: ./gradlew :aggregateScaladoc
       - name: Generating HTML from AsyncAPI document
-        uses: asyncapi/cli@7817c6d672679f26096d0a99f48b5a7015ceee1c # v3.4.0
+        uses: asyncapi/cli@a041bb71797efb86b02fe453a501ce1d2ccd2cb5 # v3.4.1
         with:
           custom_command: |
             generate fromTemplate docs/asyncapi.yml @asyncapi/html-template@3.1.0 --use-new-generator -o build/docs/asyncapi
