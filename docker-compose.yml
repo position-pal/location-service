@@ -22,7 +22,7 @@ services:
       /bin/sh -c "cqlsh cassandra-db -f /create-actor-tables.cql && cqlsh cassandra-db -f /create-storage-tables.cql"
 
   rabbitmq-broker:
-    image: rabbitmq:4-management@sha256:326cd7c1f0398aa7702764aac33849f377192ed291188a295c3c2fbe67f92515
+    image: rabbitmq:4-management@sha256:4788f7d20da2a879d49b23751f34d4ccd4a5cb3107e0910c8bc48145476674c4
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: guest
