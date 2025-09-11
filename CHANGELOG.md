@@ -1,3 +1,39 @@
+## [5.9.0](https://github.com/position-pal/location-service/compare/5.8.0...5.9.0) (2025-09-11)
+
+### Dependency updates
+
+* **api-deps:** update kernel to v1.0.7 ([#509](https://github.com/position-pal/location-service/issues/509)) ([1beb650](https://github.com/position-pal/location-service/commit/1beb650c792e5d832316aa2eac6fba47eaa2950c))
+* **deps:** update akka to v2.10.9 ([#480](https://github.com/position-pal/location-service/issues/480)) ([d86af9e](https://github.com/position-pal/location-service/commit/d86af9e30a553a55f585e84f05a4a5c0ee1ff363))
+* **deps:** update akkamanagement to v1.6.3 ([#497](https://github.com/position-pal/location-service/issues/497)) ([05190dc](https://github.com/position-pal/location-service/commit/05190dc617fc15b836480be38684fc557205a68c))
+* **deps:** update cassandra:latest docker digest to bb81efe ([#506](https://github.com/position-pal/location-service/issues/506)) ([b3b0d3e](https://github.com/position-pal/location-service/commit/b3b0d3ec24234c4b7bfd36fd34a758c2c2b07f7e))
+* **deps:** update cassandra:latest docker digest to e4ac8b6 ([#499](https://github.com/position-pal/location-service/issues/499)) ([5b7ff41](https://github.com/position-pal/location-service/commit/5b7ff41fc56575c784cde8a8a743c25f992ff0d2))
+* **deps:** update dependency com.typesafe.akka:akka-http_3 to v10.7.2 ([#486](https://github.com/position-pal/location-service/issues/486)) ([3033197](https://github.com/position-pal/location-service/commit/3033197b98b9734815b012cec57d9f9727a19705))
+* **deps:** update dependency org.typelevel:cats-mtl_3 to v1.6.0 ([#483](https://github.com/position-pal/location-service/issues/483)) ([e3f9dbb](https://github.com/position-pal/location-service/commit/e3f9dbb7b2dcbceca2ba29a42e0689110df5d003))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.140 ([#482](https://github.com/position-pal/location-service/issues/482)) ([2c9c7b3](https://github.com/position-pal/location-service/commit/2c9c7b3865127d6fccd1d1ba28593984cd47c587))
+* **deps:** update dependency semantic-release-preconfigured-conventional-commits to v1.1.141 ([#502](https://github.com/position-pal/location-service/issues/502)) ([2ff51f9](https://github.com/position-pal/location-service/commit/2ff51f90bc8217a5c03417c46808d88306605410))
+* **deps:** update eclipse-temurin:21 docker digest to 3457990 ([#500](https://github.com/position-pal/location-service/issues/500)) ([5c24e0e](https://github.com/position-pal/location-service/commit/5c24e0eff5177e18abb767a497ff857f42154a0d))
+* **deps:** update eclipse-temurin:21 docker digest to 4d8eddf ([#507](https://github.com/position-pal/location-service/issues/507)) ([9b42cc9](https://github.com/position-pal/location-service/commit/9b42cc9aee71d07afa8289d915ef53dc1b464354))
+* **deps:** update fs2 to v3.12.2 ([#503](https://github.com/position-pal/location-service/issues/503)) ([1775d12](https://github.com/position-pal/location-service/commit/1775d125bcb98f64a9b996ba8e6338debc664c44))
+* **deps:** update fs2.grpc to v2.8.3 ([#493](https://github.com/position-pal/location-service/issues/493)) ([6231d1e](https://github.com/position-pal/location-service/commit/6231d1ed7aa460074d8534f98926552a7478d3f0))
+* **deps:** update fs2.grpc to v2.8.4 ([#494](https://github.com/position-pal/location-service/issues/494)) ([0e67328](https://github.com/position-pal/location-service/commit/0e67328082bd51cc5c3bbb217954794835e9142d))
+* **deps:** update grpc-java monorepo to v1.75.0 ([#489](https://github.com/position-pal/location-service/issues/489)) ([476d655](https://github.com/position-pal/location-service/commit/476d655cf0edd96b0b4d74a94437c975c5357275))
+* **deps:** update node.js to 22.19 ([#498](https://github.com/position-pal/location-service/issues/498)) ([aa886ce](https://github.com/position-pal/location-service/commit/aa886ce9a7690cf12235f07f0cdb8241512fcab4))
+* **deps:** update plugin com.gradle.develocity to v4.1.1 ([#484](https://github.com/position-pal/location-service/issues/484)) ([e93f23d](https://github.com/position-pal/location-service/commit/e93f23d3a8c1e7299f42d2022745d2bff66a3f60))
+* **deps:** update plugin git-sensitive-semantic-versioning to v6.0.2 ([#487](https://github.com/position-pal/location-service/issues/487)) ([99c1b20](https://github.com/position-pal/location-service/commit/99c1b2015c7ec5f096f718f7b0e66ba0875c82de))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.30 ([#481](https://github.com/position-pal/location-service/issues/481)) ([c6e43cf](https://github.com/position-pal/location-service/commit/c6e43cf8ef7eeba551cdfde3aceb9e0dd0e2f245))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.0 ([#504](https://github.com/position-pal/location-service/issues/504)) ([764f499](https://github.com/position-pal/location-service/commit/764f499b1c0a5028f5cdd48b2ab0f2faabcfe3c0))
+* **deps:** update rabbitmq:4-management docker digest to 326cd7c ([#501](https://github.com/position-pal/location-service/issues/501)) ([1ce2886](https://github.com/position-pal/location-service/commit/1ce2886249c413dc3803bad9b532ae1da5cab887))
+* **deps:** update rabbitmq:4-management docker digest to 4788f7d ([#508](https://github.com/position-pal/location-service/issues/508)) ([85cfec4](https://github.com/position-pal/location-service/commit/85cfec4b05bac21020fb040bac664c787b05ab72))
+* **deps:** update scalapb to v1.0.0-alpha.2 ([#492](https://github.com/position-pal/location-service/issues/492)) ([9b45ad4](https://github.com/position-pal/location-service/commit/9b45ad459603d5800ee575ad9f93f44f7eee08ba))
+
+### Build and continuous integration
+
+* **deps:** update actions/setup-java action to v5 ([#490](https://github.com/position-pal/location-service/issues/490)) ([d5491e1](https://github.com/position-pal/location-service/commit/d5491e14c51d22ce8267642958459e70c0248a74))
+* **deps:** update asyncapi/cli action to v3.3.0 ([#485](https://github.com/position-pal/location-service/issues/485)) ([68b8595](https://github.com/position-pal/location-service/commit/68b8595d035140d681af53df12eb78b192728fdd))
+* **deps:** update asyncapi/cli action to v3.4.0 ([#491](https://github.com/position-pal/location-service/issues/491)) ([1828af8](https://github.com/position-pal/location-service/commit/1828af8d4ee18a703fde26d355054e1c0e2ff538))
+* **deps:** update asyncapi/cli action to v3.4.1 ([#495](https://github.com/position-pal/location-service/issues/495)) ([f6c733e](https://github.com/position-pal/location-service/commit/f6c733eae55691c93fd89cd2c6142ca4610f019e))
+* **deps:** update asyncapi/cli action to v3.4.2 ([#496](https://github.com/position-pal/location-service/issues/496)) ([f7aa966](https://github.com/position-pal/location-service/commit/f7aa96679698e4b7194d071e314256ae6c5bec46))
+
 ## [5.8.0](https://github.com/position-pal/location-service/compare/5.7.0...5.8.0) (2025-08-15)
 
 ### Dependency updates
