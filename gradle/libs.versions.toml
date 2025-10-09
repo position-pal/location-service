@@ -14,7 +14,7 @@ lepus = "0.5.7"
 pureconfig = "0.17.9"
 scala = "3.6.4"
 scalamock = "0.6.6"
-scalapb = "1.0.0-alpha.2"
+scalapb = "1.0.0-alpha.3"
 scalatest = "3.3.0-SNAP4"
 
 [libraries]
